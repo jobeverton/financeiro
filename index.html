@@ -3,40 +3,148 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Financeiro Expert v2.0</title>
+  <title>Financeiro Expert v3.0</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     :root {
-      --bg: #0b132b; --card: #1c2541; --accent: #4895ef;
-      --green: #4cc9f0; --red: #f72585; --text: #edf2f4;
-      --subtext: #8d99ae; --border: #3a506b; --yellow: #f1c40f;
+      --bg: #0d1117; 
+      --card: #161b22; 
+      --card-hover: #21262d;
+      --accent: #38bdf8;
+      --green: #2ecc71; 
+      --red: #f87171; 
+      --text: #f0f6fc;
+      --subtext: #8b949e; 
+      --border: #30363d; 
+      --yellow: #fbbf24;
+      --purple: #a855f7;
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
-    body { background: var(--bg); color: var(--text); padding-bottom: 80px; }
-    header { background: var(--card); padding: 15px; text-align: center; font-weight: bold; font-size: 1.1rem; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10; display: flex; justify-content: space-between; align-items: center; }
-    header select { width: auto; padding: 5px 10px; font-size: 0.85rem; }
-    .container { max-width: 650px; margin: 0 auto; padding: 15px; }
-    .nav-tabs { display: flex; justify-content: space-around; position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); border-top: 1px solid var(--border); padding: 10px 0; z-index: 20; }
-    .tab-btn { background: none; border: none; color: var(--subtext); font-size: 0.75rem; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; }
-    .tab-btn.active { color: var(--accent); font-weight: bold; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    body { background: var(--bg); color: var(--text); padding-bottom: 90px; }
+    
+    header { 
+      background: rgba(22, 27, 34, 0.8); 
+      backdrop-filter: blur(10px);
+      padding: 16px; 
+      font-weight: 700; 
+      font-size: 1.1rem; 
+      border-bottom: 1px solid var(--border); 
+      position: sticky; 
+      top: 0; 
+      z-index: 10; 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+    }
+    header select { 
+      width: auto; 
+      padding: 6px 12px; 
+      font-size: 0.85rem; 
+      border-radius: 20px;
+      background: var(--bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .container { max-width: 650px; margin: 0 auto; padding: 16px; }
+    
+    .nav-tabs { 
+      display: flex; 
+      justify-content: space-around; 
+      position: fixed; 
+      bottom: 0; 
+      left: 0; 
+      right: 0; 
+      background: rgba(22, 27, 34, 0.95); 
+      backdrop-filter: blur(10px);
+      border-top: 1px solid var(--border); 
+      padding: 12px 0; 
+      z-index: 20; 
+    }
+    .tab-btn { 
+      background: none; 
+      border: none; 
+      color: var(--subtext); 
+      font-size: 0.75rem; 
+      cursor: pointer; 
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+      gap: 5px; 
+      transition: all 0.2s ease;
+    }
+    .tab-btn.active { color: var(--accent); font-weight: 700; transform: translateY(-2px); }
+    
     .page { display: none; }
-    .page.active { display: block; }
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
-    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 15px; }
-    .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 15px; margin-bottom: 15px; }
-    .card h3 { font-size: 0.85rem; color: var(--subtext); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
-    .card .val { font-size: 1.3rem; font-weight: bold; }
-    .val.green { color: var(--green); } .val.red { color: var(--red); }
+    .page.active { display: block; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+    
+    .card { 
+      background: var(--card); 
+      border: 1px solid var(--border); 
+      border-radius: 16px; 
+      padding: 16px; 
+      margin-bottom: 12px; 
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .card h3 { font-size: 0.8rem; color: var(--subtext); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+    .card .val { font-size: 1.35rem; font-weight: 700; }
+    .val.green { color: var(--green); } 
+    .val.red { color: var(--red); }
+    
     .form-group { margin-bottom: 12px; }
-    label { display: block; font-size: 0.8rem; color: var(--subtext); margin-bottom: 4px; }
-    input, select, textarea { width: 100%; padding: 10px; background: #0b132b; border: 1px solid var(--border); border-radius: 8px; color: #fff; font-size: 0.95rem; }
-    button.btn { width: 100%; padding: 12px; background: var(--accent); border: none; border-radius: 8px; color: #fff; font-weight: bold; cursor: pointer; font-size: 0.95rem; }
-    .list-item { padding: 12px 0; border-bottom: 1px solid var(--border); }
-    .item-header { display: flex; justify-content: space-between; align-items: center; }
-    .tag { font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; background: var(--border); color: #fff; margin-left: 5px; }
-    .audit-log { font-size: 0.75rem; border-left: 2px solid var(--accent); padding-left: 8px; margin-top: 6px; color: var(--subtext); }
-    .progress-bar { background: var(--border); height: 10px; border-radius: 5px; margin-top: 6px; overflow: hidden; }
-    .progress-fill { background: var(--green); height: 100%; transition: width 0.3s; }
+    label { display: block; font-size: 0.8rem; color: var(--subtext); margin-bottom: 6px; font-weight: 500; }
+    input, select, textarea { 
+      width: 100%; 
+      padding: 12px; 
+      background: var(--bg); 
+      border: 1px solid var(--border); 
+      border-radius: 10px; 
+      color: #fff; 
+      font-size: 0.95rem; 
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    input:focus, select:focus { border-color: var(--accent); }
+    
+    button.btn { 
+      width: 100%; 
+      padding: 14px; 
+      background: var(--accent); 
+      border: none; 
+      border-radius: 10px; 
+      color: #0d1117; 
+      font-weight: 700; 
+      cursor: pointer; 
+      font-size: 0.95rem; 
+      transition: opacity 0.2s;
+    }
+    button.btn:active { opacity: 0.8; }
+
+    .list-item { padding: 14px 0; border-bottom: 1px solid var(--border); }
+    .list-item:last-child { border-bottom: none; }
+    .item-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+    
+    .tag { font-size: 0.7rem; padding: 3px 8px; border-radius: 6px; background: #21262d; color: var(--subtext); margin-left: 4px; border: 1px solid var(--border); }
+    .audit-log { font-size: 0.75rem; border-left: 2px solid var(--accent); padding-left: 8px; margin-top: 8px; color: var(--subtext); }
+    
+    .btn-trash { 
+      background: none; 
+      border: none; 
+      color: var(--red); 
+      cursor: pointer; 
+      font-size: 1.1rem; 
+      padding: 4px 8px; 
+      border-radius: 6px;
+      transition: background 0.2s;
+    }
+    .btn-trash:hover { background: rgba(248, 113, 113, 0.1); }
+
+    .progress-bar { background: var(--bg); height: 8px; border-radius: 4px; margin-top: 8px; overflow: hidden; border: 1px solid var(--border); }
+    .progress-fill { background: var(--green); height: 100%; transition: width 0.3s ease; }
   </style>
 </head>
 <body>
@@ -60,9 +168,15 @@
       <div id="dash-saldo" class="val green">R$ 0,00</div>
     </div>
     
+    <!-- CARD ESPECÍFICO PARA O SALÁRIO -->
+    <div class="card" style="border-left: 4px solid var(--purple);">
+      <h3>💵 Salário Registrado (Mês)</h3>
+      <div id="dash-salario" class="val" style="color: var(--purple);">R$ 0,00</div>
+    </div>
+    
     <div class="grid-2">
       <div class="card">
-        <h3>📈 Receitas Total</h3>
+        <h3>📈 Entradas Total</h3>
         <div id="dash-receitas" class="val green">R$ 0,00</div>
       </div>
       <div class="card">
@@ -91,14 +205,14 @@
   <!-- 2. LANÇAMENTO DETALHADO -->
   <div id="novo" class="page">
     <div class="card">
-      <h3>➕ Novo Lançamento Auditado</h3>
+      <h3>➕ Novo Lançamento</h3>
       <form id="form-transacao">
         <div class="grid-2">
           <div class="form-group">
             <label>Tipo de Operação</label>
             <select id="tipo">
-              <option value="DESPESA">Despesa</option>
-              <option value="RECEITA">Receita</option>
+              <option value="DESPESA">Despesa (Saída)</option>
+              <option value="ENTRADA">Entrada (Ganho)</option>
             </select>
           </div>
           <div class="form-group">
@@ -111,6 +225,10 @@
           <div class="form-group">
             <label>Categoria Detalhada</label>
             <select id="categoria">
+              <optgroup label="Entradas Principais">
+                <option value="Salário / Prolabore" selected>Salário / Prolabore</option>
+                <option value="Rendimentos / Extra">Rendimentos / Extra</option>
+              </optgroup>
               <optgroup label="Moradia e Habitação">
                 <option value="Aluguel/Condomínio">Aluguel / Condomínio</option>
                 <option value="Energia Elétrica">Energia Elétrica</option>
@@ -131,9 +249,7 @@
                 <option value="Uber / Táxi / Passagem">Uber / Táxi / Passagem</option>
                 <option value="Manutenção Veicular">Manutenção / IPVA / Seguro</option>
               </optgroup>
-              <optgroup label="Entradas & Outros">
-                <option value="Salário / Prolabore">Salário / Prolabore</option>
-                <option value="Rendimentos / Extra">Rendimentos / Extra</option>
+              <optgroup label="Outros Gastos">
                 <option value="Saúde e Farmácia">Saúde e Farmácia</option>
                 <option value="Educação e Cursos">Educação e Cursos</option>
               </optgroup>
@@ -172,17 +288,17 @@
           <div class="form-group">
             <label>Status Inicial</label>
             <select id="status">
-              <option value="PAGO">Pago / Confirmado</option>
+              <option value="PAGO">Pago / Recebido</option>
               <option value="PENDENTE">Pendente / A Vencer</option>
             </select>
           </div>
           <div class="form-group">
             <label>Observação / Descrição</label>
-            <input type="text" id="obs" placeholder="Ex: Assinatura mensal, jantar...">
+            <input type="text" id="obs" placeholder="Ex: Salário Mensal, Assinatura...">
           </div>
         </div>
 
-        <button type="submit" class="btn">Registrar no Audit Trail</button>
+        <button type="submit" class="btn">Registrar Lançamento</button>
       </form>
     </div>
   </div>
@@ -197,7 +313,7 @@
           <input type="number" id="c-limite" placeholder="Limite (R$)" required>
           <input type="number" id="c-fechamento" placeholder="Dia Fechamento" min="1" max="31" required>
         </div>
-        <button type="submit" class="btn" style="background:var(--border);">Cadastrar Cartão</button>
+        <button type="submit" class="btn" style="background:var(--border); color:#fff; margin-top:8px;">Cadastrar Cartão</button>
       </form>
       <div id="lista-cartoes"></div>
     </div>
@@ -213,7 +329,7 @@
           <input type="number" id="m-alvo" placeholder="Valor Meta (R$)" required>
           <input type="number" id="m-atual" placeholder="Já Guardado (R$)" required>
         </div>
-        <button type="submit" class="btn" style="background:var(--border); margin-top:8px;">Criar Nova Meta</button>
+        <button type="submit" class="btn" style="background:var(--border); color:#fff; margin-top:8px;">Criar Nova Meta</button>
       </form>
       <div id="lista-metas"></div>
     </div>
@@ -222,8 +338,8 @@
   <!-- 5. AUDITORIA & HISTÓRICO COMPLETO -->
   <div id="auditoria" class="page">
     <div class="card">
-      <h3>🛡️ Trilha de Auditoria (Audit Trail)</h3>
-      <p style="font-size:0.8rem; color:var(--subtext); margin-bottom:10px;">Todas as criações e alterações são registradas imutavelmente com data/hora.</p>
+      <h3>🛡️ Histórico & Auditoria</h3>
+      <p style="font-size:0.8rem; color:var(--subtext); margin-bottom:12px;">Para remover uma conta, clique na lixeira correspondente.</p>
       <div id="lista-transacoes"></div>
     </div>
   </div>
@@ -236,7 +352,7 @@
   <button class="tab-btn" onclick="nav('novo', this)">➕<span>Lançar</span></button>
   <button class="tab-btn" onclick="nav('cartoes', this)">💳<span>Cartões</span></button>
   <button class="tab-btn" onclick="nav('metas', this)">🎯<span>Metas</span></button>
-  <button class="tab-btn" onclick="nav('auditoria', this)">🛡️<span>Auditoria</span></button>
+  <button class="tab-btn" onclick="nav('auditoria', this)">🛡️<span>Histórico</span></button>
 </div>
 
 <!-- CONEXÃO COM O BANCO DE DADOS NA NUVEM -->
@@ -244,6 +360,7 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
+  // SUAS CREDENCIAIS DO FIREBASE PERMANECEM INTACTAS
   const firebaseConfig = {
     apiKey: "AIzaSyBp34X2K3BYJXkyNrpGy8l0XyjM-VY8uXY",
     authDomain: "financeiro-5ed97.firebaseapp.com",
@@ -298,6 +415,15 @@
     btn.classList.add('active');
   }
 
+  // Função para deletar um lançamento pelo ID
+  function deletarTransacao(id) {
+    if (confirm('Tem certeza de que deseja remover esta conta/lançamento?')) {
+      db.transacoes = db.transacoes.filter(t => t.id !== id);
+      db.logs = db.logs.filter(l => l.transacao_id !== id);
+      salvar();
+    }
+  }
+
   // Novo Lançamento
   document.getElementById('form-transacao').addEventListener('submit', (e) => {
     e.preventDefault();
@@ -329,7 +455,7 @@
     db.transacoes.push(txn);
     db.logs.push(log);
     salvar();
-    alert('Lançamento registrado e sincronizado em tempo real!');
+    alert('Lançamento registrado com sucesso!');
     e.target.reset();
     document.getElementById('data').valueAsDate = new Date();
   });
@@ -362,7 +488,7 @@
 
   function render() {
     const filtro = document.getElementById('filtro-mes').value;
-    let rec = 0, desp = 0, fixas = 0, faturaCartao = 0;
+    let rec = 0, desp = 0, fixas = 0, faturaCartao = 0, salario = 0;
     const catGastos = {};
 
     const txnsFiltradas = db.transacoes.filter(t => {
@@ -371,8 +497,12 @@
     });
 
     txnsFiltradas.forEach(t => {
-      if (t.tipo === 'RECEITA') {
+      // Suporte para retrocompatibilidade ('RECEITA' ou 'ENTRADA')
+      if (t.tipo === 'RECEITA' || t.tipo === 'ENTRADA') {
         rec += t.valor;
+        if (t.categoria === 'Salário / Prolabore') {
+          salario += t.valor;
+        }
       } else {
         desp += t.valor;
         if (t.fixa === 'FIXA') fixas += t.valor;
@@ -383,6 +513,7 @@
 
     document.getElementById('dash-saldo').innerText = `R$ ${(rec - desp).toFixed(2)}`;
     document.getElementById('dash-receitas').innerText = `R$ ${rec.toFixed(2)}`;
+    document.getElementById('dash-salario').innerText = `R$ ${salario.toFixed(2)}`;
     document.getElementById('dash-despesas').innerText = `R$ ${desp.toFixed(2)}`;
     document.getElementById('dash-fixas').innerText = `R$ ${fixas.toFixed(2)}`;
     document.getElementById('dash-cartao').innerText = `R$ ${faturaCartao.toFixed(2)}`;
@@ -396,10 +527,16 @@
         labels: Object.keys(catGastos),
         datasets: [{
           data: Object.values(catGastos),
-          backgroundColor: ['#4895ef', '#f72585', '#4cc9f0', '#f1c40f', '#7209b7', '#3a0ca3', '#4361ee']
+          backgroundColor: ['#38bdf8', '#f87171', '#2ecc71', '#fbbf24', '#a855f7', '#6366f1', '#ec4899']
         }]
       },
-      options: { plugins: { legend: { labels: { color: '#edf2f4', font: { size: 11 } } } } }
+      options: { 
+        plugins: { 
+          legend: { 
+            labels: { color: '#f0f6fc', font: { size: 11 } } 
+          } 
+        } 
+      }
     });
 
     // Relação de Cartões
@@ -429,9 +566,10 @@
       `;
     }).join('');
 
-    // Lista de Lançamentos & Auditoria
+    // Lista de Lançamentos & Auditoria com Botão de Lixeira
     document.getElementById('lista-transacoes').innerHTML = txnsFiltradas.map(t => {
       const logsTxn = db.logs.filter(l => l.transacao_id === t.id);
+      const isEntrada = (t.tipo === 'RECEITA' || t.tipo === 'ENTRADA');
       return `
         <div class="list-item">
           <div class="item-header">
@@ -440,8 +578,11 @@
               <span class="tag">${t.categoria}</span>
               <span class="tag">${t.pagamento}</span>
             </div>
-            <div class="val ${t.tipo === 'RECEITA' ? 'green' : 'red'}" style="font-size:1.1rem;">
-              ${t.tipo === 'RECEITA' ? '+' : '-'} R$ ${t.valor.toFixed(2)}
+            <div style="display:flex; align-items:center; gap:8px;">
+              <div class="val ${isEntrada ? 'green' : 'red'}" style="font-size:1.05rem;">
+                ${isEntrada ? '+' : '-'} R$ ${t.valor.toFixed(2)}
+              </div>
+              <button class="btn-trash" onclick="deletarTransacao('${t.id}')" title="Remover lançamento">🗑️</button>
             </div>
           </div>
           <div style="font-size:0.8rem; color:var(--subtext); margin-top:4px;">
@@ -452,6 +593,9 @@
       `;
     }).join('');
   }
+
+  // Tornar a função de exclusão global para o onclick
+  window.deletarTransacao = deletarTransacao;
 
   document.getElementById('data').valueAsDate = new Date();
 </script>
