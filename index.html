@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Financeiro Expert v3.0</title>
+  <title>Financeiro Expert v4.0 Pro</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     :root {
@@ -65,12 +65,12 @@
       background: none; 
       border: none; 
       color: var(--subtext); 
-      font-size: 0.75rem; 
+      font-size: 0.68rem; 
       cursor: pointer; 
       display: flex; 
       flex-direction: column; 
       align-items: center; 
-      gap: 5px; 
+      gap: 4px; 
       transition: all 0.2s ease;
     }
     .tab-btn.active { color: var(--accent); font-weight: 700; transform: translateY(-2px); }
@@ -108,7 +108,7 @@
       outline: none;
       transition: border-color 0.2s;
     }
-    input:focus, select:focus { border-color: var(--accent); }
+    input:focus, select:focus, textarea:focus { border-color: var(--accent); }
     
     button.btn { 
       width: 100%; 
@@ -145,6 +145,14 @@
 
     .progress-bar { background: var(--bg); height: 8px; border-radius: 4px; margin-top: 8px; overflow: hidden; border: 1px solid var(--border); }
     .progress-fill { background: var(--green); height: 100%; transition: width 0.3s ease; }
+    
+    .note-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      margin-top: 10px;
+    }
   </style>
 </head>
 <body>
@@ -156,6 +164,8 @@
     <option value="2026-08">Agosto / 2026</option>
     <option value="2026-09">Setembro / 2026</option>
     <option value="2026-10">Outubro / 2026</option>
+    <option value="2026-11">Novembro / 2026</option>
+    <option value="2026-12">Dezembro / 2026</option>
   </select>
 </header>
 
@@ -163,12 +173,17 @@
 
   <!-- 1. DASHBOARD COMPLETO -->
   <div id="dashboard" class="page active">
-    <div class="card">
-      <h3>💰 Saldo Atual (Mês Selecionado)</h3>
-      <div id="dash-saldo" class="val green">R$ 0,00</div>
+    <div class="grid-2">
+      <div class="card">
+        <h3>💰 Saldo Atual</h3>
+        <div id="dash-saldo" class="val green">R$ 0,00</div>
+      </div>
+      <div class="card" style="border-left: 4px solid var(--accent);">
+        <h3>🛡️ Renda Livre</h3>
+        <div id="dash-renda-livre" class="val" style="color: var(--accent);">R$ 0,00</div>
+      </div>
     </div>
     
-    <!-- CARD ESPECÍFICO PARA O SALÁRIO -->
     <div class="card" style="border-left: 4px solid var(--purple);">
       <h3>💵 Salário Registrado (Mês)</h3>
       <div id="dash-salario" class="val" style="color: var(--purple);">R$ 0,00</div>
@@ -197,6 +212,11 @@
     </div>
 
     <div class="card">
+      <h3>📈 Evolução Temporal (Entradas vs Saídas)</h3>
+      <canvas id="chartEvolucao" height="200"></canvas>
+    </div>
+
+    <div class="card">
       <h3>📊 Distribuição de Gastos por Categoria</h3>
       <canvas id="chartGastos" height="220"></canvas>
     </div>
@@ -216,7 +236,7 @@
             </select>
           </div>
           <div class="form-group">
-            <label>Valor (R$)</label>
+            <label>Valor Total (R$)</label>
             <input type="number" step="0.01" id="valor" required placeholder="0.00">
           </div>
         </div>
@@ -303,7 +323,35 @@
     </div>
   </div>
 
-  <!-- 3. CARTÕES DE CRÉDITO -->
+  <!-- 3. LIMITES POR CATEGORIA (ORÇAMENTO TÁTICO) -->
+  <div id="orcamento" class="page">
+    <div class="card">
+      <h3>⚠️ Limites de Gastos por Categoria (Budgeting)</h3>
+      <form id="form-limite" style="margin-bottom:15px;">
+        <div class="grid-2">
+          <div class="form-group">
+            <label>Categoria</label>
+            <select id="l-categoria">
+              <option value="Supermercado / Feira">Supermercado / Feira</option>
+              <option value="Deliveries / iFood">Deliveries / iFood</option>
+              <option value="Restaurantes / Bares">Restaurantes / Bares</option>
+              <option value="Combustível">Combustível</option>
+              <option value="Uber / Táxi / Passagem">Uber / Táxi / Passagem</option>
+              <option value="Passeios / Viagens">Passeios / Viagens</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Limite Mensal (R$)</label>
+            <input type="number" step="0.01" id="l-valor" placeholder="Ex: 500.00" required>
+          </div>
+        </div>
+        <button type="submit" class="btn" style="background:var(--yellow); color:#000;">Definir Limite</button>
+      </form>
+      <div id="lista-limites"></div>
+    </div>
+  </div>
+
+  <!-- 4. CARTÕES DE CRÉDITO -->
   <div id="cartoes" class="page">
     <div class="card">
       <h3>💳 Cartões de Crédito Cadastrados</h3>
@@ -319,13 +367,19 @@
     </div>
   </div>
 
-  <!-- 4. METAS PERSONALIZADAS -->
+  <!-- 5. METAS PERSONALIZADAS -->
   <div id="metas" class="page">
     <div class="card">
       <h3>🎯 Gerenciador de Metas Financeiras</h3>
       <form id="form-meta" style="margin-bottom:15px;">
-        <div class="grid-3">
-          <input type="text" id="m-nome" placeholder="Objetivo (Ex: Viagem)" required>
+        <div class="grid-2">
+          <input type="text" id="m-nome" placeholder="Objetivo (Ex: Reserva, Viagem)" required>
+          <select id="m-tipo">
+            <option value="RESERVA">🛡️ Reserva de Emergência</option>
+            <option value="CONSUMO">✈️ Objetivo / Consumo</option>
+          </select>
+        </div>
+        <div class="grid-2" style="margin-top:8px;">
           <input type="number" id="m-alvo" placeholder="Valor Meta (R$)" required>
           <input type="number" id="m-atual" placeholder="Já Guardado (R$)" required>
         </div>
@@ -335,10 +389,32 @@
     </div>
   </div>
 
-  <!-- 5. AUDITORIA & HISTÓRICO COMPLETO -->
+  <!-- 6. BLOCO DE NOTAS / ANOTAÇÕES -->
+  <div id="anotacoes" class="page">
+    <div class="card">
+      <h3>📝 Cantinho de Anotações & Lembretes</h3>
+      <form id="form-nota" style="margin-bottom:15px;">
+        <div class="form-group">
+          <label>Título da Anotação</label>
+          <input type="text" id="n-titulo" placeholder="Ex: Cotação de Seguro, Lembrete de Mercado..." required>
+        </div>
+        <div class="form-group">
+          <label>Detalhes</label>
+          <textarea id="n-texto" rows="3" placeholder="Escreva aqui suas observações, estratégias ou negociações..." required></textarea>
+        </div>
+        <button type="submit" class="btn" style="background:var(--purple); color:#fff;">Salvar Anotação</button>
+      </form>
+      <div id="lista-anotacoes"></div>
+    </div>
+  </div>
+
+  <!-- 7. AUDITORIA & HISTÓRICO COMPLETO -->
   <div id="auditoria" class="page">
     <div class="card">
-      <h3>🛡️ Histórico & Auditoria</h3>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <h3>🛡️ Histórico & Auditoria</h3>
+        <button onclick="exportarCSV()" style="background:var(--border); color:#fff; border:none; padding:6px 12px; border-radius:8px; cursor:pointer; font-size:0.75rem; font-weight:bold;">📥 Exportar CSV</button>
+      </div>
       <p style="font-size:0.8rem; color:var(--subtext); margin-bottom:12px;">Para remover uma conta, clique na lixeira correspondente.</p>
       <div id="lista-transacoes"></div>
     </div>
@@ -350,8 +426,10 @@
 <div class="nav-tabs">
   <button class="tab-btn active" onclick="nav('dashboard', this)">📊<span>Início</span></button>
   <button class="tab-btn" onclick="nav('novo', this)">➕<span>Lançar</span></button>
+  <button class="tab-btn" onclick="nav('orcamento', this)">⚠️<span>Limites</span></button>
   <button class="tab-btn" onclick="nav('cartoes', this)">💳<span>Cartões</span></button>
   <button class="tab-btn" onclick="nav('metas', this)">🎯<span>Metas</span></button>
+  <button class="tab-btn" onclick="nav('anotacoes', this)">📝<span>Notas</span></button>
   <button class="tab-btn" onclick="nav('auditoria', this)">🛡️<span>Histórico</span></button>
 </div>
 
@@ -360,7 +438,7 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-  // SUAS CREDENCIAIS DO FIREBASE PERMANECEM INTACTAS
+  // CREDENCIAIS DO FIREBASE MANTIDAS
   const firebaseConfig = {
     apiKey: "AIzaSyBp34X2K3BYJXkyNrpGy8l0XyjM-VY8uXY",
     authDomain: "financeiro-5ed97.firebaseapp.com",
@@ -386,7 +464,9 @@
         transacoes: dados.transacoes || [],
         logs: dados.logs || [],
         cartoes: dados.cartoes || [],
-        metas: dados.metas || []
+        metas: dados.metas || [],
+        anotacoes: dados.anotacoes || [],
+        limites: dados.limites || {}
       };
       render();
     }
@@ -398,9 +478,11 @@
     transacoes: [],
     logs: [],
     cartoes: [{ id: 'C1', nome: 'Cartão Principal', limite: 5000, fechamento: 5 }],
-    metas: [{ id: 'M1', nome: 'Reserva de Emergência', alvo: 10000, atual: 4500 }]
+    metas: [{ id: 'M1', nome: 'Reserva de Emergência', tipo: 'RESERVA', alvo: 10000, atual: 4500 }],
+    anotacoes: [],
+    limites: {}
   };
-  let chart;
+  let chartGastos, chartEvolucao;
 
   function salvar() {
     if (typeof window.salvarNoFirebase === 'function') {
@@ -415,7 +497,6 @@
     btn.classList.add('active');
   }
 
-  // Função para deletar um lançamento pelo ID
   function deletarTransacao(id) {
     if (confirm('Tem certeza de que deseja remover esta conta/lançamento?')) {
       db.transacoes = db.transacoes.filter(t => t.id !== id);
@@ -424,43 +505,87 @@
     }
   }
 
-  // Novo Lançamento
+  function deletarAnotacao(id) {
+    if (confirm('Deseja excluir esta anotação?')) {
+      db.anotacoes = db.anotacoes.filter(n => n.id !== id);
+      salvar();
+    }
+  }
+
+  function exportarCSV() {
+    if (!db.transacoes.length) return alert('Sem lançamentos para exportar.');
+    let csv = 'Data;Tipo;Categoria;Valor;Pagamento;Status;Observacao\n';
+    db.transacoes.forEach(t => {
+      csv += `${t.data};${t.tipo};${t.categoria};${t.valor.toFixed(2)};${t.pagamento};${t.status};"${t.obs || ''}"\n`;
+    });
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `financeiro_export_${new Date().toISOString().slice(0,10)}.csv`;
+    link.click();
+  }
+
+  // Novo Lançamento com Projeção Automática de Parcelas Futuras
   document.getElementById('form-transacao').addEventListener('submit', (e) => {
     e.preventDefault();
-    const id = 'TXN-' + Date.now();
     const parcelas = parseInt(document.getElementById('parcelas').value) || 1;
     const valorTotal = parseFloat(document.getElementById('valor').value);
     const valorParcela = valorTotal / parcelas;
+    const dataInicial = new Date(document.getElementById('data').value + 'T00:00:00');
 
-    const txn = {
-      id,
-      tipo: document.getElementById('tipo').value,
-      valor: valorParcela,
-      categoria: document.getElementById('categoria').value,
-      data: document.getElementById('data').value,
-      pagamento: document.getElementById('pagamento').value,
-      fixa: document.getElementById('fixa').value,
-      status: document.getElementById('status').value,
-      parcelas,
-      obs: document.getElementById('obs').value
-    };
+    for (let i = 0; i < parcelas; i++) {
+      const dataParcela = new Date(dataInicial);
+      dataParcela.setMonth(dataParcela.getMonth() + i);
+      const dataStr = dataParcela.toISOString().slice(0, 10);
+      const id = 'TXN-' + Date.now() + '-' + (i + 1);
 
-    const log = {
-      id: 'LOG-' + Date.now(),
-      transacao_id: id,
-      data_hora: new Date().toLocaleString('pt-BR'),
-      detalhes: `Registrado: ${txn.tipo} R$ ${valorParcela.toFixed(2)} (${txn.categoria}) - Form/Pag: ${txn.pagamento}`
-    };
+      const obsTexto = document.getElementById('obs').value;
+      const obsParcelada = parcelas > 1 
+        ? `${obsTexto ? obsTexto + ' ' : ''}(Parcela ${i + 1}/${parcelas})`
+        : obsTexto;
 
-    db.transacoes.push(txn);
-    db.logs.push(log);
+      const txn = {
+        id,
+        tipo: document.getElementById('tipo').value,
+        valor: valorParcela,
+        categoria: document.getElementById('categoria').value,
+        data: dataStr,
+        pagamento: document.getElementById('pagamento').value,
+        fixa: document.getElementById('fixa').value,
+        status: i === 0 ? document.getElementById('status').value : 'PENDENTE',
+        parcelas,
+        obs: obsParcelada
+      };
+
+      const log = {
+        id: 'LOG-' + Date.now() + '-' + (i + 1),
+        transacao_id: id,
+        data_hora: new Date().toLocaleString('pt-BR'),
+        detalhes: `Registrado: ${txn.tipo} R$ ${valorParcela.toFixed(2)} (${txn.categoria})`
+      };
+
+      db.transacoes.push(txn);
+      db.logs.push(log);
+    }
+
     salvar();
-    alert('Lançamento registrado com sucesso!');
+    alert(parcelas > 1 ? `${parcelas} parcelas geradas nos meses futuros!` : 'Lançamento registrado com sucesso!');
     e.target.reset();
     document.getElementById('data').valueAsDate = new Date();
   });
 
-  // Novo Cartão
+  // Limite por Categoria
+  document.getElementById('form-limite').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const cat = document.getElementById('l-categoria').value;
+    const val = parseFloat(document.getElementById('l-valor').value);
+    if (!db.limites) db.limites = {};
+    db.limites[cat] = val;
+    salvar();
+    e.target.reset();
+  });
+
+  // Cartões
   document.getElementById('form-cartao').addEventListener('submit', (e) => {
     e.preventDefault();
     db.cartoes.push({
@@ -473,12 +598,13 @@
     e.target.reset();
   });
 
-  // Nova Meta
+  // Metas
   document.getElementById('form-meta').addEventListener('submit', (e) => {
     e.preventDefault();
     db.metas.push({
       id: 'M-' + Date.now(),
       nome: document.getElementById('m-nome').value,
+      tipo: document.getElementById('m-tipo').value,
       alvo: parseFloat(document.getElementById('m-alvo').value),
       atual: parseFloat(document.getElementById('m-atual').value)
     });
@@ -486,9 +612,22 @@
     e.target.reset();
   });
 
+  // Anotações
+  document.getElementById('form-nota').addEventListener('submit', (e) => {
+    e.preventDefault();
+    db.anotacoes.push({
+      id: 'N-' + Date.now(),
+      titulo: document.getElementById('n-titulo').value,
+      texto: document.getElementById('n-texto').value,
+      data: new Date().toLocaleDateString('pt-BR')
+    });
+    salvar();
+    e.target.reset();
+  });
+
   function render() {
     const filtro = document.getElementById('filtro-mes').value;
-    let rec = 0, desp = 0, fixas = 0, faturaCartao = 0, salario = 0;
+    let rec = 0, desp = 0, fixas = 0, faturaCartao = 0, salario = 0, pendentes = 0;
     const catGastos = {};
 
     const txnsFiltradas = db.transacoes.filter(t => {
@@ -497,31 +636,53 @@
     });
 
     txnsFiltradas.forEach(t => {
-      // Suporte para retrocompatibilidade ('RECEITA' ou 'ENTRADA')
-      if (t.tipo === 'RECEITA' || t.tipo === 'ENTRADA') {
+      const isEntrada = (t.tipo === 'RECEITA' || t.tipo === 'ENTRADA');
+      if (isEntrada) {
         rec += t.valor;
-        if (t.categoria === 'Salário / Prolabore') {
-          salario += t.valor;
-        }
+        if (t.categoria === 'Salário / Prolabore') salario += t.valor;
       } else {
         desp += t.valor;
         if (t.fixa === 'FIXA') fixas += t.valor;
         if (t.pagamento === 'Cartão de Crédito') faturaCartao += t.valor;
+        if (t.status === 'PENDENTE') pendentes += t.valor;
         catGastos[t.categoria] = (catGastos[t.categoria] || 0) + t.valor;
       }
     });
 
-    document.getElementById('dash-saldo').innerText = `R$ ${(rec - desp).toFixed(2)}`;
+    const saldo = rec - desp;
+    const rendaLivre = saldo - pendentes;
+
+    document.getElementById('dash-saldo').innerText = `R$ ${saldo.toFixed(2)}`;
+    document.getElementById('dash-renda-livre').innerText = `R$ ${rendaLivre.toFixed(2)}`;
     document.getElementById('dash-receitas').innerText = `R$ ${rec.toFixed(2)}`;
     document.getElementById('dash-salario').innerText = `R$ ${salario.toFixed(2)}`;
     document.getElementById('dash-despesas').innerText = `R$ ${desp.toFixed(2)}`;
     document.getElementById('dash-fixas').innerText = `R$ ${fixas.toFixed(2)}`;
     document.getElementById('dash-cartao').innerText = `R$ ${faturaCartao.toFixed(2)}`;
 
+    // Gráfico Evolução Temporal (Mês a Mês)
+    const meses = ['2026-08', '2026-09', '2026-10', '2026-11', '2026-12'];
+    const dadosEntradas = meses.map(m => db.transacoes.filter(t => t.data.startsWith(m) && (t.tipo==='RECEITA'||t.tipo==='ENTRADA')).reduce((a,b)=>a+b.valor,0));
+    const dadosSaidas = meses.map(m => db.transacoes.filter(t => t.data.startsWith(m) && (t.tipo!=='RECEITA'&&t.tipo!=='ENTRADA')).reduce((a,b)=>a+b.valor,0));
+
+    const ctxEvolucao = document.getElementById('chartEvolucao').getContext('2d');
+    if (chartEvolucao) chartEvolucao.destroy();
+    chartEvolucao = new Chart(ctxEvolucao, {
+      type: 'bar',
+      data: {
+        labels: ['Ago', 'Set', 'Out', 'Nov', 'Dez'],
+        datasets: [
+          { label: 'Entradas', data: dadosEntradas, backgroundColor: '#2ecc71' },
+          { label: 'Saídas', data: dadosSaidas, backgroundColor: '#f87171' }
+        ]
+      },
+      options: { plugins: { legend: { labels: { color: '#f0f6fc' } } }, scales: { x: { ticks: { color: '#8b949e' } }, y: { ticks: { color: '#8b949e' } } } }
+    });
+
     // Gráfico de Categorias
-    const ctx = document.getElementById('chartGastos').getContext('2d');
-    if (chart) chart.destroy();
-    chart = new Chart(ctx, {
+    const ctxGastos = document.getElementById('chartGastos').getContext('2d');
+    if (chartGastos) chartGastos.destroy();
+    chartGastos = new Chart(ctxGastos, {
       type: 'doughnut',
       data: {
         labels: Object.keys(catGastos),
@@ -530,14 +691,28 @@
           backgroundColor: ['#38bdf8', '#f87171', '#2ecc71', '#fbbf24', '#a855f7', '#6366f1', '#ec4899']
         }]
       },
-      options: { 
-        plugins: { 
-          legend: { 
-            labels: { color: '#f0f6fc', font: { size: 11 } } 
-          } 
-        } 
-      }
+      options: { plugins: { legend: { labels: { color: '#f0f6fc', font: { size: 11 } } } } }
     });
+
+    // Relação de Limites
+    const limitesKeys = Object.keys(db.limites || {});
+    document.getElementById('lista-limites').innerHTML = limitesKeys.length ? limitesKeys.map(cat => {
+      const limite = db.limites[cat];
+      const gasto = catGastos[cat] || 0;
+      const pct = Math.min(((gasto / limite) * 100), 100).toFixed(1);
+      const cor = gasto > limite ? 'var(--red)' : gasto > (limite * 0.8) ? 'var(--yellow)' : 'var(--green)';
+      return `
+        <div class="list-item">
+          <div class="item-header">
+            <strong>${cat}</strong>
+            <span style="color:${cor}; font-weight:bold;">R$ ${gasto.toFixed(2)} / R$ ${limite.toFixed(2)} (${pct}%)</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: ${pct}%; background:${cor};"></div>
+          </div>
+        </div>
+      `;
+    }).join('') : '<p style="font-size:0.8rem; color:var(--subtext);">Nenhum limite definido ainda.</p>';
 
     // Relação de Cartões
     document.getElementById('lista-cartoes').innerHTML = db.cartoes.map(c => `
@@ -553,10 +728,14 @@
     // Relação de Metas
     document.getElementById('lista-metas').innerHTML = db.metas.map(m => {
       const pct = Math.min(((m.atual / m.alvo) * 100), 100).toFixed(1);
+      const tagTipo = m.tipo === 'RESERVA' ? '🛡️ Liquidez' : '✈️ Consumo';
       return `
         <div class="list-item">
           <div class="item-header">
-            <strong>${m.nome}</strong>
+            <div>
+              <strong>${m.nome}</strong>
+              <span class="tag">${tagTipo}</span>
+            </div>
             <span>R$ ${m.atual.toFixed(2)} / R$ ${m.alvo.toFixed(2)} (${pct}%)</span>
           </div>
           <div class="progress-bar">
@@ -566,7 +745,19 @@
       `;
     }).join('');
 
-    // Lista de Lançamentos & Auditoria com Botão de Lixeira
+    // Relação de Anotações
+    document.getElementById('lista-anotacoes').innerHTML = (db.anotacoes || []).map(n => `
+      <div class="note-card">
+        <div class="item-header">
+          <strong style="color:var(--accent);">${n.titulo}</strong>
+          <button class="btn-trash" onclick="deletarAnotacao('${n.id}')">🗑️</button>
+        </div>
+        <p style="font-size:0.85rem; color:var(--text); margin-top:6px; white-space:pre-wrap;">${n.texto}</p>
+        <div style="font-size:0.7rem; color:var(--subtext); margin-top:6px;">Criado em: ${n.data}</div>
+      </div>
+    `).join('');
+
+    // Lista de Lançamentos & Auditoria
     document.getElementById('lista-transacoes').innerHTML = txnsFiltradas.map(t => {
       const logsTxn = db.logs.filter(l => l.transacao_id === t.id);
       const isEntrada = (t.tipo === 'RECEITA' || t.tipo === 'ENTRADA');
@@ -594,8 +785,9 @@
     }).join('');
   }
 
-  // Tornar a função de exclusão global para o onclick
   window.deletarTransacao = deletarTransacao;
+  window.deletarAnotacao = deletarAnotacao;
+  window.exportarCSV = exportarCSV;
 
   document.getElementById('data').valueAsDate = new Date();
 </script>
