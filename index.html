@@ -3,76 +3,103 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>APP — Financeiro Expert</title>
+  <title>Financeiro Expert v2.0</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     :root {
-      --bg: #0f172a; --card: #1e293b; --accent: #3b82f6;
-      --green: #22c55e; --red: #ef4444; --text: #f8fafc;
-      --subtext: #94a3b8; --border: #334155;
+      --bg: #0b132b; --card: #1c2541; --accent: #4895ef;
+      --green: #4cc9f0; --red: #f72585; --text: #edf2f4;
+      --subtext: #8d99ae; --border: #3a506b; --yellow: #f1c40f;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
-    body { background: var(--bg); color: var(--text); padding-bottom: 70px; }
-    header { background: var(--card); padding: 15px; text-align: center; font-weight: bold; font-size: 1.2rem; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10; }
-    .container { max-width: 600px; margin: 0 auto; padding: 15px; }
-    .nav-tabs { display: flex; justify-content: space-around; position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); border-top: 1px solid var(--border); padding: 10px 0; }
-    .tab-btn { background: none; border: none; color: var(--subtext); font-size: 0.8rem; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    body { background: var(--bg); color: var(--text); padding-bottom: 80px; }
+    header { background: var(--card); padding: 15px; text-align: center; font-weight: bold; font-size: 1.1rem; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10; display: flex; justify-content: space-between; align-items: center; }
+    header select { width: auto; padding: 5px 10px; font-size: 0.85rem; }
+    .container { max-width: 650px; margin: 0 auto; padding: 15px; }
+    .nav-tabs { display: flex; justify-content: space-around; position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); border-top: 1px solid var(--border); padding: 10px 0; z-index: 20; }
+    .tab-btn { background: none; border: none; color: var(--subtext); font-size: 0.75rem; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; }
     .tab-btn.active { color: var(--accent); font-weight: bold; }
     .page { display: none; }
     .page.active { display: block; }
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 15px; }
     .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 15px; margin-bottom: 15px; }
-    .card h3 { font-size: 0.9rem; color: var(--subtext); margin-bottom: 5px; }
-    .card .val { font-size: 1.4rem; font-weight: bold; }
+    .card h3 { font-size: 0.85rem; color: var(--subtext); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .card .val { font-size: 1.3rem; font-weight: bold; }
     .val.green { color: var(--green); } .val.red { color: var(--red); }
     .form-group { margin-bottom: 12px; }
-    label { display: block; font-size: 0.85rem; color: var(--subtext); margin-bottom: 5px; }
-    input, select, textarea { width: 100%; padding: 10px; background: #0f172a; border: 1px solid var(--border); border-radius: 8px; color: #fff; font-size: 1rem; }
-    button.btn { width: 100%; padding: 12px; background: var(--accent); border: none; border-radius: 8px; color: #fff; font-weight: bold; cursor: pointer; font-size: 1rem; }
-    .list-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); }
-    .tag { font-size: 0.75rem; padding: 2px 6px; border-radius: 4px; background: var(--border); }
-    .audit-log { font-size: 0.8rem; border-left: 2px solid var(--accent); padding-left: 10px; margin-top: 8px; color: var(--subtext); }
+    label { display: block; font-size: 0.8rem; color: var(--subtext); margin-bottom: 4px; }
+    input, select, textarea { width: 100%; padding: 10px; background: #0b132b; border: 1px solid var(--border); border-radius: 8px; color: #fff; font-size: 0.95rem; }
+    button.btn { width: 100%; padding: 12px; background: var(--accent); border: none; border-radius: 8px; color: #fff; font-weight: bold; cursor: pointer; font-size: 0.95rem; }
+    .list-item { padding: 12px 0; border-bottom: 1px solid var(--border); }
+    .item-header { display: flex; justify-content: space-between; align-items: center; }
+    .tag { font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; background: var(--border); color: #fff; margin-left: 5px; }
+    .audit-log { font-size: 0.75rem; border-left: 2px solid var(--accent); padding-left: 8px; margin-top: 6px; color: var(--subtext); }
+    .progress-bar { background: var(--border); height: 10px; border-radius: 5px; margin-top: 6px; overflow: hidden; }
+    .progress-fill { background: var(--green); height: 100%; transition: width 0.3s; }
   </style>
 </head>
 <body>
 
-<header>📱 APP — Financeiro Expert</header>
+<header>
+  <span>📱 Financeiro Expert</span>
+  <select id="filtro-mes" onchange="render()">
+    <option value="TODOS">Todo o Histórico</option>
+    <option value="2026-08">Agosto / 2026</option>
+    <option value="2026-09">Setembro / 2026</option>
+    <option value="2026-10">Outubro / 2026</option>
+  </select>
+</header>
 
 <div class="container">
 
-  <!-- 1. TELA INICIAL / DASHBOARD -->
+  <!-- 1. DASHBOARD COMPLETO -->
   <div id="dashboard" class="page active">
     <div class="card">
-      <h3>💰 Saldo Atual</h3>
+      <h3>💰 Saldo Atual (Mês Selecionado)</h3>
       <div id="dash-saldo" class="val green">R$ 0,00</div>
     </div>
     
     <div class="grid-2">
       <div class="card">
-        <h3>📈 Receitas do Mês</h3>
+        <h3>📈 Receitas Total</h3>
         <div id="dash-receitas" class="val green">R$ 0,00</div>
       </div>
       <div class="card">
-        <h3>📉 Despesas do Mês</h3>
+        <h3>📉 Despesas Total</h3>
         <div id="dash-despesas" class="val red">R$ 0,00</div>
       </div>
     </div>
 
+    <div class="grid-2">
+      <div class="card">
+        <h3>🏠 Contas Fixas</h3>
+        <div id="dash-fixas" class="val" style="color:var(--yellow)">R$ 0,00</div>
+      </div>
+      <div class="card">
+        <h3>💳 Fatura Cartão</h3>
+        <div id="dash-cartao" class="val red">R$ 0,00</div>
+      </div>
+    </div>
+
     <div class="card">
-      <h3>📊 Gastos por Categoria</h3>
-      <canvas id="chartGastos" height="200"></canvas>
+      <h3>📊 Distribuição de Gastos por Categoria</h3>
+      <canvas id="chartGastos" height="220"></canvas>
     </div>
   </div>
 
-  <!-- 2. NOVO LANÇAMENTO -->
+  <!-- 2. LANÇAMENTO DETALHADO -->
   <div id="novo" class="page">
     <div class="card">
-      <h3>➕ Adicionar Lançamento (Com Auditoria)</h3>
+      <h3>➕ Novo Lançamento Auditado</h3>
       <form id="form-transacao">
         <div class="grid-2">
           <div class="form-group">
-            <label>Tipo</label>
-            <select id="tipo"><option value="DESPESA">Despesa</option><option value="RECEITA">Receita</option></select>
+            <label>Tipo de Operação</label>
+            <select id="tipo">
+              <option value="DESPESA">Despesa</option>
+              <option value="RECEITA">Receita</option>
+            </select>
           </div>
           <div class="form-group">
             <label>Valor (R$)</label>
@@ -82,62 +109,121 @@
 
         <div class="grid-2">
           <div class="form-group">
-            <label>Categoria</label>
+            <label>Categoria Detalhada</label>
             <select id="categoria">
-              <option value="Moradia">Moradia</option>
-              <option value="Alimentação">Alimentação</option>
-              <option value="Transporte">Transporte</option>
-              <option value="Lazer">Lazer</option>
-              <option value="Salário">Salário</option>
+              <optgroup label="Moradia e Habitação">
+                <option value="Aluguel/Condomínio">Aluguel / Condomínio</option>
+                <option value="Energia Elétrica">Energia Elétrica</option>
+                <option value="Água e Saneamento">Água e Saneamento</option>
+                <option value="Internet / Fibra">Internet / Fibra</option>
+                <option value="Gás de Cozinha">Gás de Cozinha</option>
+              </optgroup>
+              <optgroup label="Alimentação & Lazer">
+                <option value="Supermercado / Feira">Supermercado / Feira</option>
+                <option value="Deliveries / iFood">Deliveries / iFood</option>
+                <option value="Restaurantes / Bares">Restaurantes / Bares</option>
+                <option value="Cinema / Teatros">Cinema / Teatros</option>
+                <option value="Passeios / Viagens">Passeios / Viagens</option>
+                <option value="Streaming / Jogos">Streaming / Jogos</option>
+              </optgroup>
+              <optgroup label="Transporte & Veículo">
+                <option value="Combustível">Combustível</option>
+                <option value="Uber / Táxi / Passagem">Uber / Táxi / Passagem</option>
+                <option value="Manutenção Veicular">Manutenção / IPVA / Seguro</option>
+              </optgroup>
+              <optgroup label="Entradas & Outros">
+                <option value="Salário / Prolabore">Salário / Prolabore</option>
+                <option value="Rendimentos / Extra">Rendimentos / Extra</option>
+                <option value="Saúde e Farmácia">Saúde e Farmácia</option>
+                <option value="Educação e Cursos">Educação e Cursos</option>
+              </optgroup>
             </select>
           </div>
           <div class="form-group">
-            <label>Data</label>
+            <label>Data da Transação</label>
             <input type="date" id="data" required>
+          </div>
+        </div>
+
+        <div class="grid-3">
+          <div class="form-group">
+            <label>Meio de Pago</label>
+            <select id="pagamento">
+              <option value="PIX / Dinheiro">PIX / Dinheiro</option>
+              <option value="Cartão de Crédito">Cartão de Crédito</option>
+              <option value="Cartão de Débito">Cartão de Débito</option>
+              <option value="Boleto">Boleto</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Recorrência</label>
+            <select id="fixa">
+              <option value="VARIAVEL">Variável</option>
+              <option value="FIXA">Fixa Mensal</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Parcelas</label>
+            <input type="number" id="parcelas" min="1" max="72" value="1">
           </div>
         </div>
 
         <div class="grid-2">
           <div class="form-group">
-            <label>Fixa / Variável</label>
-            <select id="fixa"><option value="FIXA">Fixa</option><option value="VARIAVEL">Variável</option></select>
+            <label>Status Inicial</label>
+            <select id="status">
+              <option value="PAGO">Pago / Confirmado</option>
+              <option value="PENDENTE">Pendente / A Vencer</option>
+            </select>
           </div>
           <div class="form-group">
-            <label>Status</label>
-            <select id="status"><option value="PAGO">Pago</option><option value="PENDENTE">Pendente</option></select>
+            <label>Observação / Descrição</label>
+            <input type="text" id="obs" placeholder="Ex: Assinatura mensal, jantar...">
           </div>
         </div>
 
-        <div class="form-group">
-          <label>Observação</label>
-          <input type="text" id="obs" placeholder="Ex: Compras do mês">
-        </div>
-
-        <button type="submit" class="btn">Salvar Registro Auditado</button>
+        <button type="submit" class="btn">Registrar no Audit Trail</button>
       </form>
     </div>
   </div>
 
-  <!-- 3. METAS -->
-  <div id="metas" class="page">
+  <!-- 3. CARTÕES DE CRÉDITO -->
+  <div id="cartoes" class="page">
     <div class="card">
-      <h3>🎯 Progresso das Metas</h3>
-      <div style="margin-top:15px;">
-        <div style="display:flex; justify-content:space-between; font-size:0.9rem;">
-          <span>iPhone 16 Pro</span>
-          <span>R$ 3.500 / R$ 8.000 (43.75%)</span>
+      <h3>💳 Cartões de Crédito Cadastrados</h3>
+      <form id="form-cartao" style="margin-bottom:15px;">
+        <div class="grid-3">
+          <input type="text" id="c-nome" placeholder="Nome (Ex: Nubank)" required>
+          <input type="number" id="c-limite" placeholder="Limite (R$)" required>
+          <input type="number" id="c-fechamento" placeholder="Dia Fechamento" min="1" max="31" required>
         </div>
-        <div style="background:var(--border); height:10px; border-radius:5px; margin-top:5px; overflow:hidden;">
-          <div style="background:var(--green); width:43.75%; height:100%;"></div>
-        </div>
-      </div>
+        <button type="submit" class="btn" style="background:var(--border);">Cadastrar Cartão</button>
+      </form>
+      <div id="lista-cartoes"></div>
     </div>
   </div>
 
-  <!-- 4. AUDITORIA & EXTRATO -->
+  <!-- 4. METAS PERSONALIZADAS -->
+  <div id="metas" class="page">
+    <div class="card">
+      <h3>🎯 Gerenciador de Metas Financeiras</h3>
+      <form id="form-meta" style="margin-bottom:15px;">
+        <div class="grid-3">
+          <input type="text" id="m-nome" placeholder="Objetivo (Ex: Viagem)" required>
+          <input type="number" id="m-alvo" placeholder="Valor Meta (R$)" required>
+          <input type="number" id="m-atual" placeholder="Já Guardado (R$)" required>
+        </div>
+        <button type="submit" class="btn" style="background:var(--border); margin-top:8px;">Criar Nova Meta</button>
+      </form>
+      <div id="lista-metas"></div>
+    </div>
+  </div>
+
+  <!-- 5. AUDITORIA & HISTÓRICO COMPLETO -->
   <div id="auditoria" class="page">
     <div class="card">
-      <h3>🛡️ Extrato & Audit Trail</h3>
+      <h3>🛡️ Trilha de Auditoria (Audit Trail)</h3>
+      <p style="font-size:0.8rem; color:var(--subtext); margin-bottom:10px;">Todas as criações e alterações são registradas imutavelmente com data/hora.</p>
       <div id="lista-transacoes"></div>
     </div>
   </div>
@@ -148,16 +234,22 @@
 <div class="nav-tabs">
   <button class="tab-btn active" onclick="nav('dashboard', this)">📊<span>Início</span></button>
   <button class="tab-btn" onclick="nav('novo', this)">➕<span>Lançar</span></button>
+  <button class="tab-btn" onclick="nav('cartoes', this)">💳<span>Cartões</span></button>
   <button class="tab-btn" onclick="nav('metas', this)">🎯<span>Metas</span></button>
   <button class="tab-btn" onclick="nav('auditoria', this)">🛡️<span>Auditoria</span></button>
 </div>
 
 <script>
-  let db = JSON.parse(localStorage.getItem('fe_db')) || { transacoes: [], logs: [] };
+  let db = JSON.parse(localStorage.getItem('fe_db_v2')) || {
+    transacoes: [],
+    logs: [],
+    cartoes: [{ id: 'C1', nome: 'Cartão Principal', limite: 5000, fechamento: 5 }],
+    metas: [{ id: 'M1', nome: 'Reserva de Emergência', alvo: 10000, atual: 4500 }]
+  };
   let chart;
 
   function salvar() {
-    localStorage.setItem('fe_db', JSON.stringify(db));
+    localStorage.setItem('fe_db_v2', JSON.stringify(db));
     render();
   }
 
@@ -168,44 +260,85 @@
     btn.classList.add('active');
   }
 
+  // Novo Lançamento
   document.getElementById('form-transacao').addEventListener('submit', (e) => {
     e.preventDefault();
     const id = 'TXN-' + Date.now();
+    const parcelas = parseInt(document.getElementById('parcelas').value) || 1;
+    const valorTotal = parseFloat(document.getElementById('valor').value);
+    const valorParcela = valorTotal / parcelas;
+
     const txn = {
       id,
       tipo: document.getElementById('tipo').value,
-      valor: parseFloat(document.getElementById('valor').value),
+      valor: valorParcela,
       categoria: document.getElementById('categoria').value,
       data: document.getElementById('data').value,
+      pagamento: document.getElementById('pagamento').value,
       fixa: document.getElementById('fixa').value,
       status: document.getElementById('status').value,
+      parcelas,
       obs: document.getElementById('obs').value
     };
 
-    // Log de Auditoria Imutável
     const log = {
       id: 'LOG-' + Date.now(),
       transacao_id: id,
-      acao: 'CRIAR',
       data_hora: new Date().toLocaleString('pt-BR'),
-      detalhes: `Criado ${txn.tipo} de R$ ${txn.valor.toFixed(2)} [${txn.categoria}]`
+      detalhes: `Registrado: ${txn.tipo} R$ ${valorParcela.toFixed(2)} (${txn.categoria}) - Form/Pag: ${txn.pagamento}`
     };
 
     db.transacoes.push(txn);
     db.logs.push(log);
     salvar();
-    alert('Lançamento registrado e gravado na trilha de auditoria!');
+    alert('Lançamento e log de auditoria gravados com sucesso!');
+    e.target.reset();
+    document.getElementById('data').valueAsDate = new Date();
+  });
+
+  // Novo Cartão
+  document.getElementById('form-cartao').addEventListener('submit', (e) => {
+    e.preventDefault();
+    db.cartoes.push({
+      id: 'C-' + Date.now(),
+      nome: document.getElementById('c-nome').value,
+      limite: parseFloat(document.getElementById('c-limite').value),
+      fechamento: parseInt(document.getElementById('c-fechamento').value)
+    });
+    salvar();
+    e.target.reset();
+  });
+
+  // Nova Meta
+  document.getElementById('form-meta').addEventListener('submit', (e) => {
+    e.preventDefault();
+    db.metas.push({
+      id: 'M-' + Date.now(),
+      nome: document.getElementById('m-nome').value,
+      alvo: parseFloat(document.getElementById('m-alvo').value),
+      atual: parseFloat(document.getElementById('m-atual').value)
+    });
+    salvar();
     e.target.reset();
   });
 
   function render() {
-    let rec = 0, desp = 0;
+    const filtro = document.getElementById('filtro-mes').value;
+    let rec = 0, desp = 0, fixas = 0, faturaCartao = 0;
     const catGastos = {};
 
-    db.transacoes.forEach(t => {
-      if (t.tipo === 'RECEITA') rec += t.valor;
-      else {
+    const txnsFiltradas = db.transacoes.filter(t => {
+      if (filtro === 'TODOS') return true;
+      return t.data.startsWith(filtro);
+    });
+
+    txnsFiltradas.forEach(t => {
+      if (t.tipo === 'RECEITA') {
+        rec += t.valor;
+      } else {
         desp += t.valor;
+        if (t.fixa === 'FIXA') fixas += t.valor;
+        if (t.pagamento === 'Cartão de Crédito') faturaCartao += t.valor;
         catGastos[t.categoria] = (catGastos[t.categoria] || 0) + t.valor;
       }
     });
@@ -213,39 +346,76 @@
     document.getElementById('dash-saldo').innerText = `R$ ${(rec - desp).toFixed(2)}`;
     document.getElementById('dash-receitas').innerText = `R$ ${rec.toFixed(2)}`;
     document.getElementById('dash-despesas').innerText = `R$ ${desp.toFixed(2)}`;
+    document.getElementById('dash-fixas').innerText = `R$ ${fixas.toFixed(2)}`;
+    document.getElementById('dash-cartao').innerText = `R$ ${faturaCartao.toFixed(2)}`;
 
-    // Atualiza Gráfico
+    // Gráfico de Categorias
     const ctx = document.getElementById('chartGastos').getContext('2d');
     if (chart) chart.destroy();
     chart = new Chart(ctx, {
       type: 'doughnut',
       data: {
         labels: Object.keys(catGastos),
-        datasets: [{ data: Object.values(catGastos), backgroundColor: ['#3b82f6', '#ef4444', '#fbbc04', '#34a853', '#a855f7'] }]
+        datasets: [{
+          data: Object.values(catGastos),
+          backgroundColor: ['#4895ef', '#f72585', '#4cc9f0', '#f1c40f', '#7209b7', '#3a0ca3', '#4361ee']
+        }]
       },
-      options: { plugins: { legend: { labels: { color: '#fff' } } } }
+      options: { plugins: { legend: { labels: { color: '#edf2f4', font: { size: 11 } } } } }
     });
 
-    // Atualiza Lista com Auditoria
-    const listEl = document.getElementById('lista-transacoes');
-    listEl.innerHTML = db.transacoes.map(t => {
+    // Relação de Cartões
+    document.getElementById('lista-cartoes').innerHTML = db.cartoes.map(c => `
+      <div class="list-item">
+        <div class="item-header">
+          <strong>${c.nome}</strong>
+          <span class="tag">Fecha dia ${c.fechamento}</span>
+        </div>
+        <div style="font-size:0.85rem; color:var(--subtext); margin-top:4px;">Limite Total: R$ ${c.limite.toFixed(2)}</div>
+      </div>
+    `).join('');
+
+    // Relação de Metas
+    document.getElementById('lista-metas').innerHTML = db.metas.map(m => {
+      const pct = Math.min(((m.atual / m.alvo) * 100), 100).toFixed(1);
+      return `
+        <div class="list-item">
+          <div class="item-header">
+            <strong>${m.nome}</strong>
+            <span>R$ ${m.atual.toFixed(2)} / R$ ${m.alvo.toFixed(2)} (${pct}%)</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: ${pct}%;"></div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    // Lista de Lançamentos & Auditoria
+    document.getElementById('lista-transacoes').innerHTML = txnsFiltradas.map(t => {
       const logsTxn = db.logs.filter(l => l.transacao_id === t.id);
       return `
         <div class="list-item">
-          <div>
-            <strong>${t.obs || t.categoria}</strong> <span class="tag">${t.fixa}</span>
-            <div style="font-size:0.8rem; color:var(--subtext);">${t.data} • ${t.status}</div>
-            ${logsTxn.map(l => `<div class="audit-log">🛡️ ${l.data_hora}: ${l.detalhes}</div>`).join('')}
+          <div class="item-header">
+            <div>
+              <strong>${t.obs || t.categoria}</strong>
+              <span class="tag">${t.categoria}</span>
+              <span class="tag">${t.pagamento}</span>
+            </div>
+            <div class="val ${t.tipo === 'RECEITA' ? 'green' : 'red'}" style="font-size:1.1rem;">
+              ${t.tipo === 'RECEITA' ? '+' : '-'} R$ ${t.valor.toFixed(2)}
+            </div>
           </div>
-          <div class="val ${t.tipo === 'RECEITA' ? 'green' : 'red'}">
-            ${t.tipo === 'RECEITA' ? '+' : '-'} R$ ${t.valor.toFixed(2)}
+          <div style="font-size:0.8rem; color:var(--subtext); margin-top:4px;">
+            ${t.data} • Status: <strong>${t.status}</strong> ${t.parcelas > 1 ? `• Parcelas: ${t.parcelas}x` : ''}
           </div>
+          ${logsTxn.map(l => `<div class="audit-log">🛡️ ${l.data_hora}: ${l.detalhes}</div>`).join('')}
         </div>
       `;
     }).join('');
   }
 
-  // Define data atual no form e inicia app
+  // Ajusta data padrão para hoje e inicializa
   document.getElementById('data').valueAsDate = new Date();
   render();
 </script>
