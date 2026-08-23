@@ -239,8 +239,45 @@
   <button class="tab-btn" onclick="nav('auditoria', this)">🛡️<span>Auditoria</span></button>
 </div>
 
+<!-- CONEXÃO COM O BANCO DE DADOS NA NUVEM -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBp34X2K3BYJXkyNrpGy8l0XyjM-VY8uXY",
+    authDomain: "financeiro-5ed97.firebaseapp.com",
+    databaseURL: "https://financeiro-5ed97-default-rtdb.firebaseio.com",
+    projectId: "financeiro-5ed97",
+    storageBucket: "financeiro-5ed97.firebasestorage.app",
+    messagingSenderId: "689227262420",
+    appId: "1:689227262420:web:a25a067e62b665e3cece41"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const firebaseDb = getDatabase(app);
+
+  window.salvarNoFirebase = function(dados) {
+    set(ref(firebaseDb, 'financeiro/'), dados);
+  };
+
+  const dbRef = ref(firebaseDb, 'financeiro/');
+  onValue(dbRef, (snapshot) => {
+    const dados = snapshot.val();
+    if (dados) {
+      db = {
+        transacoes: dados.transacoes || [],
+        logs: dados.logs || [],
+        cartoes: dados.cartoes || [],
+        metas: dados.metas || []
+      };
+      render();
+    }
+  });
+</script>
+
 <script>
-  let db = JSON.parse(localStorage.getItem('fe_db_v2')) || {
+  let db = {
     transacoes: [],
     logs: [],
     cartoes: [{ id: 'C1', nome: 'Cartão Principal', limite: 5000, fechamento: 5 }],
@@ -249,8 +286,9 @@
   let chart;
 
   function salvar() {
-    localStorage.setItem('fe_db_v2', JSON.stringify(db));
-    render();
+    if (typeof window.salvarNoFirebase === 'function') {
+      window.salvarNoFirebase(db);
+    }
   }
 
   function nav(pageId, btn) {
@@ -291,7 +329,7 @@
     db.transacoes.push(txn);
     db.logs.push(log);
     salvar();
-    alert('Lançamento e log de auditoria gravados com sucesso!');
+    alert('Lançamento registrado e sincronizado em tempo real!');
     e.target.reset();
     document.getElementById('data').valueAsDate = new Date();
   });
@@ -415,9 +453,7 @@
     }).join('');
   }
 
-  // Ajusta data padrão para hoje e inicializa
   document.getElementById('data').valueAsDate = new Date();
-  render();
 </script>
 
 </body>
