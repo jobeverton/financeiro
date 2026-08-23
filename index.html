@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>APP — Financeiro Expert</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg: #0f172a; --card: #1e293b; --accent: #3b82f6;
+      --green: #22c55e; --red: #ef4444; --text: #f8fafc;
+      --subtext: #94a3b8; --border: #334155;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
+    body { background: var(--bg); color: var(--text); padding-bottom: 70px; }
+    header { background: var(--card); padding: 15px; text-align: center; font-weight: bold; font-size: 1.2rem; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10; }
+    .container { max-width: 600px; margin: 0 auto; padding: 15px; }
+    .nav-tabs { display: flex; justify-content: space-around; position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); border-top: 1px solid var(--border); padding: 10px 0; }
+    .tab-btn { background: none; border: none; color: var(--subtext); font-size: 0.8rem; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .tab-btn.active { color: var(--accent); font-weight: bold; }
+    .page { display: none; }
+    .page.active { display: block; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 15px; margin-bottom: 15px; }
+    .card h3 { font-size: 0.9rem; color: var(--subtext); margin-bottom: 5px; }
+    .card .val { font-size: 1.4rem; font-weight: bold; }
+    .val.green { color: var(--green); } .val.red { color: var(--red); }
+    .form-group { margin-bottom: 12px; }
+    label { display: block; font-size: 0.85rem; color: var(--subtext); margin-bottom: 5px; }
+    input, select, textarea { width: 100%; padding: 10px; background: #0f172a; border: 1px solid var(--border); border-radius: 8px; color: #fff; font-size: 1rem; }
+    button.btn { width: 100%; padding: 12px; background: var(--accent); border: none; border-radius: 8px; color: #fff; font-weight: bold; cursor: pointer; font-size: 1rem; }
+    .list-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); }
+    .tag { font-size: 0.75rem; padding: 2px 6px; border-radius: 4px; background: var(--border); }
+    .audit-log { font-size: 0.8rem; border-left: 2px solid var(--accent); padding-left: 10px; margin-top: 8px; color: var(--subtext); }
+  </style>
+</head>
+<body>
+
+<header>📱 APP — Financeiro Expert</header>
+
+<div class="container">
+
+  <!-- 1. TELA INICIAL / DASHBOARD -->
+  <div id="dashboard" class="page active">
+    <div class="card">
+      <h3>💰 Saldo Atual</h3>
+      <div id="dash-saldo" class="val green">R$ 0,00</div>
+    </div>
+    
+    <div class="grid-2">
+      <div class="card">
+        <h3>📈 Receitas do Mês</h3>
+        <div id="dash-receitas" class="val green">R$ 0,00</div>
+      </div>
+      <div class="card">
+        <h3>📉 Despesas do Mês</h3>
+        <div id="dash-despesas" class="val red">R$ 0,00</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>📊 Gastos por Categoria</h3>
+      <canvas id="chartGastos" height="200"></canvas>
+    </div>
+  </div>
+
+  <!-- 2. NOVO LANÇAMENTO -->
+  <div id="novo" class="page">
+    <div class="card">
+      <h3>➕ Adicionar Lançamento (Com Auditoria)</h3>
+      <form id="form-transacao">
+        <div class="grid-2">
+          <div class="form-group">
+            <label>Tipo</label>
+            <select id="tipo"><option value="DESPESA">Despesa</option><option value="RECEITA">Receita</option></select>
+          </div>
+          <div class="form-group">
+            <label>Valor (R$)</label>
+            <input type="number" step="0.01" id="valor" required placeholder="0.00">
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="form-group">
+            <label>Categoria</label>
+            <select id="categoria">
+              <option value="Moradia">Moradia</option>
+              <option value="Alimentação">Alimentação</option>
+              <option value="Transporte">Transporte</option>
+              <option value="Lazer">Lazer</option>
+              <option value="Salário">Salário</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Data</label>
+            <input type="date" id="data" required>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="form-group">
+            <label>Fixa / Variável</label>
+            <select id="fixa"><option value="FIXA">Fixa</option><option value="VARIAVEL">Variável</option></select>
+          </div>
+          <div class="form-group">
+            <label>Status</label>
+            <select id="status"><option value="PAGO">Pago</option><option value="PENDENTE">Pendente</option></select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Observação</label>
+          <input type="text" id="obs" placeholder="Ex: Compras do mês">
+        </div>
+
+        <button type="submit" class="btn">Salvar Registro Auditado</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 3. METAS -->
+  <div id="metas" class="page">
+    <div class="card">
+      <h3>🎯 Progresso das Metas</h3>
+      <div style="margin-top:15px;">
+        <div style="display:flex; justify-content:space-between; font-size:0.9rem;">
+          <span>iPhone 16 Pro</span>
+          <span>R$ 3.500 / R$ 8.000 (43.75%)</span>
+        </div>
+        <div style="background:var(--border); height:10px; border-radius:5px; margin-top:5px; overflow:hidden;">
+          <div style="background:var(--green); width:43.75%; height:100%;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. AUDITORIA & EXTRATO -->
+  <div id="auditoria" class="page">
+    <div class="card">
+      <h3>🛡️ Extrato & Audit Trail</h3>
+      <div id="lista-transacoes"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- NAVEGAÇÃO INFERIOR -->
+<div class="nav-tabs">
+  <button class="tab-btn active" onclick="nav('dashboard', this)">📊<span>Início</span></button>
+  <button class="tab-btn" onclick="nav('novo', this)">➕<span>Lançar</span></button>
+  <button class="tab-btn" onclick="nav('metas', this)">🎯<span>Metas</span></button>
+  <button class="tab-btn" onclick="nav('auditoria', this)">🛡️<span>Auditoria</span></button>
+</div>
+
+<script>
+  let db = JSON.parse(localStorage.getItem('fe_db')) || { transacoes: [], logs: [] };
+  let chart;
+
+  function salvar() {
+    localStorage.setItem('fe_db', JSON.stringify(db));
+    render();
+  }
+
+  function nav(pageId, btn) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(pageId).classList.add('active');
+    btn.classList.add('active');
+  }
+
+  document.getElementById('form-transacao').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const id = 'TXN-' + Date.now();
+    const txn = {
+      id,
+      tipo: document.getElementById('tipo').value,
+      valor: parseFloat(document.getElementById('valor').value),
+      categoria: document.getElementById('categoria').value,
+      data: document.getElementById('data').value,
+      fixa: document.getElementById('fixa').value,
+      status: document.getElementById('status').value,
+      obs: document.getElementById('obs').value
+    };
+
+    // Log de Auditoria Imutável
+    const log = {
+      id: 'LOG-' + Date.now(),
+      transacao_id: id,
+      acao: 'CRIAR',
+      data_hora: new Date().toLocaleString('pt-BR'),
+      detalhes: `Criado ${txn.tipo} de R$ ${txn.valor.toFixed(2)} [${txn.categoria}]`
+    };
+
+    db.transacoes.push(txn);
+    db.logs.push(log);
+    salvar();
+    alert('Lançamento registrado e gravado na trilha de auditoria!');
+    e.target.reset();
+  });
+
+  function render() {
+    let rec = 0, desp = 0;
+    const catGastos = {};
+
+    db.transacoes.forEach(t => {
+      if (t.tipo === 'RECEITA') rec += t.valor;
+      else {
+        desp += t.valor;
+        catGastos[t.categoria] = (catGastos[t.categoria] || 0) + t.valor;
+      }
+    });
+
+    document.getElementById('dash-saldo').innerText = `R$ ${(rec - desp).toFixed(2)}`;
+    document.getElementById('dash-receitas').innerText = `R$ ${rec.toFixed(2)}`;
+    document.getElementById('dash-despesas').innerText = `R$ ${desp.toFixed(2)}`;
+
+    // Atualiza Gráfico
+    const ctx = document.getElementById('chartGastos').getContext('2d');
+    if (chart) chart.destroy();
+    chart = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: Object.keys(catGastos),
+        datasets: [{ data: Object.values(catGastos), backgroundColor: ['#3b82f6', '#ef4444', '#fbbc04', '#34a853', '#a855f7'] }]
+      },
+      options: { plugins: { legend: { labels: { color: '#fff' } } } }
+    });
+
+    // Atualiza Lista com Auditoria
+    const listEl = document.getElementById('lista-transacoes');
+    listEl.innerHTML = db.transacoes.map(t => {
+      const logsTxn = db.logs.filter(l => l.transacao_id === t.id);
+      return `
+        <div class="list-item">
+          <div>
+            <strong>${t.obs || t.categoria}</strong> <span class="tag">${t.fixa}</span>
+            <div style="font-size:0.8rem; color:var(--subtext);">${t.data} • ${t.status}</div>
+            ${logsTxn.map(l => `<div class="audit-log">🛡️ ${l.data_hora}: ${l.detalhes}</div>`).join('')}
+          </div>
+          <div class="val ${t.tipo === 'RECEITA' ? 'green' : 'red'}">
+            ${t.tipo === 'RECEITA' ? '+' : '-'} R$ ${t.valor.toFixed(2)}
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // Define data atual no form e inicia app
+  document.getElementById('data').valueAsDate = new Date();
+  render();
+</script>
+
+</body>
+</html>
