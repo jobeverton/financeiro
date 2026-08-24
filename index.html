@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Financeiro Expert v4.4 Pro</title>
+  <title>Financeiro Expert v6.0 Pro</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     :root {
@@ -130,28 +130,33 @@
     
     .tag { font-size: 0.7rem; padding: 3px 8px; border-radius: 6px; background: #21262d; color: var(--subtext); margin-left: 4px; border: 1px solid var(--border); }
     
-    .btn-trash { 
+    .btn-icon { 
       background: none; 
       border: none; 
-      color: var(--red); 
       cursor: pointer; 
       font-size: 1.1rem; 
       padding: 4px 8px; 
       border-radius: 6px;
       transition: background 0.2s;
     }
-    .btn-trash:hover { background: rgba(248, 113, 113, 0.1); }
+    .btn-icon:hover { background: rgba(255, 255, 255, 0.08); }
+    .btn-trash { color: var(--red); }
+    .btn-edit { color: var(--yellow); }
 
     .progress-bar { background: var(--bg); height: 8px; border-radius: 4px; margin-top: 8px; overflow: hidden; border: 1px solid var(--border); }
     .progress-fill { background: var(--green); height: 100%; transition: width 0.3s ease; }
     
     .note-card {
-      background: var(--bg);
+      background: var(--card-hover);
       border: 1px solid var(--border);
       border-radius: 12px;
-      padding: 12px;
-      margin-top: 10px;
+      padding: 14px;
+      margin-bottom: 12px;
+      position: relative;
     }
+    .note-card.prio-ALTA { border-left: 4px solid var(--red); }
+    .note-card.prio-MEDIA { border-left: 4px solid var(--yellow); }
+    .note-card.prio-BAIXA { border-left: 4px solid var(--green); }
 
     .btn-atalho {
       background: var(--card-hover);
@@ -201,12 +206,51 @@
       padding: 20px;
       box-shadow: 0 10px 25px rgba(0,0,0,0.5);
     }
+
+    .btn-reset-sec {
+      background: rgba(248, 113, 113, 0.1);
+      border: 1px solid var(--red);
+      color: var(--red);
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: bold;
+      cursor: pointer;
+      width: 100%;
+      text-align: left;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .btn-reset-sec:hover { background: rgba(248, 113, 113, 0.2); }
+
+    .shop-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .shop-item.purchased .shop-name {
+      text-decoration: line-through;
+      color: var(--subtext);
+    }
+    .shop-check {
+      width: 22px;
+      height: 22px;
+      cursor: pointer;
+      accent-color: var(--green);
+    }
   </style>
 </head>
 <body>
 
 <header>
-  <span>📱 Financeiro Expert</span>
+  <div style="display:flex; align-items:center; gap:8px;">
+    <span>📱 Financeiro Expert</span>
+    <button onclick="abrirModalConfig()" style="background:none; border:none; color:var(--subtext); cursor:pointer; font-size:1.1rem;">⚙️</button>
+  </div>
   <select id="filtro-mes" onchange="render()">
     <option value="TODOS">Todo o Histórico</option>
     <option value="2026-08">Agosto / 2026</option>
@@ -260,13 +304,18 @@
     </div>
 
     <div class="card">
-      <h3>📈 Evolução Temporal (Entradas vs Saídas)</h3>
-      <canvas id="chartEvolucao" height="200"></canvas>
+      <h3>📈 Detalhamento por Categoria (Gastos)</h3>
+      <canvas id="chartEvolucao" height="230"></canvas>
     </div>
 
     <div class="card">
-      <h3>📊 Distribuição de Gastos por Categoria</h3>
+      <h3>📊 Distribuição Proporcional de Gastos</h3>
       <canvas id="chartGastos" height="220"></canvas>
+    </div>
+
+    <div class="card" style="border-left: 4px solid var(--red);">
+      <h3>🚨 Raio-X dos Maiores Drenos de Dinheiro</h3>
+      <div id="lista-drenos" style="margin-top:10px;"></div>
     </div>
   </div>
 
@@ -289,7 +338,7 @@
         <input type="hidden" id="tipo" value="DESPESA">
 
         <div class="form-group">
-          <label>Valor da Operação (R$)</label>
+          <label>Valor Total da Operação (R$)</label>
           <input type="number" step="0.01" id="valor" required placeholder="0,00" style="font-size:1.6rem; font-weight:bold; text-align:center; color:var(--red);" oninput="verificarImpactoOrcamento(this.value)">
         </div>
 
@@ -317,10 +366,20 @@
           </div>
         </div>
 
-        <div class="grid-2">
+        <div style="background:var(--card-hover); border:1px solid var(--border); padding:10px; border-radius:10px; margin-bottom:12px;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <label style="margin:0; font-weight:bold; color:var(--yellow);">⚠️ Definir/Atualizar Limite para esta Categoria?</label>
+            <input type="checkbox" id="chk-definir-limite" onchange="toggleCampoLimite(this.checked)" style="width:18px; height:18px; cursor:pointer;">
+          </div>
+          <div id="div-campo-limite" style="display:none; margin-top:8px;">
+            <input type="number" step="0.01" id="limite-categoria-val" placeholder="Limite mensal em R$ (Ex: 500.00)">
+          </div>
+        </div>
+
+        <div class="grid-3">
           <div class="form-group">
             <label>Meio de Pagamento</label>
-            <select id="pagamento" onchange="toggleOpcoesCartao(this.value)">
+            <select id="pagamento" onchange="verificarMeioPagamento(this.value)">
               <option value="PIX / Dinheiro">PIX / Dinheiro</option>
               <option value="Cartão de Crédito">Cartão de Crédito</option>
               <option value="Cartão de Débito">Cartão de Débito</option>
@@ -334,7 +393,7 @@
           </div>
           
           <div class="form-group" id="group-fixa">
-            <label>Tipo de Recorrência</label>
+            <label>Recorrência</label>
             <select id="fixa">
               <option value="VARIAVEL">Pontual / Variável</option>
               <option value="FIXA">Fixa Mensal</option>
@@ -361,48 +420,45 @@
     </div>
   </div>
 
-  <!-- 3. LIMITES -->
-  <div id="orcamento" class="page">
+  <!-- 3. LISTA DE COMPRAS -->
+  <div id="compras" class="page">
     <div class="card">
-      <h3>⚠️ Limites de Gastos por Categoria (Budgeting)</h3>
-      <form id="form-limite" style="margin-bottom:15px;">
+      <h3>🛒 Lista de Compras Inteligente</h3>
+      <p style="font-size:0.75rem; color:var(--subtext); margin-bottom:12px;">Adicione seus produtos, defina a quantidade e valor unitário para cálculo automático do total.</p>
+      
+      <form id="form-compras" style="margin-bottom:15px;">
         <div class="grid-2">
-          <div class="form-group">
-            <label>Categoria</label>
-            <select id="l-categoria" onchange="verificarCategoriaPersonalizada(this, 'campo-l-custom')">
-            </select>
-            <div id="campo-l-custom" style="display:none; margin-top:8px;">
-              <input type="text" id="l-categoria-custom" placeholder="Digite o nome da categoria...">
-            </div>
-          </div>
-          <div class="form-group">
-            <label>Limite Mensal (R$)</label>
-            <input type="number" step="0.01" id="l-valor" placeholder="Ex: 500.00" required>
-          </div>
+          <input type="text" id="c-item" placeholder="Item (Ex: Leite, Sabão)" required>
+          <input type="number" id="c-qtd" placeholder="Qtd" value="1" min="1" required>
         </div>
-        <button type="submit" class="btn" style="background:var(--yellow); color:#000;">Definir Limite</button>
+        <div class="grid-2" style="margin-top:8px;">
+          <input type="number" step="0.01" id="c-preco" placeholder="Preço (R$)">
+          <button type="submit" class="btn" style="background:var(--green); color:#fff;">Adicionar Item</button>
+        </div>
       </form>
-      <div id="lista-limites"></div>
+
+      <div style="background:var(--card-hover); border:1px solid var(--border); padding:12px; border-radius:10px; margin-bottom:12px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:0.85rem; color:var(--subtext); font-weight:bold;">Total no Carrinho</span>
+          <div id="compras-total-carrinho" style="font-weight:bold; font-size:1.3rem; color:var(--green);">R$ 0,00</div>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:6px; margin-bottom:12px;">
+        <button type="button" onclick="filtrarCompras('TODOS')" style="flex:1; padding:6px; background:var(--card-hover); border:1px solid var(--border); color:#fff; border-radius:6px; font-size:0.75rem; cursor:pointer;">Todos</button>
+        <button type="button" onclick="filtrarCompras('PENDENTES')" style="flex:1; padding:6px; background:var(--card-hover); border:1px solid var(--border); color:var(--yellow); border-radius:6px; font-size:0.75rem; cursor:pointer;">Pendentes</button>
+        <button type="button" onclick="filtrarCompras('COMPRADOS')" style="flex:1; padding:6px; background:var(--card-hover); border:1px solid var(--border); color:var(--green); border-radius:6px; font-size:0.75rem; cursor:pointer;">No Carrinho</button>
+      </div>
+
+      <div id="lista-compras"></div>
+
+      <button type="button" onclick="limparComprados()" style="width:100%; margin-top:12px; background:none; border:1px dashed var(--border); color:var(--subtext); padding:8px; border-radius:8px; font-size:0.75rem; cursor:pointer;">
+        扫 Remover itens já comprados da lista
+      </button>
     </div>
   </div>
 
-  <!-- 4. CARTÕES -->
-  <div id="cartoes" class="page">
-    <div class="card">
-      <h3>💳 Cartões de Crédito Cadastrados</h3>
-      <form id="form-cartao" style="margin-bottom:15px;">
-        <div class="grid-3">
-          <input type="text" id="c-nome" placeholder="Nome (Ex: Nubank)" required>
-          <input type="number" id="c-limite" placeholder="Limite (R$)" required>
-          <input type="number" id="c-fechamento" placeholder="Dia Fechamento" min="1" max="31" required>
-        </div>
-        <button type="submit" class="btn" style="background:var(--border); color:#fff; margin-top:8px;">Cadastrar Cartão</button>
-      </form>
-      <div id="lista-cartoes"></div>
-    </div>
-  </div>
-
-  <!-- 5. METAS -->
+  <!-- 4. METAS -->
   <div id="metas" class="page">
     <div class="card">
       <h3>🎯 Gerenciador de Metas Financeiras</h3>
@@ -424,58 +480,155 @@
     </div>
   </div>
 
-  <!-- 6. ANOTAÇÕES -->
+  <!-- 5. ANOTAÇÕES -->
   <div id="anotacoes" class="page">
     <div class="card">
-      <h3>📝 Cantinho de Anotações & Lembretes</h3>
+      <h3>📝 Bloco de Notas & Lembretes</h3>
       <form id="form-nota" style="margin-bottom:15px;">
         <div class="form-group">
-          <label>Título da Anotação</label>
-          <input type="text" id="n-titulo" placeholder="Ex: Cotação de Seguro..." required>
+          <label>Título / Assunto</label>
+          <input type="text" id="n-titulo" placeholder="Ex: Cotação de Seguro, Lembrete da Fatura..." required>
+        </div>
+        <div class="grid-2">
+          <div class="form-group">
+            <label>Prioridade</label>
+            <select id="n-prio">
+              <option value="BAIXA">🟢 Baixa</option>
+              <option value="MEDIA">🟡 Média</option>
+              <option value="ALTA">🔴 Alta</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Data Alvo (Opcional)</label>
+            <input type="date" id="n-data-alvo">
+          </div>
         </div>
         <div class="form-group">
-          <label>Detalhes</label>
-          <textarea id="n-texto" rows="3" placeholder="Escreva aqui suas observações..." required></textarea>
+          <label>Conteúdo / Detalhes</label>
+          <textarea id="n-texto" rows="3" placeholder="Escreva os detalhes aqui..." required></textarea>
         </div>
-        <button type="submit" class="btn" style="background:var(--purple); color:#fff;">Salvar Anotação</button>
+        <button type="submit" class="btn" style="background:var(--purple); color:#fff;">Criar Anotação</button>
       </form>
+
+      <div style="margin-bottom: 12px;">
+        <input type="text" id="busca-nota" placeholder="🔍 Pesquisar notas..." oninput="render()" style="padding: 8px 12px; font-size:0.85rem;">
+      </div>
+
       <div id="lista-anotacoes"></div>
     </div>
   </div>
 
-  <!-- 7. AUDITORIA -->
+  <!-- 6. AUDITORIA -->
   <div id="auditoria" class="page">
     <div class="card">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
         <h3>🛡️ Histórico & Auditoria</h3>
         <button onclick="exportarCSV()" style="background:var(--border); color:#fff; border:none; padding:6px 12px; border-radius:8px; cursor:pointer; font-size:0.75rem; font-weight:bold;">📥 Exportar CSV</button>
       </div>
-      <p style="font-size:0.8rem; color:var(--subtext); margin-bottom:12px;">Para remover uma conta, clique na lixeira correspondente.</p>
+      <p style="font-size:0.8rem; color:var(--subtext); margin-bottom:12px;">Clique no lápis (✏️) para editar um lançamento ou na lixeira (🗑️) para excluir.</p>
       <div id="lista-transacoes"></div>
     </div>
   </div>
 
 </div>
 
-<!-- MODAL DE ATALHOS -->
+<!-- MODAIS -->
+<div class="modal-overlay" id="modal-config">
+  <div class="modal-content">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+      <h3 style="color:var(--accent); font-size:1.1rem;">⚙️ Configurações & Reset</h3>
+      <button type="button" onclick="fecharModalConfig()" style="background:none; border:none; color:var(--subtext); font-size:1.2rem; cursor:pointer;">✖</button>
+    </div>
+    <p style="font-size:0.8rem; color:var(--subtext); margin-bottom:16px;">
+      Utilize as opções abaixo para redefinir áreas específicas do seu sistema ou zerar todo o aplicativo para começar novamente.
+    </p>
+    <div style="display:flex; flex-direction:column; gap:6px; margin-bottom:16px;">
+      <button class="btn-reset-sec" onclick="resetAba('transacoes')"><span>🗑️ Limpar Lançamentos</span><span>Limpar</span></button>
+      <button class="btn-reset-sec" onclick="resetAba('compras')"><span>🛒 Limpar Compras</span><span>Limpar</span></button>
+      <button class="btn-reset-sec" onclick="resetAba('limites')"><span>⚠️ Limpar Limites</span><span>Limpar</span></button>
+      <button class="btn-reset-sec" onclick="resetAba('metas')"><span>🎯 Limpar Metas</span><span>Limpar</span></button>
+      <button class="btn-reset-sec" onclick="resetAba('anotacoes')"><span>📝 Limpar Notas</span><span>Limpar</span></button>
+    </div>
+    <div style="border-top:1px solid var(--border); padding-top:16px;">
+      <button type="button" onclick="resetGeral()" style="width:100%; background:var(--red); color:#fff; border:none; padding:12px; border-radius:8px; font-weight:bold; cursor:pointer;">
+        💥 Resetar Todo o Sistema
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-mov-meta">
+  <div class="modal-content">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+      <h3 style="color:var(--accent); font-size:1.1rem;" id="mov-meta-titulo">💵 Movimentar Meta</h3>
+      <button type="button" onclick="fecharModalMovMeta()" style="background:none; border:none; color:var(--subtext); font-size:1.2rem; cursor:pointer;">✖</button>
+    </div>
+    <form id="form-mov-meta">
+      <input type="hidden" id="mov-meta-id">
+      <input type="hidden" id="mov-meta-tipo-operacao">
+      <div class="form-group">
+        <label>Valor a movimentar (R$)</label>
+        <input type="number" step="0.01" id="mov-meta-valor" placeholder="0.00" required style="font-size:1.4rem; font-weight:bold; text-align:center;">
+      </div>
+      <div style="display:flex; gap:10px; margin-top:20px;">
+        <button type="submit" id="mov-meta-btn-confirmar" style="flex:1; background:var(--green); color:#fff; border:none; padding:12px; border-radius:8px; font-weight:bold; cursor:pointer;">Confirmar</button>
+        <button type="button" onclick="fecharModalMovMeta()" style="background:var(--card-hover); border:1px solid var(--border); color:var(--subtext); padding:12px; border-radius:8px; font-weight:bold; cursor:pointer;">Cancelar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-edit-meta">
+  <div class="modal-content">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+      <h3 style="color:var(--yellow); font-size:1.1rem;">✏️ Editar Meta</h3>
+      <button type="button" onclick="fecharModalEditMeta()" style="background:none; border:none; color:var(--subtext); font-size:1.2rem; cursor:pointer;">✖</button>
+    </div>
+    <form id="form-edit-meta">
+      <input type="hidden" id="edit-meta-id">
+      <div class="form-group">
+        <label>Nome do Objetivo</label>
+        <input type="text" id="edit-meta-nome" required>
+      </div>
+      <div class="form-group">
+        <label>Tipo</label>
+        <select id="edit-meta-tipo">
+          <option value="RESERVA">🛡️ Reserva de Emergência</option>
+          <option value="CONSUMO">✈️ Objetivo / Consumo</option>
+        </select>
+      </div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label>Valor Alvo (R$)</label>
+          <input type="number" step="0.01" id="edit-meta-alvo" required>
+        </div>
+        <div class="form-group">
+          <label>Já Guardado (R$)</label>
+          <input type="number" step="0.01" id="edit-meta-atual" required>
+        </div>
+      </div>
+      <div style="display:flex; gap:10px; margin-top:20px;">
+        <button type="submit" style="flex:1; background:var(--green); color:#fff; border:none; padding:12px; border-radius:8px; font-weight:bold; cursor:pointer;">Salvar Meta</button>
+        <button type="button" onclick="fecharModalEditMeta()" style="background:var(--card-hover); border:1px solid var(--border); color:var(--subtext); padding:12px; border-radius:8px; font-weight:bold; cursor:pointer;">Cancelar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <div class="modal-overlay" id="modal-atalhos">
   <div class="modal-content">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
       <h3 style="color:var(--yellow); font-size:1.1rem;" id="m-header-atalhos">⚙️ Configurar Atalhos</h3>
       <button type="button" onclick="fecharModalAtalhos()" style="background:none; border:none; color:var(--subtext); font-size:1.2rem; cursor:pointer;">✖</button>
     </div>
-
-    <!-- CRIAR CATEGORIA PELA MODAL -->
     <div style="background:rgba(56,189,248,0.1); border:1px dashed var(--accent); padding:10px; border-radius:10px; margin-bottom:14px;">
-      <div style="font-size:0.75rem; color:var(--accent); font-weight:bold; margin-bottom:4px;" id="m-titulo-nova-cat">➕ Criar Nova Categoria no Sistema</div>
+      <div style="font-size:0.75rem; color:var(--accent); font-weight:bold; margin-bottom:4px;" id="m-titulo-nova-cat">➕ Criar Nova Categoria</div>
       <div style="display:flex; gap:6px;">
         <input type="text" id="m-nova-cat-nome" placeholder="Ex: Farmácia, Freelance..." style="padding:8px; font-size:0.85rem;">
         <button type="button" onclick="criarCategoriaPelaModal()" style="background:var(--accent); color:#0d1117; border:none; padding:8px 12px; border-radius:8px; font-weight:bold; cursor:pointer; font-size:0.8rem; white-space:nowrap;">Adicionar</button>
       </div>
     </div>
-    
     <div id="form-edicao-modal" style="display:flex; flex-direction:column; gap:12px;"></div>
-
     <div style="display:flex; gap:10px; margin-top:20px;">
       <button type="button" onclick="salvarConfigAtalhosModal()" style="flex:1; background:var(--green); color:#fff; border:none; padding:12px; border-radius:8px; font-weight:bold; cursor:pointer;">Salvar Alterações</button>
       <button type="button" onclick="fecharModalAtalhos()" style="background:var(--card-hover); border:1px solid var(--border); color:var(--subtext); padding:12px; border-radius:8px; font-weight:bold; cursor:pointer;">Cancelar</button>
@@ -483,18 +636,74 @@
   </div>
 </div>
 
+<div class="modal-overlay" id="modal-edit-txn">
+  <div class="modal-content">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+      <h3 style="color:var(--yellow); font-size:1.1rem;">✏️ Editar Lançamento</h3>
+      <button type="button" onclick="fecharModalEditTxn()" style="background:none; border:none; color:var(--subtext); font-size:1.2rem; cursor:pointer;">✖</button>
+    </div>
+    <form id="form-edit-txn">
+      <input type="hidden" id="edit-txn-id">
+      <div class="form-group">
+        <label>Tipo</label>
+        <select id="edit-txn-tipo">
+          <option value="DESPESA">🔴 Despesa</option>
+          <option value="ENTRADA">🟢 Entrada</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Valor (R$)</label>
+        <input type="number" step="0.01" id="edit-txn-valor" required>
+      </div>
+      <div class="form-group">
+        <label>Categoria</label>
+        <input type="text" id="edit-txn-categoria" required>
+      </div>
+      <div class="form-group">
+        <label>Data</label>
+        <input type="date" id="edit-txn-data" required>
+      </div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label>Meio de Pagamento</label>
+          <select id="edit-txn-pagamento">
+            <option value="PIX / Dinheiro">PIX / Dinheiro</option>
+            <option value="Cartão de Crédito">Cartão de Crédito</option>
+            <option value="Cartão de Débito">Cartão de Débito</option>
+            <option value="Boleto">Boleto</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <select id="edit-txn-status">
+            <option value="PAGO">Pago / Efetuado</option>
+            <option value="PENDENTE">Pendente / Agendado</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Observação</label>
+        <input type="text" id="edit-txn-obs">
+      </div>
+      <div style="display:flex; gap:10px; margin-top:20px;">
+        <button type="submit" style="flex:1; background:var(--green); color:#fff; border:none; padding:12px; border-radius:8px; font-weight:bold; cursor:pointer;">Salvar</button>
+        <button type="button" onclick="fecharModalEditTxn()" style="background:var(--card-hover); border:1px solid var(--border); color:var(--subtext); padding:12px; border-radius:8px; font-weight:bold; cursor:pointer;">Cancelar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <!-- NAVEGAÇÃO -->
 <div class="nav-tabs">
   <button class="tab-btn active" onclick="nav('dashboard', this)">📊<span>Início</span></button>
   <button class="tab-btn" onclick="nav('novo', this)">➕<span>Lançar</span></button>
-  <button class="tab-btn" onclick="nav('orcamento', this)">⚠️<span>Limites</span></button>
-  <button class="tab-btn" onclick="nav('cartoes', this)">💳<span>Cartões</span></button>
+  <button class="tab-btn" onclick="nav('compras', this)">🛒<span>Compras</span></button>
   <button class="tab-btn" onclick="nav('metas', this)">🎯<span>Metas</span></button>
   <button class="tab-btn" onclick="nav('anotacoes', this)">📝<span>Notas</span></button>
   <button class="tab-btn" onclick="nav('auditoria', this)">🛡️<span>Histórico</span></button>
 </div>
 
-<!-- FIREBASE -->
+<!-- FIREBASE & LOGIC -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
@@ -523,9 +732,9 @@
       db = {
         transacoes: dados.transacoes || [],
         logs: dados.logs || [],
-        cartoes: dados.cartoes || [],
         metas: dados.metas || [],
         anotacoes: dados.anotacoes || [],
+        compras: dados.compras || [],
         limites: dados.limites || {},
         categoriasCustom: padronizarCategoriasCustom(dados.categoriasCustom || []),
         atalhosConfig: padronizarAtalhos(dados.atalhosConfig)
@@ -541,9 +750,9 @@
   let db = {
     transacoes: [],
     logs: [],
-    cartoes: [{ id: 'C1', nome: 'Cartão Principal', limite: 5000, fechamento: 5 }],
     metas: [{ id: 'M1', nome: 'Reserva de Emergência', tipo: 'RESERVA', alvo: 10000, atual: 4500 }],
     anotacoes: [],
+    compras: [],
     limites: {},
     categoriasCustom: [],
     atalhosConfig: {
@@ -564,6 +773,7 @@
     }
   };
   let chartGastos, chartEvolucao;
+  let filtroComprasStatus = 'TODOS';
 
   const ESTRUTURA_CATEGORIAS = {
     ENTRADA: [
@@ -624,6 +834,191 @@
     ]
   };
 
+  function toggleCampoLimite(checado) {
+    document.getElementById('div-campo-limite').style.display = checado ? 'block' : 'none';
+  }
+
+  function abrirModalConfig() {
+    document.getElementById('modal-config').style.display = 'flex';
+  }
+
+  function fecharModalConfig() {
+    document.getElementById('modal-config').style.display = 'none';
+  }
+
+  function resetAba(chave) {
+    if (confirm(`Tem certeza de que deseja resetar esta seção (${chave.toUpperCase()})?`)) {
+      if (chave === 'transacoes') db.transacoes = [];
+      if (chave === 'limites') db.limites = {};
+      if (chave === 'metas') db.metas = [];
+      if (chave === 'anotacoes') db.anotacoes = [];
+      if (chave === 'compras') db.compras = [];
+      salvar();
+      render();
+      alert('Seção limpa com sucesso!');
+    }
+  }
+
+  function resetGeral() {
+    if (confirm('ATENÇÃO: Deseja redefinir todo o sistema para as configurações de fábrica? Todos os dados salvos serão removidos!')) {
+      db.transacoes = [];
+      db.logs = [];
+      db.metas = [];
+      db.anotacoes = [];
+      db.compras = [];
+      db.limites = {};
+      db.categoriasCustom = [];
+      salvar();
+      render();
+      fecharModalConfig();
+      alert('Sistema resetado do zero com sucesso!');
+    }
+  }
+
+  function abrirMovimentoMeta(id, tipoOp) {
+    const meta = db.metas.find(m => m.id === id);
+    if (!meta) return;
+
+    document.getElementById('mov-meta-id').value = id;
+    document.getElementById('mov-meta-tipo-operacao').value = tipoOp;
+    
+    const titulo = document.getElementById('mov-meta-titulo');
+    const btn = document.getElementById('mov-meta-btn-confirmar');
+
+    if (tipoOp === 'ADD') {
+      titulo.innerText = `🟢 Guardar em: ${meta.nome}`;
+      btn.style.background = 'var(--green)';
+      btn.innerText = 'Guardar Valor';
+    } else {
+      titulo.innerText = `🔴 Retirar de: ${meta.nome}`;
+      btn.style.background = 'var(--red)';
+      btn.innerText = 'Retirar Valor';
+    }
+
+    document.getElementById('mov-meta-valor').value = '';
+    document.getElementById('modal-mov-meta').style.display = 'flex';
+  }
+
+  function fecharModalMovMeta() {
+    document.getElementById('modal-mov-meta').style.display = 'none';
+  }
+
+  document.getElementById('form-mov-meta').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const id = document.getElementById('mov-meta-id').value;
+    const tipoOp = document.getElementById('mov-meta-tipo-operacao').value;
+    const val = parseFloat(document.getElementById('mov-meta-valor').value) || 0;
+
+    const meta = db.metas.find(m => m.id === id);
+    if (meta && val > 0) {
+      if (tipoOp === 'ADD') {
+        meta.atual += val;
+      } else {
+        meta.atual = Math.max(0, meta.atual - val);
+      }
+      salvar();
+      render();
+      fecharModalMovMeta();
+    }
+  });
+
+  function abrirEdicaoMeta(id) {
+    const meta = db.metas.find(m => m.id === id);
+    if (!meta) return;
+
+    document.getElementById('edit-meta-id').value = meta.id;
+    document.getElementById('edit-meta-nome').value = meta.nome;
+    document.getElementById('edit-meta-tipo').value = meta.tipo;
+    document.getElementById('edit-meta-alvo').value = meta.alvo;
+    document.getElementById('edit-meta-atual').value = meta.atual;
+
+    document.getElementById('modal-edit-meta').style.display = 'flex';
+  }
+
+  function fecharModalEditMeta() {
+    document.getElementById('modal-edit-meta').style.display = 'none';
+  }
+
+  function deletarMeta(id) {
+    if (confirm('Tem certeza que deseja excluir esta meta?')) {
+      db.metas = db.metas.filter(m => m.id !== id);
+      salvar();
+      render();
+    }
+  }
+
+  document.getElementById('form-edit-meta').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const id = document.getElementById('edit-meta-id').value;
+    const meta = db.metas.find(m => m.id === id);
+    if (meta) {
+      meta.nome = document.getElementById('edit-meta-nome').value.trim();
+      meta.tipo = document.getElementById('edit-meta-tipo').value;
+      meta.alvo = parseFloat(document.getElementById('edit-meta-alvo').value);
+      meta.atual = parseFloat(document.getElementById('edit-meta-atual').value);
+
+      salvar();
+      render();
+      fecharModalEditMeta();
+    }
+  });
+
+  document.getElementById('form-compras').addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (!db.compras) db.compras = [];
+    
+    db.compras.push({
+      id: 'C-' + Date.now(),
+      nome: document.getElementById('c-item').value.trim(),
+      qtd: parseInt(document.getElementById('c-qtd').value) || 1,
+      preco: parseFloat(document.getElementById('c-preco').value) || 0,
+      comprado: false
+    });
+
+    salvar();
+    render();
+    e.target.reset();
+    document.getElementById('c-qtd').value = 1;
+  });
+
+  function toggleCompra(id) {
+    const item = db.compras.find(c => c.id === id);
+    if (item) {
+      item.comprado = !item.comprado;
+      salvar();
+      render();
+    }
+  }
+
+  function deletarCompra(id) {
+    db.compras = db.compras.filter(c => c.id !== id);
+    salvar();
+    render();
+  }
+
+  function filtrarCompras(status) {
+    filtroComprasStatus = status;
+    render();
+  }
+
+  function limparComprados() {
+    if (confirm('Deseja remover todos os itens que já foram marcados como comprados?')) {
+      db.compras = db.compras.filter(c => !c.comprado);
+      salvar();
+      render();
+    }
+  }
+
+  function verificarMeioPagamento(meio) {
+    const groupParcelas = document.getElementById('group-parcelas');
+    if (meio === 'Cartão de Crédito' || meio === 'Boleto') {
+      groupParcelas.style.display = 'block';
+    } else {
+      groupParcelas.style.display = 'none';
+      document.getElementById('parcelas').value = 1;
+    }
+  }
+
   function padronizarCategoriasCustom(lista) {
     return lista.map(item => {
       if (typeof item === 'string') {
@@ -637,7 +1032,6 @@
     if (!atalhos) {
       return db.atalhosConfig;
     }
-    // Converte dados antigos em formato de array para objeto separado por tipo
     if (Array.isArray(atalhos)) {
       return {
         DESPESA: atalhos,
@@ -674,6 +1068,45 @@
     }
   }
 
+  function abrirEdicaoTransacao(id) {
+    const txn = db.transacoes.find(t => t.id === id);
+    if (!txn) return;
+
+    document.getElementById('edit-txn-id').value = txn.id;
+    document.getElementById('edit-txn-tipo').value = txn.tipo;
+    document.getElementById('edit-txn-valor').value = txn.valor;
+    document.getElementById('edit-txn-categoria').value = txn.categoria;
+    document.getElementById('edit-txn-data').value = txn.data;
+    document.getElementById('edit-txn-pagamento').value = txn.pagamento;
+    document.getElementById('edit-txn-status').value = txn.status || 'PAGO';
+    document.getElementById('edit-txn-obs').value = txn.obs || '';
+
+    document.getElementById('modal-edit-txn').style.display = 'flex';
+  }
+
+  function fecharModalEditTxn() {
+    document.getElementById('modal-edit-txn').style.display = 'none';
+  }
+
+  document.getElementById('form-edit-txn').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const id = document.getElementById('edit-txn-id').value;
+    const txn = db.transacoes.find(t => t.id === id);
+    
+    if (txn) {
+      txn.tipo = document.getElementById('edit-txn-tipo').value;
+      txn.valor = parseFloat(document.getElementById('edit-txn-valor').value);
+      txn.categoria = document.getElementById('edit-txn-categoria').value.trim();
+      txn.data = document.getElementById('edit-txn-data').value;
+      txn.pagamento = document.getElementById('edit-txn-pagamento').value;
+      txn.status = document.getElementById('edit-txn-status').value;
+      txn.obs = document.getElementById('edit-txn-obs').value.trim();
+
+      salvar();
+      fecharModalEditTxn();
+    }
+  });
+
   function deletarAnotacao(id) {
     if (confirm('Deseja excluir esta anotação?')) {
       db.anotacoes = db.anotacoes.filter(n => n.id !== id);
@@ -708,7 +1141,6 @@
     db.categoriasCustom = padronizarCategoriasCustom(db.categoriasCustom);
     
     const selectCat = document.getElementById('categoria');
-    const selectLim = document.getElementById('l-categoria');
     const tipoAtual = document.getElementById('tipo').value || 'DESPESA';
 
     if (selectCat) {
@@ -748,45 +1180,6 @@
 
       if (Array.from(selectCat.options).some(o => o.value === valorSelecionado)) {
         selectCat.value = valorSelecionado;
-      }
-    }
-
-    if (selectLim) {
-      const valorLimSelecionado = selectLim.value;
-      selectLim.innerHTML = '';
-
-      ESTRUTURA_CATEGORIAS.DESPESA.forEach(g => {
-        const optGroup = document.createElement('optgroup');
-        optGroup.label = g.grupo;
-        g.opcoes.forEach(optVal => {
-          const opt = document.createElement('option');
-          opt.value = optVal;
-          opt.textContent = optVal;
-          optGroup.appendChild(opt);
-        });
-        selectLim.appendChild(optGroup);
-      });
-
-      const grpCustomLim = document.createElement('optgroup');
-      grpCustomLim.label = "Suas Despesas Customizadas";
-
-      const customDespesas = db.categoriasCustom.filter(c => c.tipo === 'DESPESA');
-      customDespesas.forEach(cat => {
-        const opt = document.createElement('option');
-        opt.value = cat.nome;
-        opt.textContent = cat.nome;
-        grpCustomLim.appendChild(opt);
-      });
-
-      const optNovaLim = document.createElement('option');
-      optNovaLim.value = '__NOVA__';
-      optNovaLim.textContent = '➕ Outra Categoria...';
-      grpCustomLim.appendChild(optNovaLim);
-
-      selectLim.appendChild(grpCustomLim);
-
-      if (Array.from(selectLim.options).some(o => o.value === valorLimSelecionado)) {
-        selectLim.value = valorLimSelecionado;
       }
     }
   }
@@ -856,7 +1249,6 @@
           <div style="font-size:0.75rem; color:var(--accent); font-weight:bold; margin-bottom:6px;">Atalho #${index + 1} (${tipoAtual})</div>
           <div style="display:flex; flex-direction:column; gap:6px;">
             <input type="text" id="m-label-${index}" value="${at.label}" placeholder="Nome do botão">
-            
             <select id="m-cat-${index}" onchange="toggleOutrosInputModal(${index})">
       `;
       
@@ -950,7 +1342,7 @@
 
     document.getElementById('obs').value = obs;
     document.getElementById('pagamento').value = meio;
-    toggleOpcoesCartao(meio);
+    verificarMeioPagamento(meio);
     document.getElementById('valor').focus();
   }
 
@@ -985,16 +1377,6 @@
     document.getElementById('data').valueAsDate = d;
   }
 
-  function toggleOpcoesCartao(meioPagamento) {
-    const groupParcelas = document.getElementById('group-parcelas');
-    if (meioPagamento === 'Cartão de Crédito') {
-      groupParcelas.style.display = 'block';
-    } else {
-      groupParcelas.style.display = 'none';
-      document.getElementById('parcelas').value = 1;
-    }
-  }
-
   function verificarImpactoOrcamento(val) {
     const valorNum = parseFloat(val) || 0;
     const catSel = document.getElementById('categoria').value;
@@ -1016,7 +1398,6 @@
     alerta.style.display = 'none';
   }
 
-  // SUBMIT FORMULÁRIOS
   document.getElementById('form-transacao').addEventListener('submit', (e) => {
     e.preventDefault();
     const selectCat = document.getElementById('categoria');
@@ -1043,8 +1424,18 @@
       document.getElementById('campo-cat-custom').style.display = 'none';
     }
 
+    const chkLimite = document.getElementById('chk-definir-limite');
+    if (chkLimite && chkLimite.checked && tipoOperacao === 'DESPESA') {
+      const valLim = parseFloat(document.getElementById('limite-categoria-val').value) || 0;
+      if (valLim > 0) {
+        if (!db.limites) db.limites = {};
+        db.limites[categoriaFinal] = valLim;
+      }
+    }
+
     const meioPagamento = document.getElementById('pagamento').value;
-    const parcelas = meioPagamento === 'Cartão de Crédito' ? (parseInt(document.getElementById('parcelas').value) || 1) : 1;
+    const podeParcelar = (meioPagamento === 'Cartão de Crédito' || meioPagamento === 'Boleto');
+    const parcelas = podeParcelar ? (parseInt(document.getElementById('parcelas').value) || 1) : 1;
     const valorTotal = parseFloat(document.getElementById('valor').value);
     const valorParcela = valorTotal / parcelas;
     const dataInicial = new Date(document.getElementById('data').value + 'T00:00:00');
@@ -1089,45 +1480,12 @@
     alert(parcelas > 1 ? `${parcelas} parcelas geradas nos meses futuros!` : 'Lançamento registrado com sucesso!');
     e.target.reset();
     document.getElementById('data').valueAsDate = new Date();
+    document.getElementById('parcelas').value = 1;
     document.getElementById('alerta-orcamento').style.display = 'none';
+    if (chkLimite) chkLimite.checked = false;
+    toggleCampoLimite(false);
+    verificarMeioPagamento(document.getElementById('pagamento').value);
     setTipoOperacao('DESPESA');
-  });
-
-  document.getElementById('form-limite').addEventListener('submit', (e) => {
-    e.preventDefault();
-    const selectLim = document.getElementById('l-categoria');
-    let cat = selectLim.value;
-    if (cat === '__NOVA__' || cat === 'Outros') {
-      cat = document.getElementById('l-categoria-custom').value.trim();
-      if (!cat) return alert('Digite o nome da categoria!');
-      
-      if (!db.categoriasCustom) db.categoriasCustom = [];
-      db.categoriasCustom = padronizarCategoriasCustom(db.categoriasCustom);
-      
-      if (!db.categoriasCustom.some(c => c.nome.toLowerCase() === cat.toLowerCase() && c.tipo === 'DESPESA')) {
-        db.categoriasCustom.push({ nome: cat, tipo: 'DESPESA' });
-      }
-
-      document.getElementById('campo-l-custom').style.display = 'none';
-    }
-    const val = parseFloat(document.getElementById('l-valor').value);
-    if (!db.limites) db.limites = {};
-    db.limites[cat] = val;
-    salvar();
-    atualizarSelectsCategorias();
-    e.target.reset();
-  });
-
-  document.getElementById('form-cartao').addEventListener('submit', (e) => {
-    e.preventDefault();
-    db.cartoes.push({
-      id: 'C-' + Date.now(),
-      nome: document.getElementById('c-nome').value,
-      limite: parseFloat(document.getElementById('c-limite').value),
-      fechamento: parseInt(document.getElementById('c-fechamento').value)
-    });
-    salvar();
-    e.target.reset();
   });
 
   document.getElementById('form-meta').addEventListener('submit', (e) => {
@@ -1148,8 +1506,10 @@
     db.anotacoes.push({
       id: 'N-' + Date.now(),
       titulo: document.getElementById('n-titulo').value,
+      prio: document.getElementById('n-prio').value,
+      dataAlvo: document.getElementById('n-data-alvo').value,
       texto: document.getElementById('n-texto').value,
-      data: new Date().toLocaleDateString('pt-BR')
+      dataCriacao: new Date().toLocaleDateString('pt-BR')
     });
     salvar();
     e.target.reset();
@@ -1179,72 +1539,113 @@
     document.getElementById('dash-fixas').innerText = `R$ ${totalFixas.toFixed(2)}`;
     document.getElementById('dash-cartao').innerText = `R$ ${totalCartao.toFixed(2)}`;
 
-    // Limites
-    const listLimites = document.getElementById('lista-limites');
-    if (listLimites) {
-      listLimites.innerHTML = '';
-      Object.keys(db.limites || {}).forEach(cat => {
-        const lim = db.limites[cat];
-        const gast = txns.filter(t => t.categoria === cat && t.tipo === 'DESPESA').reduce((a, b) => a + b.valor, 0);
-        const pct = Math.min((gast / lim) * 100, 100);
-        listLimites.innerHTML += `
-          <div class="list-item">
-            <div class="item-header">
-              <span><strong>${cat}</strong></span>
-              <span>R$ ${gast.toFixed(2)} / R$ ${lim.toFixed(2)}</span>
+    const containerDrenos = document.getElementById('lista-drenos');
+    if (containerDrenos) {
+      const mapaDespesas = {};
+      txns.filter(t => t.tipo === 'DESPESA').forEach(t => {
+        mapaDespesas[t.categoria] = (mapaDespesas[t.categoria] || 0) + t.valor;
+      });
+
+      const ordenados = Object.entries(mapaDespesas).sort((a, b) => b[1] - a[1]);
+
+      if (ordenados.length === 0) {
+        containerDrenos.innerHTML = '<span style="font-size:0.8rem; color:var(--subtext);">Sem despesas no período selecionado.</span>';
+      } else {
+        let htmlDrenos = '';
+        ordenados.slice(0, 4).forEach(([cat, val], index) => {
+          const pct = totalDespesas > 0 ? ((val / totalDespesas) * 100).toFixed(1) : 0;
+          htmlDrenos += `
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; font-size:0.85rem;">
+              <span><strong>#${index + 1} ${cat}</strong></span>
+              <span style="color:var(--red); font-weight:bold;">R$ ${val.toFixed(2)} (${pct}%)</span>
             </div>
-            <div class="progress-bar"><div class="progress-fill" style="width:${pct}%; background:${pct > 90 ? 'var(--red)' : 'var(--green)'};"></div></div>
+          `;
+        });
+        containerDrenos.innerHTML = htmlDrenos;
+      }
+    }
+
+    const containerCompras = document.getElementById('lista-compras');
+    if (containerCompras) {
+      if (!db.compras) db.compras = [];
+      let itensFiltrados = db.compras;
+      if (filtroComprasStatus === 'PENDENTES') itensFiltrados = db.compras.filter(c => !c.comprado);
+      if (filtroComprasStatus === 'COMPRADOS') itensFiltrados = db.compras.filter(c => c.comprado);
+
+      const totalCarrinho = db.compras
+        .filter(c => c.comprado)
+        .reduce((a, b) => a + ((b.preco || 0) * (b.qtd || 1)), 0);
+
+      document.getElementById('compras-total-carrinho').innerText = `R$ ${totalCarrinho.toFixed(2)}`;
+
+      containerCompras.innerHTML = itensFiltrados.length ? itensFiltrados.map(c => {
+        const totalItem = (c.preco || 0) * (c.qtd || 1);
+        const textoPreco = c.preco > 0 
+          ? (c.qtd > 1 ? `R$ ${c.preco.toFixed(2)} un. (Total: R$ ${totalItem.toFixed(2)})` : `R$ ${totalItem.toFixed(2)}`)
+          : 'Sem preço informado';
+
+        return `
+          <div class="shop-item ${c.comprado ? 'purchased' : ''}">
+            <div style="display:flex; align-items:center; gap:10px;">
+              <input type="checkbox" class="shop-check" ${c.comprado ? 'checked' : ''} onchange="toggleCompra('${c.id}')">
+              <div>
+                <span class="shop-name"><strong>${c.nome}</strong> (x${c.qtd})</span>
+                <div style="font-size:0.75rem; color:var(--subtext);">${textoPreco}</div>
+              </div>
+            </div>
+            <button class="btn-icon btn-trash" onclick="deletarCompra('${c.id}')">🗑️</button>
           </div>
         `;
-      });
+      }).join('') : '<p style="font-size:0.8rem; color:var(--subtext);">Nenhum item na lista.</p>';
     }
 
-    // Cartões
-    const listCartoes = document.getElementById('lista-cartoes');
-    if (listCartoes) {
-      listCartoes.innerHTML = db.cartoes.map(c => `
-        <div class="list-item">
-          <div class="item-header">
-            <span>💳 <strong>${c.nome}</strong> (Fecha dia ${c.fechamento})</span>
-            <span>Limite: R$ ${c.limite.toFixed(2)}</span>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    // Metas
     const listMetas = document.getElementById('lista-metas');
     if (listMetas) {
-      listMetas.innerHTML = db.metas.map(m => {
+      listMetas.innerHTML = db.metas.length ? db.metas.map(m => {
         const pct = Math.min((m.atual / m.alvo) * 100, 100);
         return `
           <div class="list-item">
             <div class="item-header">
-              <span>🎯 <strong>${m.nome}</strong></span>
-              <span>R$ ${m.atual.toFixed(2)} / R$ ${m.alvo.toFixed(2)}</span>
+              <div>
+                <span>🎯 <strong>${m.nome}</strong></span>
+                <div style="font-size:0.75rem; color:var(--subtext); margin-top:2px;">R$ ${m.atual.toFixed(2)} de R$ ${m.alvo.toFixed(2)}</div>
+              </div>
+              <div style="text-align:right;">
+                <button class="btn-icon" style="color:var(--green);" onclick="abrirMovimentoMeta('${m.id}', 'ADD')">➕</button>
+                <button class="btn-icon" style="color:var(--red);" onclick="abrirMovimentoMeta('${m.id}', 'SUB')">➖</button>
+                <button class="btn-icon btn-edit" onclick="abrirEdicaoMeta('${m.id}')">✏️</button>
+                <button class="btn-icon btn-trash" onclick="deletarMeta('${m.id}')">🗑️</button>
+              </div>
             </div>
             <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;"></div></div>
           </div>
         `;
-      }).join('');
+      }).join('') : '<p style="font-size:0.8rem; color:var(--subtext);">Nenhuma meta cadastrada.</p>';
     }
 
-    // Anotações
     const listNotas = document.getElementById('lista-anotacoes');
     if (listNotas) {
-      listNotas.innerHTML = db.anotacoes.map(n => `
-        <div class="note-card">
+      const termoBusca = (document.getElementById('busca-nota') ? document.getElementById('busca-nota').value.toLowerCase() : '');
+      const notasFiltradas = db.anotacoes.filter(n => 
+        n.titulo.toLowerCase().includes(termoBusca) || 
+        n.texto.toLowerCase().includes(termoBusca)
+      );
+
+      listNotas.innerHTML = notasFiltradas.length ? notasFiltradas.map(n => `
+        <div class="note-card prio-${n.prio || 'BAIXA'}">
           <div class="item-header">
-            <strong>${n.titulo}</strong>
-            <button class="btn-trash" onclick="deletarAnotacao('${n.id}')">🗑️</button>
+            <div>
+              <strong>${n.titulo}</strong>
+              ${n.dataAlvo ? `<span class="tag">📅 Até: ${n.dataAlvo}</span>` : ''}
+            </div>
+            <button class="btn-icon btn-trash" onclick="deletarAnotacao('${n.id}')">🗑️</button>
           </div>
-          <p style="font-size:0.85rem; color:var(--subtext); margin-top:6px;">${n.texto}</p>
-          <small style="font-size:0.7rem; color:var(--subtext); display:block; margin-top:6px;">${n.data}</small>
+          <p style="font-size:0.85rem; color:var(--text); margin-top:8px; white-space: pre-wrap;">${n.texto}</p>
+          <small style="font-size:0.7rem; color:var(--subtext); display:block; margin-top:8px;">Criado em: ${n.dataCriacao || n.data || '-'}</small>
         </div>
-      `).join('');
+      `).join('') : '<p style="font-size:0.8rem; color:var(--subtext);">Nenhuma anotação encontrada.</p>';
     }
 
-    // Histórico
     const listTxns = document.getElementById('lista-transacoes');
     if (listTxns) {
       listTxns.innerHTML = txns.slice().reverse().map(t => `
@@ -1258,7 +1659,10 @@
               <div class="val ${t.tipo === 'DESPESA' ? 'red' : 'green'}" style="font-size:1rem;">
                 ${t.tipo === 'DESPESA' ? '-' : '+'} R$ ${t.valor.toFixed(2)}
               </div>
-              <button class="btn-trash" onclick="deletarTransacao('${t.id}')">🗑️</button>
+              <div style="margin-top:4px;">
+                <button class="btn-icon btn-edit" onclick="abrirEdicaoTransacao('${t.id}')">✏️</button>
+                <button class="btn-icon btn-trash" onclick="deletarTransacao('${t.id}')">🗑️</button>
+              </div>
             </div>
           </div>
         </div>
@@ -1282,7 +1686,7 @@
         labels: Object.keys(cats),
         datasets: [{
           data: Object.values(cats),
-          backgroundColor: ['#f87171', '#38bdf8', '#fbbf24', '#a855f7', '#2ecc71', '#f43f5e']
+          backgroundColor: ['#f87171', '#38bdf8', '#fbbf24', '#a855f7', '#2ecc71', '#f43f5e', '#fb923c', '#06b6d4']
         }]
       },
       options: { plugins: { legend: { labels: { color: '#f0f6fc' } } } }
@@ -1290,16 +1694,32 @@
 
     const ctxEvolucao = document.getElementById('chartEvolucao').getContext('2d');
     if (chartEvolucao) chartEvolucao.destroy();
+    
+    const labelsCategorias = Object.keys(cats);
+    const valoresCategorias = Object.values(cats);
+
     chartEvolucao = new Chart(ctxEvolucao, {
       type: 'bar',
       data: {
-        labels: ['Totais'],
+        labels: labelsCategorias.length ? labelsCategorias : ['Sem dados'],
         datasets: [
-          { label: 'Entradas', data: [txns.filter(t => t.tipo !== 'DESPESA').reduce((a,b)=>a+b.valor,0)], backgroundColor: '#2ecc71' },
-          { label: 'Saídas', data: [txns.filter(t => t.tipo === 'DESPESA').reduce((a,b)=>a+b.valor,0)], backgroundColor: '#f87171' }
+          { 
+            label: 'Total Gasto (R$)', 
+            data: valoresCategorias.length ? valoresCategorias : [0], 
+            backgroundColor: '#f87171' 
+          }
         ]
       },
-      options: { scales: { y: { ticks: { color: '#f0f6fc' } }, x: { ticks: { color: '#f0f6fc' } } }, plugins: { legend: { labels: { color: '#f0f6fc' } } } }
+      options: { 
+        indexAxis: 'y',
+        scales: { 
+          y: { ticks: { color: '#f0f6fc' } }, 
+          x: { ticks: { color: '#f0f6fc' } } 
+        }, 
+        plugins: { 
+          legend: { display: false } 
+        } 
+      }
     });
   }
 
