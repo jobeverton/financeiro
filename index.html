@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Financeiro Expert v4.0 Pro</title>
+  <title>Financeiro Expert v4.4 Pro</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     :root {
@@ -80,7 +80,7 @@
     @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
-    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 12px; }
     
     .card { 
       background: var(--card); 
@@ -129,7 +129,6 @@
     .item-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
     
     .tag { font-size: 0.7rem; padding: 3px 8px; border-radius: 6px; background: #21262d; color: var(--subtext); margin-left: 4px; border: 1px solid var(--border); }
-    .audit-log { font-size: 0.75rem; border-left: 2px solid var(--accent); padding-left: 8px; margin-top: 8px; color: var(--subtext); }
     
     .btn-trash { 
       background: none; 
@@ -153,6 +152,55 @@
       padding: 12px;
       margin-top: 10px;
     }
+
+    .btn-atalho {
+      background: var(--card-hover);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px 4px;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .btn-atalho:active {
+      border-color: var(--accent);
+      transform: scale(0.98);
+    }
+    .btn-atalho.config {
+      background: rgba(251, 191, 36, 0.1);
+      border-color: var(--yellow);
+      color: var(--yellow);
+      font-weight: bold;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(4px);
+      z-index: 50;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .modal-content {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      width: 100%;
+      max-width: 500px;
+      max-height: 85vh;
+      overflow-y: auto;
+      padding: 20px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    }
   </style>
 </head>
 <body>
@@ -171,7 +219,7 @@
 
 <div class="container">
 
-  <!-- 1. DASHBOARD COMPLETO -->
+  <!-- 1. DASHBOARD -->
   <div id="dashboard" class="page active">
     <div class="grid-2">
       <div class="card">
@@ -222,85 +270,75 @@
     </div>
   </div>
 
-  <!-- 2. LANÇAMENTO DETALHADO -->
+  <!-- 2. LANÇAMENTO -->
   <div id="novo" class="page">
     <div class="card">
-      <h3>➕ Novo Lançamento</h3>
+      
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <label style="margin:0;" id="label-atalhos">⚡ Atalhos Rápidos</label>
+        <button type="button" onclick="abrirModalAtalhos()" style="background:none; border:none; color:var(--yellow); font-size:0.75rem; cursor:pointer;">⚙️ Personalizar</button>
+      </div>
+
+      <div class="grid-3" id="container-botoes-atalho" style="margin-bottom: 16px;"></div>
+
       <form id="form-transacao">
-        <div class="grid-2">
-          <div class="form-group">
-            <label>Tipo de Operação</label>
-            <select id="tipo">
-              <option value="DESPESA">Despesa (Saída)</option>
-              <option value="ENTRADA">Entrada (Ganho)</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Valor Total (R$)</label>
-            <input type="number" step="0.01" id="valor" required placeholder="0.00">
-          </div>
+        <div style="display:flex; background:var(--bg); border:1px solid var(--border); border-radius:12px; padding:4px; margin-bottom:12px;">
+          <button type="button" id="btn-tipo-despesa" onclick="setTipoOperacao('DESPESA')" style="flex:1; padding:10px; border:none; border-radius:8px; background:var(--red); color:#fff; font-weight:bold; cursor:pointer;">🔴 Despesa</button>
+          <button type="button" id="btn-tipo-entrada" onclick="setTipoOperacao('ENTRADA')" style="flex:1; padding:10px; border:none; border-radius:8px; background:transparent; color:var(--subtext); font-weight:bold; cursor:pointer;">🟢 Entrada</button>
+        </div>
+        <input type="hidden" id="tipo" value="DESPESA">
+
+        <div class="form-group">
+          <label>Valor da Operação (R$)</label>
+          <input type="number" step="0.01" id="valor" required placeholder="0,00" style="font-size:1.6rem; font-weight:bold; text-align:center; color:var(--red);" oninput="verificarImpactoOrcamento(this.value)">
+        </div>
+
+        <div id="alerta-orcamento" style="display:none; background:rgba(251,191,36,0.15); border:1px solid var(--yellow); color:var(--yellow); padding:8px 12px; border-radius:8px; font-size:0.75rem; margin-bottom:12px;">
+          ⚠️ <strong>Atenção:</strong> Este lançamento ultrapassará o limite estipulado para esta categoria!
         </div>
 
         <div class="grid-2">
           <div class="form-group">
             <label>Categoria Detalhada</label>
-            <select id="categoria">
-              <optgroup label="Entradas Principais">
-                <option value="Salário / Prolabore" selected>Salário / Prolabore</option>
-                <option value="Rendimentos / Extra">Rendimentos / Extra</option>
-              </optgroup>
-              <optgroup label="Moradia e Habitação">
-                <option value="Aluguel/Condomínio">Aluguel / Condomínio</option>
-                <option value="Energia Elétrica">Energia Elétrica</option>
-                <option value="Água e Saneamento">Água e Saneamento</option>
-                <option value="Internet / Fibra">Internet / Fibra</option>
-                <option value="Gás de Cozinha">Gás de Cozinha</option>
-              </optgroup>
-              <optgroup label="Alimentação & Lazer">
-                <option value="Supermercado / Feira">Supermercado / Feira</option>
-                <option value="Deliveries / iFood">Deliveries / iFood</option>
-                <option value="Restaurantes / Bares">Restaurantes / Bares</option>
-                <option value="Cinema / Teatros">Cinema / Teatros</option>
-                <option value="Passeios / Viagens">Passeios / Viagens</option>
-                <option value="Streaming / Jogos">Streaming / Jogos</option>
-              </optgroup>
-              <optgroup label="Transporte & Veículo">
-                <option value="Combustível">Combustível</option>
-                <option value="Uber / Táxi / Passagem">Uber / Táxi / Passagem</option>
-                <option value="Manutenção Veicular">Manutenção / IPVA / Seguro</option>
-              </optgroup>
-              <optgroup label="Outros Gastos">
-                <option value="Saúde e Farmácia">Saúde e Farmácia</option>
-                <option value="Educação e Cursos">Educação e Cursos</option>
-              </optgroup>
+            <select id="categoria" onchange="verificarCategoriaPersonalizada(this, 'campo-cat-custom'); verificarImpactoOrcamento(document.getElementById('valor').value);">
             </select>
+            <div id="campo-cat-custom" style="display:none; margin-top:8px;">
+              <input type="text" id="categoria-custom" placeholder="Digite o nome da nova categoria...">
+            </div>
           </div>
+
           <div class="form-group">
             <label>Data da Transação</label>
             <input type="date" id="data" required>
+            <div style="display:flex; gap:6px; margin-top:4px;">
+              <button type="button" onclick="setDataAtalho(0)" style="flex:1; background:var(--card-hover); border:1px solid var(--border); color:var(--subtext); font-size:0.7rem; border-radius:4px; padding:2px; cursor:pointer;">Hoje</button>
+              <button type="button" onclick="setDataAtalho(-1)" style="flex:1; background:var(--card-hover); border:1px solid var(--border); color:var(--subtext); font-size:0.7rem; border-radius:4px; padding:2px; cursor:pointer;">Ontem</button>
+            </div>
           </div>
         </div>
 
-        <div class="grid-3">
+        <div class="grid-2">
           <div class="form-group">
-            <label>Meio de Pago</label>
-            <select id="pagamento">
+            <label>Meio de Pagamento</label>
+            <select id="pagamento" onchange="toggleOpcoesCartao(this.value)">
               <option value="PIX / Dinheiro">PIX / Dinheiro</option>
               <option value="Cartão de Crédito">Cartão de Crédito</option>
               <option value="Cartão de Débito">Cartão de Débito</option>
               <option value="Boleto">Boleto</option>
             </select>
           </div>
-          <div class="form-group">
-            <label>Recorrência</label>
+
+          <div class="form-group" id="group-parcelas" style="display:none;">
+            <label>Nº de Parcelas</label>
+            <input type="number" id="parcelas" min="1" max="72" value="1">
+          </div>
+          
+          <div class="form-group" id="group-fixa">
+            <label>Tipo de Recorrência</label>
             <select id="fixa">
-              <option value="VARIAVEL">Variável</option>
+              <option value="VARIAVEL">Pontual / Variável</option>
               <option value="FIXA">Fixa Mensal</option>
             </select>
-          </div>
-          <div class="form-group">
-            <label>Parcelas</label>
-            <input type="number" id="parcelas" min="1" max="72" value="1">
           </div>
         </div>
 
@@ -308,22 +346,22 @@
           <div class="form-group">
             <label>Status Inicial</label>
             <select id="status">
-              <option value="PAGO">Pago / Recebido</option>
-              <option value="PENDENTE">Pendente / A Vencer</option>
+              <option value="PAGO">Pago / Efetuado</option>
+              <option value="PENDENTE">Pendente / Agendado</option>
             </select>
           </div>
           <div class="form-group">
-            <label>Observação / Descrição</label>
-            <input type="text" id="obs" placeholder="Ex: Salário Mensal, Assinatura...">
+            <label>Descrição / Observação</label>
+            <input type="text" id="obs" placeholder="Ex: Almoço de negócios, Farmácia...">
           </div>
         </div>
 
-        <button type="submit" class="btn">Registrar Lançamento</button>
+        <button type="submit" class="btn" style="margin-top:8px;">Salvar Lançamento</button>
       </form>
     </div>
   </div>
 
-  <!-- 3. LIMITES POR CATEGORIA (ORÇAMENTO TÁTICO) -->
+  <!-- 3. LIMITES -->
   <div id="orcamento" class="page">
     <div class="card">
       <h3>⚠️ Limites de Gastos por Categoria (Budgeting)</h3>
@@ -331,14 +369,11 @@
         <div class="grid-2">
           <div class="form-group">
             <label>Categoria</label>
-            <select id="l-categoria">
-              <option value="Supermercado / Feira">Supermercado / Feira</option>
-              <option value="Deliveries / iFood">Deliveries / iFood</option>
-              <option value="Restaurantes / Bares">Restaurantes / Bares</option>
-              <option value="Combustível">Combustível</option>
-              <option value="Uber / Táxi / Passagem">Uber / Táxi / Passagem</option>
-              <option value="Passeios / Viagens">Passeios / Viagens</option>
+            <select id="l-categoria" onchange="verificarCategoriaPersonalizada(this, 'campo-l-custom')">
             </select>
+            <div id="campo-l-custom" style="display:none; margin-top:8px;">
+              <input type="text" id="l-categoria-custom" placeholder="Digite o nome da categoria...">
+            </div>
           </div>
           <div class="form-group">
             <label>Limite Mensal (R$)</label>
@@ -351,7 +386,7 @@
     </div>
   </div>
 
-  <!-- 4. CARTÕES DE CRÉDITO -->
+  <!-- 4. CARTÕES -->
   <div id="cartoes" class="page">
     <div class="card">
       <h3>💳 Cartões de Crédito Cadastrados</h3>
@@ -367,7 +402,7 @@
     </div>
   </div>
 
-  <!-- 5. METAS PERSONALIZADAS -->
+  <!-- 5. METAS -->
   <div id="metas" class="page">
     <div class="card">
       <h3>🎯 Gerenciador de Metas Financeiras</h3>
@@ -389,18 +424,18 @@
     </div>
   </div>
 
-  <!-- 6. BLOCO DE NOTAS / ANOTAÇÕES -->
+  <!-- 6. ANOTAÇÕES -->
   <div id="anotacoes" class="page">
     <div class="card">
       <h3>📝 Cantinho de Anotações & Lembretes</h3>
       <form id="form-nota" style="margin-bottom:15px;">
         <div class="form-group">
           <label>Título da Anotação</label>
-          <input type="text" id="n-titulo" placeholder="Ex: Cotação de Seguro, Lembrete de Mercado..." required>
+          <input type="text" id="n-titulo" placeholder="Ex: Cotação de Seguro..." required>
         </div>
         <div class="form-group">
           <label>Detalhes</label>
-          <textarea id="n-texto" rows="3" placeholder="Escreva aqui suas observações, estratégias ou negociações..." required></textarea>
+          <textarea id="n-texto" rows="3" placeholder="Escreva aqui suas observações..." required></textarea>
         </div>
         <button type="submit" class="btn" style="background:var(--purple); color:#fff;">Salvar Anotação</button>
       </form>
@@ -408,7 +443,7 @@
     </div>
   </div>
 
-  <!-- 7. AUDITORIA & HISTÓRICO COMPLETO -->
+  <!-- 7. AUDITORIA -->
   <div id="auditoria" class="page">
     <div class="card">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
@@ -422,7 +457,33 @@
 
 </div>
 
-<!-- NAVEGAÇÃO INFERIOR -->
+<!-- MODAL DE ATALHOS -->
+<div class="modal-overlay" id="modal-atalhos">
+  <div class="modal-content">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+      <h3 style="color:var(--yellow); font-size:1.1rem;" id="m-header-atalhos">⚙️ Configurar Atalhos</h3>
+      <button type="button" onclick="fecharModalAtalhos()" style="background:none; border:none; color:var(--subtext); font-size:1.2rem; cursor:pointer;">✖</button>
+    </div>
+
+    <!-- CRIAR CATEGORIA PELA MODAL -->
+    <div style="background:rgba(56,189,248,0.1); border:1px dashed var(--accent); padding:10px; border-radius:10px; margin-bottom:14px;">
+      <div style="font-size:0.75rem; color:var(--accent); font-weight:bold; margin-bottom:4px;" id="m-titulo-nova-cat">➕ Criar Nova Categoria no Sistema</div>
+      <div style="display:flex; gap:6px;">
+        <input type="text" id="m-nova-cat-nome" placeholder="Ex: Farmácia, Freelance..." style="padding:8px; font-size:0.85rem;">
+        <button type="button" onclick="criarCategoriaPelaModal()" style="background:var(--accent); color:#0d1117; border:none; padding:8px 12px; border-radius:8px; font-weight:bold; cursor:pointer; font-size:0.8rem; white-space:nowrap;">Adicionar</button>
+      </div>
+    </div>
+    
+    <div id="form-edicao-modal" style="display:flex; flex-direction:column; gap:12px;"></div>
+
+    <div style="display:flex; gap:10px; margin-top:20px;">
+      <button type="button" onclick="salvarConfigAtalhosModal()" style="flex:1; background:var(--green); color:#fff; border:none; padding:12px; border-radius:8px; font-weight:bold; cursor:pointer;">Salvar Alterações</button>
+      <button type="button" onclick="fecharModalAtalhos()" style="background:var(--card-hover); border:1px solid var(--border); color:var(--subtext); padding:12px; border-radius:8px; font-weight:bold; cursor:pointer;">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- NAVEGAÇÃO -->
 <div class="nav-tabs">
   <button class="tab-btn active" onclick="nav('dashboard', this)">📊<span>Início</span></button>
   <button class="tab-btn" onclick="nav('novo', this)">➕<span>Lançar</span></button>
@@ -433,12 +494,11 @@
   <button class="tab-btn" onclick="nav('auditoria', this)">🛡️<span>Histórico</span></button>
 </div>
 
-<!-- CONEXÃO COM O BANCO DE DADOS NA NUVEM -->
+<!-- FIREBASE -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-  // CREDENCIAIS DO FIREBASE MANTIDAS
   const firebaseConfig = {
     apiKey: "AIzaSyBp34X2K3BYJXkyNrpGy8l0XyjM-VY8uXY",
     authDomain: "financeiro-5ed97.firebaseapp.com",
@@ -466,8 +526,12 @@
         cartoes: dados.cartoes || [],
         metas: dados.metas || [],
         anotacoes: dados.anotacoes || [],
-        limites: dados.limites || {}
+        limites: dados.limites || {},
+        categoriasCustom: padronizarCategoriasCustom(dados.categoriasCustom || []),
+        atalhosConfig: padronizarAtalhos(dados.atalhosConfig)
       };
+      atualizarSelectsCategorias();
+      renderAtalhosEditaveis();
       render();
     }
   });
@@ -480,9 +544,114 @@
     cartoes: [{ id: 'C1', nome: 'Cartão Principal', limite: 5000, fechamento: 5 }],
     metas: [{ id: 'M1', nome: 'Reserva de Emergência', tipo: 'RESERVA', alvo: 10000, atual: 4500 }],
     anotacoes: [],
-    limites: {}
+    limites: {},
+    categoriasCustom: [],
+    atalhosConfig: {
+      DESPESA: [
+        { label: '🛒 Mercado', cat: 'Supermercado / Feira', meio: 'PIX / Dinheiro' },
+        { label: '🚗 Uber', cat: 'Uber / Táxi / Passagem', meio: 'Cartão de Crédito' },
+        { label: '🍔 iFood', cat: 'Deliveries / iFood', meio: 'Cartão de Crédito' },
+        { label: '⚓ Posto', cat: 'Combustível', meio: 'Cartão de Débito' },
+        { label: '🍽️ Almoço', cat: 'Restaurantes / Bares', meio: 'Cartão de Crédito' }
+      ],
+      ENTRADA: [
+        { label: '💵 Salário', cat: 'Salário / Prolabore', meio: 'PIX / Dinheiro' },
+        { label: '💻 Freelance', cat: 'Vendas / Serviços', meio: 'PIX / Dinheiro' },
+        { label: '📈 Dividendos', cat: 'Investimentos / Dividendos', meio: 'PIX / Dinheiro' },
+        { label: '🔄 Reembolso', cat: 'Reembolsos / Retornos', meio: 'PIX / Dinheiro' },
+        { label: '🎁 Extra', cat: 'Rendimentos / Extra', meio: 'PIX / Dinheiro' }
+      ]
+    }
   };
   let chartGastos, chartEvolucao;
+
+  const ESTRUTURA_CATEGORIAS = {
+    ENTRADA: [
+      {
+        grupo: 'Entradas Principais',
+        opcoes: [
+          'Salário / Prolabore',
+          'Rendimentos / Extra',
+          'Vendas / Serviços',
+          'Investimentos / Dividendos',
+          'Reembolsos / Retornos'
+        ]
+      }
+    ],
+    DESPESA: [
+      {
+        grupo: 'Moradia e Habitação',
+        opcoes: [
+          'Aluguel/Condomínio',
+          'Energia Elétrica',
+          'Água e Saneamento',
+          'Internet / Fibra',
+          'Gás de Cozinha'
+        ]
+      },
+      {
+        grupo: 'Alimentação & Lazer',
+        opcoes: [
+          'Supermercado / Feira',
+          'Deliveries / iFood',
+          'Restaurantes / Bares',
+          'Cinema / Teatros',
+          'Passeios / Viagens',
+          'Streaming / Jogos'
+        ]
+      },
+      {
+        grupo: 'Transporte & Veículo',
+        opcoes: [
+          'Combustível',
+          'Uber / Táxi / Passagem',
+          'Manutenção / IPVA / Seguro'
+        ]
+      },
+      {
+        grupo: 'Outros Gastos Avançados',
+        opcoes: [
+          'Saúde e Farmácia',
+          'Educação e Cursos',
+          'Impostos, Taxas e Tarifas',
+          'Cuidados Pessoais & Estética',
+          'Pets & Animais',
+          'Manutenção & Reformas',
+          'Presentes & Doações',
+          'Outros'
+        ]
+      }
+    ]
+  };
+
+  function padronizarCategoriasCustom(lista) {
+    return lista.map(item => {
+      if (typeof item === 'string') {
+        return { nome: item, tipo: 'DESPESA' };
+      }
+      return item;
+    });
+  }
+
+  function padronizarAtalhos(atalhos) {
+    if (!atalhos) {
+      return db.atalhosConfig;
+    }
+    // Converte dados antigos em formato de array para objeto separado por tipo
+    if (Array.isArray(atalhos)) {
+      return {
+        DESPESA: atalhos,
+        ENTRADA: [
+          { label: '💵 Salário', cat: 'Salário / Prolabore', meio: 'PIX / Dinheiro' },
+          { label: '💻 Freelance', cat: 'Vendas / Serviços', meio: 'PIX / Dinheiro' },
+          { label: '📈 Dividendos', cat: 'Investimentos / Dividendos', meio: 'PIX / Dinheiro' },
+          { label: '🔄 Reembolso', cat: 'Reembolsos / Retornos', meio: 'PIX / Dinheiro' },
+          { label: '🎁 Extra', cat: 'Rendimentos / Extra', meio: 'PIX / Dinheiro' }
+        ]
+      };
+    }
+    return atalhos;
+  }
 
   function salvar() {
     if (typeof window.salvarNoFirebase === 'function') {
@@ -525,10 +694,357 @@
     link.click();
   }
 
-  // Novo Lançamento com Projeção Automática de Parcelas Futuras
+  function verificarCategoriaPersonalizada(selectElem, divId) {
+    const divCustom = document.getElementById(divId);
+    if (selectElem.value === '__NOVA__' || selectElem.value === 'Outros') {
+      divCustom.style.display = 'block';
+    } else {
+      divCustom.style.display = 'none';
+    }
+  }
+
+  function atualizarSelectsCategorias() {
+    if (!db.categoriasCustom) db.categoriasCustom = [];
+    db.categoriasCustom = padronizarCategoriasCustom(db.categoriasCustom);
+    
+    const selectCat = document.getElementById('categoria');
+    const selectLim = document.getElementById('l-categoria');
+    const tipoAtual = document.getElementById('tipo').value || 'DESPESA';
+
+    if (selectCat) {
+      const valorSelecionado = selectCat.value;
+      selectCat.innerHTML = '';
+
+      const grupos = ESTRUTURA_CATEGORIAS[tipoAtual] || ESTRUTURA_CATEGORIAS.DESPESA;
+      grupos.forEach(g => {
+        const optGroup = document.createElement('optgroup');
+        optGroup.label = g.grupo;
+        g.opcoes.forEach(optVal => {
+          const opt = document.createElement('option');
+          opt.value = optVal;
+          opt.textContent = optVal;
+          optGroup.appendChild(opt);
+        });
+        selectCat.appendChild(optGroup);
+      });
+
+      const grpCustom = document.createElement('optgroup');
+      grpCustom.label = "Suas Categorias (" + (tipoAtual === 'ENTRADA' ? 'Entradas' : 'Despesas') + ")";
+
+      const customFiltradas = db.categoriasCustom.filter(c => c.tipo === tipoAtual);
+      customFiltradas.forEach(cat => {
+        const opt = document.createElement('option');
+        opt.value = cat.nome;
+        opt.textContent = cat.nome;
+        grpCustom.appendChild(opt);
+      });
+
+      const optNova = document.createElement('option');
+      optNova.value = '__NOVA__';
+      optNova.textContent = '➕ Criar Nova Categoria...';
+      grpCustom.appendChild(optNova);
+
+      selectCat.appendChild(grpCustom);
+
+      if (Array.from(selectCat.options).some(o => o.value === valorSelecionado)) {
+        selectCat.value = valorSelecionado;
+      }
+    }
+
+    if (selectLim) {
+      const valorLimSelecionado = selectLim.value;
+      selectLim.innerHTML = '';
+
+      ESTRUTURA_CATEGORIAS.DESPESA.forEach(g => {
+        const optGroup = document.createElement('optgroup');
+        optGroup.label = g.grupo;
+        g.opcoes.forEach(optVal => {
+          const opt = document.createElement('option');
+          opt.value = optVal;
+          opt.textContent = optVal;
+          optGroup.appendChild(opt);
+        });
+        selectLim.appendChild(optGroup);
+      });
+
+      const grpCustomLim = document.createElement('optgroup');
+      grpCustomLim.label = "Suas Despesas Customizadas";
+
+      const customDespesas = db.categoriasCustom.filter(c => c.tipo === 'DESPESA');
+      customDespesas.forEach(cat => {
+        const opt = document.createElement('option');
+        opt.value = cat.nome;
+        opt.textContent = cat.nome;
+        grpCustomLim.appendChild(opt);
+      });
+
+      const optNovaLim = document.createElement('option');
+      optNovaLim.value = '__NOVA__';
+      optNovaLim.textContent = '➕ Outra Categoria...';
+      grpCustomLim.appendChild(optNovaLim);
+
+      selectLim.appendChild(grpCustomLim);
+
+      if (Array.from(selectLim.options).some(o => o.value === valorLimSelecionado)) {
+        selectLim.value = valorLimSelecionado;
+      }
+    }
+  }
+
+  function renderAtalhosEditaveis() {
+    const container = document.getElementById('container-botoes-atalho');
+    if (!container) return;
+
+    const tipoAtual = document.getElementById('tipo').value || 'DESPESA';
+    const listaAtalhos = (db.atalhosConfig && db.atalhosConfig[tipoAtual]) ? db.atalhosConfig[tipoAtual] : [];
+
+    const labelAtalhos = document.getElementById('label-atalhos');
+    if (labelAtalhos) {
+      labelAtalhos.innerText = tipoAtual === 'ENTRADA' ? '⚡ Atalhos (Entradas)' : '⚡ Atalhos (Despesas)';
+    }
+
+    let html = '';
+    listaAtalhos.forEach(at => {
+      html += `
+        <button type="button" class="btn-atalho" onclick="preencherAtalho('${at.cat}', '${at.label.replace(/[^a-zA-Z0-9\s]/g, '').trim()}', '${at.meio}')">
+          ${at.label}
+        </button>
+      `;
+    });
+
+    html += `
+      <button type="button" class="btn-atalho config" onclick="abrirModalAtalhos()">
+        ⚙️ Editar
+      </button>
+    `;
+
+    container.innerHTML = html;
+  }
+
+  function abrirModalAtalhos() {
+    const modal = document.getElementById('modal-atalhos');
+    const tipoAtual = document.getElementById('tipo').value || 'DESPESA';
+    
+    const headerModal = document.getElementById('m-header-atalhos');
+    if (headerModal) {
+      headerModal.innerText = `⚙️ Atalhos (${tipoAtual === 'ENTRADA' ? 'Entradas' : 'Despesas'})`;
+    }
+
+    const titulo = document.getElementById('m-titulo-nova-cat');
+    if (titulo) {
+      titulo.innerText = `➕ Criar Categoria de ${tipoAtual === 'ENTRADA' ? 'Entrada' : 'Despesa'}`;
+    }
+
+    renderizarItensModal();
+    modal.style.display = 'flex';
+  }
+
+  function renderizarItensModal() {
+    const containerForm = document.getElementById('form-edicao-modal');
+    const selectCat = document.getElementById('categoria');
+    const opcoesCat = Array.from(selectCat.options).filter(o => o.value !== '__NOVA__');
+    const tipoAtual = document.getElementById('tipo').value || 'DESPESA';
+    const listaAtalhos = (db.atalhosConfig && db.atalhosConfig[tipoAtual]) ? db.atalhosConfig[tipoAtual] : [];
+
+    let html = '';
+    listaAtalhos.forEach((at, index) => {
+      const isOutros = !opcoesCat.some(opt => opt.value === at.cat);
+      const catValorAtual = isOutros ? 'Outros' : at.cat;
+
+      html += `
+        <div style="background:var(--bg); border:1px solid var(--border); padding:10px; border-radius:10px;">
+          <div style="font-size:0.75rem; color:var(--accent); font-weight:bold; margin-bottom:6px;">Atalho #${index + 1} (${tipoAtual})</div>
+          <div style="display:flex; flex-direction:column; gap:6px;">
+            <input type="text" id="m-label-${index}" value="${at.label}" placeholder="Nome do botão">
+            
+            <select id="m-cat-${index}" onchange="toggleOutrosInputModal(${index})">
+      `;
+      
+      opcoesCat.forEach(opt => {
+        const sel = opt.value === catValorAtual ? 'selected' : '';
+        html += `<option value="${opt.value}" ${sel}>${opt.text}</option>`;
+      });
+
+      html += `
+            </select>
+            <input type="text" id="m-custom-${index}" value="${isOutros ? at.cat : ''}" placeholder="Digite o nome customizado..." style="display:${catValorAtual === 'Outros' ? 'block' : 'none'};">
+          </div>
+        </div>
+      `;
+    });
+
+    containerForm.innerHTML = html;
+  }
+
+  function toggleOutrosInputModal(index) {
+    const sel = document.getElementById(`m-cat-${index}`).value;
+    const inputCustom = document.getElementById(`m-custom-${index}`);
+    if (sel === 'Outros') {
+      inputCustom.style.display = 'block';
+    } else {
+      inputCustom.style.display = 'none';
+    }
+  }
+
+  function criarCategoriaPelaModal() {
+    const inputNome = document.getElementById('m-nova-cat-nome');
+    const nome = inputNome.value.trim();
+    const tipoAtual = document.getElementById('tipo').value || 'DESPESA';
+    if (!nome) return alert('Digite um nome válido para a categoria.');
+
+    if (!db.categoriasCustom) db.categoriasCustom = [];
+    db.categoriasCustom = padronizarCategoriasCustom(db.categoriasCustom);
+
+    const existe = db.categoriasCustom.some(c => c.nome.toLowerCase() === nome.toLowerCase() && c.tipo === tipoAtual);
+    if (!existe) {
+      db.categoriasCustom.push({ nome, tipo: tipoAtual });
+      salvar();
+      atualizarSelectsCategorias();
+      renderizarItensModal();
+      inputNome.value = '';
+      alert(`Categoria "${nome}" criada com sucesso para ${tipoAtual === 'ENTRADA' ? 'Entradas' : 'Despesas'}!`);
+    } else {
+      alert('Esta categoria já existe para esse tipo!');
+    }
+  }
+
+  function fecharModalAtalhos() {
+    document.getElementById('modal-atalhos').style.display = 'none';
+  }
+
+  function salvarConfigAtalhosModal() {
+    const tipoAtual = document.getElementById('tipo').value || 'DESPESA';
+    const listaAtalhos = db.atalhosConfig[tipoAtual];
+
+    listaAtalhos.forEach((at, index) => {
+      const novoLabel = document.getElementById(`m-label-${index}`).value;
+      const selectCatVal = document.getElementById(`m-cat-${index}`).value;
+      const customVal = document.getElementById(`m-custom-${index}`).value.trim();
+
+      if (novoLabel) at.label = novoLabel;
+      
+      if (selectCatVal === 'Outros' && customVal) {
+        at.cat = customVal;
+      } else if (selectCatVal) {
+        at.cat = selectCatVal;
+      }
+    });
+
+    salvar();
+    renderAtalhosEditaveis();
+    fecharModalAtalhos();
+  }
+
+  function preencherAtalho(categoria, obs, meio) {
+    const selectCat = document.getElementById('categoria');
+    
+    let existeNoSelect = Array.from(selectCat.options).some(o => o.value === categoria);
+    if (existeNoSelect) {
+      selectCat.value = categoria;
+      document.getElementById('campo-cat-custom').style.display = 'none';
+    } else {
+      selectCat.value = 'Outros';
+      document.getElementById('campo-cat-custom').style.display = 'block';
+      document.getElementById('categoria-custom').value = categoria;
+    }
+
+    document.getElementById('obs').value = obs;
+    document.getElementById('pagamento').value = meio;
+    toggleOpcoesCartao(meio);
+    document.getElementById('valor').focus();
+  }
+
+  function setTipoOperacao(tipo) {
+    document.getElementById('tipo').value = tipo;
+    const btnDespesa = document.getElementById('btn-tipo-despesa');
+    const btnEntrada = document.getElementById('btn-tipo-entrada');
+    const inputValor = document.getElementById('valor');
+
+    if (tipo === 'DESPESA') {
+      btnDespesa.style.background = 'var(--red)';
+      btnDespesa.style.color = '#fff';
+      btnEntrada.style.background = 'transparent';
+      btnEntrada.style.color = 'var(--subtext)';
+      inputValor.style.color = 'var(--red)';
+    } else {
+      btnEntrada.style.background = 'var(--green)';
+      btnEntrada.style.color = '#fff';
+      btnDespesa.style.background = 'transparent';
+      btnDespesa.style.color = 'var(--subtext)';
+      inputValor.style.color = 'var(--green)';
+    }
+
+    atualizarSelectsCategorias();
+    renderAtalhosEditaveis();
+    verificarImpactoOrcamento(inputValor.value);
+  }
+
+  function setDataAtalho(diasDiferenca) {
+    const d = new Date();
+    d.setDate(d.getDate() + diasDiferenca);
+    document.getElementById('data').valueAsDate = d;
+  }
+
+  function toggleOpcoesCartao(meioPagamento) {
+    const groupParcelas = document.getElementById('group-parcelas');
+    if (meioPagamento === 'Cartão de Crédito') {
+      groupParcelas.style.display = 'block';
+    } else {
+      groupParcelas.style.display = 'none';
+      document.getElementById('parcelas').value = 1;
+    }
+  }
+
+  function verificarImpactoOrcamento(val) {
+    const valorNum = parseFloat(val) || 0;
+    const catSel = document.getElementById('categoria').value;
+    const tipoSel = document.getElementById('tipo').value;
+    const alerta = document.getElementById('alerta-orcamento');
+    
+    if (tipoSel === 'DESPESA' && db.limites && db.limites[catSel]) {
+      const limite = db.limites[catSel];
+      const mesAtual = new Date().toISOString().slice(0, 7);
+      const gastoAtual = db.transacoes
+        .filter(t => t.data.startsWith(mesAtual) && t.categoria === catSel && (t.tipo !== 'RECEITA' && t.tipo !== 'ENTRADA'))
+        .reduce((a, b) => a + b.valor, 0);
+
+      if ((gastoAtual + valorNum) > limite) {
+        alerta.style.display = 'block';
+        return;
+      }
+    }
+    alerta.style.display = 'none';
+  }
+
+  // SUBMIT FORMULÁRIOS
   document.getElementById('form-transacao').addEventListener('submit', (e) => {
     e.preventDefault();
-    const parcelas = parseInt(document.getElementById('parcelas').value) || 1;
+    const selectCat = document.getElementById('categoria');
+    const tipoOperacao = document.getElementById('tipo').value;
+    let categoriaFinal = selectCat.value;
+
+    if (categoriaFinal === '__NOVA__' || categoriaFinal === 'Outros') {
+      const inputCustom = document.getElementById('categoria-custom');
+      categoriaFinal = inputCustom.value.trim();
+      if (!categoriaFinal) {
+        alert('Por favor, digite o nome da categoria.');
+        return;
+      }
+      
+      if (!db.categoriasCustom) db.categoriasCustom = [];
+      db.categoriasCustom = padronizarCategoriasCustom(db.categoriasCustom);
+
+      const jaExiste = db.categoriasCustom.some(c => c.nome.toLowerCase() === categoriaFinal.toLowerCase() && c.tipo === tipoOperacao);
+      if (!jaExiste) {
+        db.categoriasCustom.push({ nome: categoriaFinal, tipo: tipoOperacao });
+      }
+
+      inputCustom.value = '';
+      document.getElementById('campo-cat-custom').style.display = 'none';
+    }
+
+    const meioPagamento = document.getElementById('pagamento').value;
+    const parcelas = meioPagamento === 'Cartão de Crédito' ? (parseInt(document.getElementById('parcelas').value) || 1) : 1;
     const valorTotal = parseFloat(document.getElementById('valor').value);
     const valorParcela = valorTotal / parcelas;
     const dataInicial = new Date(document.getElementById('data').value + 'T00:00:00');
@@ -546,11 +1062,11 @@
 
       const txn = {
         id,
-        tipo: document.getElementById('tipo').value,
+        tipo: tipoOperacao,
         valor: valorParcela,
-        categoria: document.getElementById('categoria').value,
+        categoria: categoriaFinal,
         data: dataStr,
-        pagamento: document.getElementById('pagamento').value,
+        pagamento: meioPagamento,
         fixa: document.getElementById('fixa').value,
         status: i === 0 ? document.getElementById('status').value : 'PENDENTE',
         parcelas,
@@ -569,23 +1085,39 @@
     }
 
     salvar();
+    atualizarSelectsCategorias();
     alert(parcelas > 1 ? `${parcelas} parcelas geradas nos meses futuros!` : 'Lançamento registrado com sucesso!');
     e.target.reset();
     document.getElementById('data').valueAsDate = new Date();
+    document.getElementById('alerta-orcamento').style.display = 'none';
+    setTipoOperacao('DESPESA');
   });
 
-  // Limite por Categoria
   document.getElementById('form-limite').addEventListener('submit', (e) => {
     e.preventDefault();
-    const cat = document.getElementById('l-categoria').value;
+    const selectLim = document.getElementById('l-categoria');
+    let cat = selectLim.value;
+    if (cat === '__NOVA__' || cat === 'Outros') {
+      cat = document.getElementById('l-categoria-custom').value.trim();
+      if (!cat) return alert('Digite o nome da categoria!');
+      
+      if (!db.categoriasCustom) db.categoriasCustom = [];
+      db.categoriasCustom = padronizarCategoriasCustom(db.categoriasCustom);
+      
+      if (!db.categoriasCustom.some(c => c.nome.toLowerCase() === cat.toLowerCase() && c.tipo === 'DESPESA')) {
+        db.categoriasCustom.push({ nome: cat, tipo: 'DESPESA' });
+      }
+
+      document.getElementById('campo-l-custom').style.display = 'none';
+    }
     const val = parseFloat(document.getElementById('l-valor').value);
     if (!db.limites) db.limites = {};
     db.limites[cat] = val;
     salvar();
+    atualizarSelectsCategorias();
     e.target.reset();
   });
 
-  // Cartões
   document.getElementById('form-cartao').addEventListener('submit', (e) => {
     e.preventDefault();
     db.cartoes.push({
@@ -598,7 +1130,6 @@
     e.target.reset();
   });
 
-  // Metas
   document.getElementById('form-meta').addEventListener('submit', (e) => {
     e.preventDefault();
     db.metas.push({
@@ -606,13 +1137,12 @@
       nome: document.getElementById('m-nome').value,
       tipo: document.getElementById('m-tipo').value,
       alvo: parseFloat(document.getElementById('m-alvo').value),
-      atual: parseFloat(document.getElementById('m-atual').value)
+      atual: parseFloat(document.getElementById('m-atual').value) || 0
     });
     salvar();
     e.target.reset();
   });
 
-  // Anotações
   document.getElementById('form-nota').addEventListener('submit', (e) => {
     e.preventDefault();
     db.anotacoes.push({
@@ -626,170 +1156,156 @@
   });
 
   function render() {
-    const filtro = document.getElementById('filtro-mes').value;
-    let rec = 0, desp = 0, fixas = 0, faturaCartao = 0, salario = 0, pendentes = 0;
-    const catGastos = {};
+    const mesFiltro = document.getElementById('filtro-mes').value;
+    
+    let txns = db.transacoes;
+    if (mesFiltro !== 'TODOS') {
+      txns = txns.filter(t => t.data.startsWith(mesFiltro));
+    }
 
-    const txnsFiltradas = db.transacoes.filter(t => {
-      if (filtro === 'TODOS') return true;
-      return t.data.startsWith(filtro);
-    });
+    const totalEntradas = txns.filter(t => t.tipo === 'ENTRADA' || t.tipo === 'RECEITA').reduce((a, b) => a + b.valor, 0);
+    const totalDespesas = txns.filter(t => t.tipo === 'DESPESA').reduce((a, b) => a + b.valor, 0);
+    const totalSalario = txns.filter(t => t.categoria.includes('Salário')).reduce((a, b) => a + b.valor, 0);
+    const totalFixas = txns.filter(t => t.fixa === 'FIXA').reduce((a, b) => a + b.valor, 0);
+    const totalCartao = txns.filter(t => t.pagamento === 'Cartão de Crédito').reduce((a, b) => a + b.valor, 0);
 
-    txnsFiltradas.forEach(t => {
-      const isEntrada = (t.tipo === 'RECEITA' || t.tipo === 'ENTRADA');
-      if (isEntrada) {
-        rec += t.valor;
-        if (t.categoria === 'Salário / Prolabore') salario += t.valor;
-      } else {
-        desp += t.valor;
-        if (t.fixa === 'FIXA') fixas += t.valor;
-        if (t.pagamento === 'Cartão de Crédito') faturaCartao += t.valor;
-        if (t.status === 'PENDENTE') pendentes += t.valor;
-        catGastos[t.categoria] = (catGastos[t.categoria] || 0) + t.valor;
-      }
-    });
-
-    const saldo = rec - desp;
-    const rendaLivre = saldo - pendentes;
+    const saldo = totalEntradas - totalDespesas;
 
     document.getElementById('dash-saldo').innerText = `R$ ${saldo.toFixed(2)}`;
-    document.getElementById('dash-renda-livre').innerText = `R$ ${rendaLivre.toFixed(2)}`;
-    document.getElementById('dash-receitas').innerText = `R$ ${rec.toFixed(2)}`;
-    document.getElementById('dash-salario').innerText = `R$ ${salario.toFixed(2)}`;
-    document.getElementById('dash-despesas').innerText = `R$ ${desp.toFixed(2)}`;
-    document.getElementById('dash-fixas').innerText = `R$ ${fixas.toFixed(2)}`;
-    document.getElementById('dash-cartao').innerText = `R$ ${faturaCartao.toFixed(2)}`;
+    document.getElementById('dash-renda-livre').innerText = `R$ ${(totalEntradas - totalFixas).toFixed(2)}`;
+    document.getElementById('dash-salario').innerText = `R$ ${totalSalario.toFixed(2)}`;
+    document.getElementById('dash-receitas').innerText = `R$ ${totalEntradas.toFixed(2)}`;
+    document.getElementById('dash-despesas').innerText = `R$ ${totalDespesas.toFixed(2)}`;
+    document.getElementById('dash-fixas').innerText = `R$ ${totalFixas.toFixed(2)}`;
+    document.getElementById('dash-cartao').innerText = `R$ ${totalCartao.toFixed(2)}`;
 
-    // Gráfico Evolução Temporal (Mês a Mês)
-    const meses = ['2026-08', '2026-09', '2026-10', '2026-11', '2026-12'];
-    const dadosEntradas = meses.map(m => db.transacoes.filter(t => t.data.startsWith(m) && (t.tipo==='RECEITA'||t.tipo==='ENTRADA')).reduce((a,b)=>a+b.valor,0));
-    const dadosSaidas = meses.map(m => db.transacoes.filter(t => t.data.startsWith(m) && (t.tipo!=='RECEITA'&&t.tipo!=='ENTRADA')).reduce((a,b)=>a+b.valor,0));
+    // Limites
+    const listLimites = document.getElementById('lista-limites');
+    if (listLimites) {
+      listLimites.innerHTML = '';
+      Object.keys(db.limites || {}).forEach(cat => {
+        const lim = db.limites[cat];
+        const gast = txns.filter(t => t.categoria === cat && t.tipo === 'DESPESA').reduce((a, b) => a + b.valor, 0);
+        const pct = Math.min((gast / lim) * 100, 100);
+        listLimites.innerHTML += `
+          <div class="list-item">
+            <div class="item-header">
+              <span><strong>${cat}</strong></span>
+              <span>R$ ${gast.toFixed(2)} / R$ ${lim.toFixed(2)}</span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" style="width:${pct}%; background:${pct > 90 ? 'var(--red)' : 'var(--green)'};"></div></div>
+          </div>
+        `;
+      });
+    }
+
+    // Cartões
+    const listCartoes = document.getElementById('lista-cartoes');
+    if (listCartoes) {
+      listCartoes.innerHTML = db.cartoes.map(c => `
+        <div class="list-item">
+          <div class="item-header">
+            <span>💳 <strong>${c.nome}</strong> (Fecha dia ${c.fechamento})</span>
+            <span>Limite: R$ ${c.limite.toFixed(2)}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Metas
+    const listMetas = document.getElementById('lista-metas');
+    if (listMetas) {
+      listMetas.innerHTML = db.metas.map(m => {
+        const pct = Math.min((m.atual / m.alvo) * 100, 100);
+        return `
+          <div class="list-item">
+            <div class="item-header">
+              <span>🎯 <strong>${m.nome}</strong></span>
+              <span>R$ ${m.atual.toFixed(2)} / R$ ${m.alvo.toFixed(2)}</span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;"></div></div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Anotações
+    const listNotas = document.getElementById('lista-anotacoes');
+    if (listNotas) {
+      listNotas.innerHTML = db.anotacoes.map(n => `
+        <div class="note-card">
+          <div class="item-header">
+            <strong>${n.titulo}</strong>
+            <button class="btn-trash" onclick="deletarAnotacao('${n.id}')">🗑️</button>
+          </div>
+          <p style="font-size:0.85rem; color:var(--subtext); margin-top:6px;">${n.texto}</p>
+          <small style="font-size:0.7rem; color:var(--subtext); display:block; margin-top:6px;">${n.data}</small>
+        </div>
+      `).join('');
+    }
+
+    // Histórico
+    const listTxns = document.getElementById('lista-transacoes');
+    if (listTxns) {
+      listTxns.innerHTML = txns.slice().reverse().map(t => `
+        <div class="list-item">
+          <div class="item-header">
+            <div>
+              <strong>${t.categoria}</strong> <span class="tag">${t.pagamento}</span>
+              <div style="font-size:0.75rem; color:var(--subtext); margin-top:2px;">${t.data} ${t.obs ? '- ' + t.obs : ''}</div>
+            </div>
+            <div style="text-align:right;">
+              <div class="val ${t.tipo === 'DESPESA' ? 'red' : 'green'}" style="font-size:1rem;">
+                ${t.tipo === 'DESPESA' ? '-' : '+'} R$ ${t.valor.toFixed(2)}
+              </div>
+              <button class="btn-trash" onclick="deletarTransacao('${t.id}')">🗑️</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    renderGraficos(txns);
+  }
+
+  function renderGraficos(txns) {
+    const cats = {};
+    txns.filter(t => t.tipo === 'DESPESA').forEach(t => {
+      cats[t.categoria] = (cats[t.categoria] || 0) + t.valor;
+    });
+
+    const ctxGastos = document.getElementById('chartGastos').getContext('2d');
+    if (chartGastos) chartGastos.destroy();
+    chartGastos = new Chart(ctxGastos, {
+      type: 'doughnut',
+      data: {
+        labels: Object.keys(cats),
+        datasets: [{
+          data: Object.values(cats),
+          backgroundColor: ['#f87171', '#38bdf8', '#fbbf24', '#a855f7', '#2ecc71', '#f43f5e']
+        }]
+      },
+      options: { plugins: { legend: { labels: { color: '#f0f6fc' } } } }
+    });
 
     const ctxEvolucao = document.getElementById('chartEvolucao').getContext('2d');
     if (chartEvolucao) chartEvolucao.destroy();
     chartEvolucao = new Chart(ctxEvolucao, {
       type: 'bar',
       data: {
-        labels: ['Ago', 'Set', 'Out', 'Nov', 'Dez'],
+        labels: ['Totais'],
         datasets: [
-          { label: 'Entradas', data: dadosEntradas, backgroundColor: '#2ecc71' },
-          { label: 'Saídas', data: dadosSaidas, backgroundColor: '#f87171' }
+          { label: 'Entradas', data: [txns.filter(t => t.tipo !== 'DESPESA').reduce((a,b)=>a+b.valor,0)], backgroundColor: '#2ecc71' },
+          { label: 'Saídas', data: [txns.filter(t => t.tipo === 'DESPESA').reduce((a,b)=>a+b.valor,0)], backgroundColor: '#f87171' }
         ]
       },
-      options: { plugins: { legend: { labels: { color: '#f0f6fc' } } }, scales: { x: { ticks: { color: '#8b949e' } }, y: { ticks: { color: '#8b949e' } } } }
+      options: { scales: { y: { ticks: { color: '#f0f6fc' } }, x: { ticks: { color: '#f0f6fc' } } }, plugins: { legend: { labels: { color: '#f0f6fc' } } } }
     });
-
-    // Gráfico de Categorias
-    const ctxGastos = document.getElementById('chartGastos').getContext('2d');
-    if (chartGastos) chartGastos.destroy();
-    chartGastos = new Chart(ctxGastos, {
-      type: 'doughnut',
-      data: {
-        labels: Object.keys(catGastos),
-        datasets: [{
-          data: Object.values(catGastos),
-          backgroundColor: ['#38bdf8', '#f87171', '#2ecc71', '#fbbf24', '#a855f7', '#6366f1', '#ec4899']
-        }]
-      },
-      options: { plugins: { legend: { labels: { color: '#f0f6fc', font: { size: 11 } } } } }
-    });
-
-    // Relação de Limites
-    const limitesKeys = Object.keys(db.limites || {});
-    document.getElementById('lista-limites').innerHTML = limitesKeys.length ? limitesKeys.map(cat => {
-      const limite = db.limites[cat];
-      const gasto = catGastos[cat] || 0;
-      const pct = Math.min(((gasto / limite) * 100), 100).toFixed(1);
-      const cor = gasto > limite ? 'var(--red)' : gasto > (limite * 0.8) ? 'var(--yellow)' : 'var(--green)';
-      return `
-        <div class="list-item">
-          <div class="item-header">
-            <strong>${cat}</strong>
-            <span style="color:${cor}; font-weight:bold;">R$ ${gasto.toFixed(2)} / R$ ${limite.toFixed(2)} (${pct}%)</span>
-          </div>
-          <div class="progress-bar">
-            <div class="progress-fill" style="width: ${pct}%; background:${cor};"></div>
-          </div>
-        </div>
-      `;
-    }).join('') : '<p style="font-size:0.8rem; color:var(--subtext);">Nenhum limite definido ainda.</p>';
-
-    // Relação de Cartões
-    document.getElementById('lista-cartoes').innerHTML = db.cartoes.map(c => `
-      <div class="list-item">
-        <div class="item-header">
-          <strong>${c.nome}</strong>
-          <span class="tag">Fecha dia ${c.fechamento}</span>
-        </div>
-        <div style="font-size:0.85rem; color:var(--subtext); margin-top:4px;">Limite Total: R$ ${c.limite.toFixed(2)}</div>
-      </div>
-    `).join('');
-
-    // Relação de Metas
-    document.getElementById('lista-metas').innerHTML = db.metas.map(m => {
-      const pct = Math.min(((m.atual / m.alvo) * 100), 100).toFixed(1);
-      const tagTipo = m.tipo === 'RESERVA' ? '🛡️ Liquidez' : '✈️ Consumo';
-      return `
-        <div class="list-item">
-          <div class="item-header">
-            <div>
-              <strong>${m.nome}</strong>
-              <span class="tag">${tagTipo}</span>
-            </div>
-            <span>R$ ${m.atual.toFixed(2)} / R$ ${m.alvo.toFixed(2)} (${pct}%)</span>
-          </div>
-          <div class="progress-bar">
-            <div class="progress-fill" style="width: ${pct}%;"></div>
-          </div>
-        </div>
-      `;
-    }).join('');
-
-    // Relação de Anotações
-    document.getElementById('lista-anotacoes').innerHTML = (db.anotacoes || []).map(n => `
-      <div class="note-card">
-        <div class="item-header">
-          <strong style="color:var(--accent);">${n.titulo}</strong>
-          <button class="btn-trash" onclick="deletarAnotacao('${n.id}')">🗑️</button>
-        </div>
-        <p style="font-size:0.85rem; color:var(--text); margin-top:6px; white-space:pre-wrap;">${n.texto}</p>
-        <div style="font-size:0.7rem; color:var(--subtext); margin-top:6px;">Criado em: ${n.data}</div>
-      </div>
-    `).join('');
-
-    // Lista de Lançamentos & Auditoria
-    document.getElementById('lista-transacoes').innerHTML = txnsFiltradas.map(t => {
-      const logsTxn = db.logs.filter(l => l.transacao_id === t.id);
-      const isEntrada = (t.tipo === 'RECEITA' || t.tipo === 'ENTRADA');
-      return `
-        <div class="list-item">
-          <div class="item-header">
-            <div>
-              <strong>${t.obs || t.categoria}</strong>
-              <span class="tag">${t.categoria}</span>
-              <span class="tag">${t.pagamento}</span>
-            </div>
-            <div style="display:flex; align-items:center; gap:8px;">
-              <div class="val ${isEntrada ? 'green' : 'red'}" style="font-size:1.05rem;">
-                ${isEntrada ? '+' : '-'} R$ ${t.valor.toFixed(2)}
-              </div>
-              <button class="btn-trash" onclick="deletarTransacao('${t.id}')" title="Remover lançamento">🗑️</button>
-            </div>
-          </div>
-          <div style="font-size:0.8rem; color:var(--subtext); margin-top:4px;">
-            ${t.data} • Status: <strong>${t.status}</strong> ${t.parcelas > 1 ? `• Parcelas: ${t.parcelas}x` : ''}
-          </div>
-          ${logsTxn.map(l => `<div class="audit-log">🛡️ ${l.data_hora}: ${l.detalhes}</div>`).join('')}
-        </div>
-      `;
-    }).join('');
   }
 
-  window.deletarTransacao = deletarTransacao;
-  window.deletarAnotacao = deletarAnotacao;
-  window.exportarCSV = exportarCSV;
-
   document.getElementById('data').valueAsDate = new Date();
+  atualizarSelectsCategorias();
+  renderAtalhosEditaveis();
 </script>
 
 </body>
