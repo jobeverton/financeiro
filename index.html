@@ -34,7 +34,7 @@ canvas{max-height:280px}.divider{border-top:1px solid var(--border);margin:14px 
   <div class="fab-container"><button class="btn green-btn" onclick="abrirModal('modal-novo-lancamento')" style="box-shadow:0 4px 14px rgba(46,204,113,.4);font-size:.95rem">➕ Novo Lançamento Rápido</button></div>
   <div id="dashboard-alerts"></div>
   
-  <!-- CARD DE META EM DESTAQUE NA INÍCIO -->
+  <!-- CARD DE META EM DESTAQUE NA INÍCIO (INDEPENDENTE DA ABA METAS) -->
   <div class="card kpi purple-border" id="card-meta-destaque">
     <div class="section-title"><h3>🎯 Meta Principal em Foco</h3><span id="meta-destaque-tag" class="tag">Reserva</span></div>
     <div id="conteudo-meta-destaque"><div class="empty">Nenhuma meta ativa para exibir.</div></div>
@@ -75,13 +75,19 @@ canvas{max-height:280px}.divider{border-top:1px solid var(--border);margin:14px 
 </div></div>
 <!-- MODAIS -->
 <div class="modal-overlay" id="modal-config"><div class="modal-content"><div class="modal-head"><h3>⚙️ Configurações & Personalização</h3><button class="close" onclick="fecharModal('modal-config')">✖</button></div>
-  <p class="mini">Gerencie quais abas aparecem no rodapé, ordene-as e faça limpezas com segurança.</p>
+  <p class="mini">Gerencie quais abas aparecem no rodapé, o card na tela inicial e faça limpezas com segurança.</p>
   
   <div style="margin:14px 0">
+    <label style="color:var(--accent);margin-bottom:8px">🎯 Exibição da Meta na Tela Inicial</label>
+    <div style="display:flex;gap:8px;align-items:center;background:var(--bg);padding:8px;border-radius:8px;border:1px solid var(--border);margin-bottom:12px">
+      <input type="checkbox" id="chk-visivel-card-meta" style="width:18px;height:18px;accent-color:var(--accent)">
+      <label for="chk-visivel-card-meta" style="margin:0;color:var(--text);font-weight:normal;cursor:pointer">Exibir card "Meta Principal em Foco" na Início</label>
+    </div>
+
     <label style="color:var(--accent);margin-bottom:8px">🔀 Visibilidade e Ordem das Abas no Rodapé</label>
-    <div class="mini" style="margin-bottom:8px">Marque quais abas deseja exibir e defina a ordem delas:</div>
+    <div class="mini" style="margin-bottom:8px">Marque quais abas deseja exibir no menu inferior e defina a ordem delas:</div>
     <div style="display:grid;gap:8px" id="container-config-abas"></div>
-    <button class="btn secondary small" style="margin-top:10px;width:100%" onclick="salvarConfigAbasRodape()">Salvar Configuração do Rodapé</button>
+    <button class="btn secondary small" style="margin-top:10px;width:100%" onclick="salvarConfigAbasRodape()">Salvar Configurações</button>
   </div>
 
   <div class="divider"></div>
@@ -108,10 +114,10 @@ canvas{max-height:280px}.divider{border-top:1px solid var(--border);margin:14px 
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";import{getDatabase,ref,set,onValue}from"https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 const firebaseConfig={apiKey:"AIzaSyBp34X2K3BYJXkyNrpGy8l0XyjM-VY8uXY",authDomain:"financeiro-5ed97.firebaseapp.com",databaseURL:"https://financeiro-5ed97-default-rtdb.firebaseio.com",projectId:"financeiro-5ed97",storageBucket:"financeiro-5ed97.firebasestorage.app",messagingSenderId:"689227262420",appId:"1:689227262420:web:a25a067e62b665e3cece41"};
-const app=initializeApp(firebaseConfig),firebaseDb=getDatabase(app),dbRef=ref(firebaseDb,'financeiro/');window.salvarNoFirebase=dados=>set(dbRef,dados);onValue(dbRef,s=>{const d=s.val();if(d){db={...db,...d,transacoes:d.transacoes||[],logs:d.logs||[],metas:d.metas||[],anotacoes:d.anotacoes||[],compras:d.compras||[],limites:d.limites||{},categoriasCustom:padronizarCategoriasCustom(d.categoriasCustom||[]),atalhosConfig:padronizarAtalhos(d.atalhosConfig),ordemAbas:d.ordemAbas||['dashboard','compras','metas','anotacoes','auditoria'],abasVisiveis:d.abasVisiveis||{dashboard:true,compras:true,metas:true,anotacoes:true,auditoria:true}};atualizarMeses();atualizarSelectsCategorias();renderAtalhosEditaveis();renderRodape();renderConfigAbas();render()}});
+const app=initializeApp(firebaseConfig),firebaseDb=getDatabase(app),dbRef=ref(firebaseDb,'financeiro/');window.salvarNoFirebase=dados=>set(dbRef,dados);onValue(dbRef,s=>{const d=s.val();if(d){db={...db,...d,transacoes:d.transacoes||[],logs:d.logs||[],metas:d.metas||[],anotacoes:d.anotacoes||[],compras:d.compras||[],limites:d.limites||{},categoriasCustom:padronizarCategoriasCustom(d.categoriasCustom||[]),atalhosConfig:padronizarAtalhos(d.atalhosConfig),ordemAbas:d.ordemAbas||['dashboard','compras','anotacoes','auditoria'],abasVisiveis:d.abasVisiveis||{dashboard:true,compras:true,metas:false,anotacoes:true,auditoria:true},cardMetaIninicioVisivel:d.cardMetaIninicioVisivel!==undefined?d.cardMetaIninicioVisivel:true};atualizarMeses();atualizarSelectsCategorias();renderAtalhosEditaveis();renderRodape();renderConfigAbas();render()}});
 </script>
 <script>
-let db={transacoes:[],logs:[],metas:[{id:'M1',nome:'Reserva de Emergência',tipo:'RESERVA',alvo:10000,atual:4500,auto:true}],anotacoes:[],compras:[],limites:{},categoriasCustom:[],ordemAbas:['dashboard','compras','metas','anotacoes','auditoria'],abasVisiveis:{dashboard:true,compras:true,metas:true,anotacoes:true,auditoria:true},atalhosConfig:{DESPESA:[{label:'🛒 Mercado',cat:'Supermercado / Feira',meio:'PIX / Dinheiro'},{label:'🚗 Uber',cat:'Uber / Táxi / Passagem',meio:'Cartão de Débito'},{label:'🍔 iFood',cat:'Deliveries / iFood',meio:'Cartão de Débito'},{label:'⛽ Posto',cat:'Combustível',meio:'Cartão de Débito'},{label:'🍽️ Almoço',cat:'Restaurantes / Bares',meio:'PIX / Dinheiro'}],ENTRADA:[{label:'💵 Salário',cat:'Salário / Prolabore',meio:'PIX / Dinheiro'},{label:'💻 Freelance',cat:'Vendas / Serviços',meio:'PIX / Dinheiro'},{label:'📈 Dividendos',cat:'Investimentos / Dividendos',meio:'PIX / Dinheiro'},{label:'🔄 Reembolso',cat:'Reembolsos / Retornos',meio:'PIX / Dinheiro'},{label:'🎁 Extra',cat:'Rendimentos / Extra',meio:'PIX / Dinheiro'}]}};
+let db={transacoes:[],logs:[],metas:[{id:'M1',nome:'Reserva de Emergência',tipo:'RESERVA',alvo:10000,atual:4500,auto:true}],anotacoes:[],compras:[],limites:{},categoriasCustom:[],ordemAbas:['dashboard','compras','anotacoes','auditoria'],abasVisiveis:{dashboard:true,compras:true,metas:false,anotacoes:true,auditoria:true},cardMetaIninicioVisivel:true,atalhosConfig:{DESPESA:[{label:'🛒 Mercado',cat:'Supermercado / Feira',meio:'PIX / Dinheiro'},{label:'🚗 Uber',cat:'Uber / Táxi / Passagem',meio:'Cartão de Débito'},{label:'🍔 iFood',cat:'Deliveries / iFood',meio:'Cartão de Débito'},{label:'⛽ Posto',cat:'Combustível',meio:'Cartão de Débito'},{label:'🍽️ Almoço',cat:'Restaurantes / Bares',meio:'PIX / Dinheiro'}],ENTRADA:[{label:'💵 Salário',cat:'Salário / Prolabore',meio:'PIX / Dinheiro'},{label:'💻 Freelance',cat:'Vendas / Serviços',meio:'PIX / Dinheiro'},{label:'📈 Dividendos',cat:'Investimentos / Dividendos',meio:'PIX / Dinheiro'},{label:'🔄 Reembolso',cat:'Reembolsos / Retornos',meio:'PIX / Dinheiro'},{label:'🎁 Extra',cat:'Rendimentos / Extra',meio:'PIX / Dinheiro'}]}};
 let chartGastos=null,chartEvolucao=null,filtroComprasStatus='TODOS';
 const DADOS_ABAS={dashboard:{id:'dashboard',label:'Início',icone:'📊'},compras:{id:'compras',label:'Compras',icone:'🛒'},metas:{id:'metas',label:'Metas',icone:'🎯'},anotacoes:{id:'anotacoes',label:'Notas',icone:'📝'},auditoria:{id:'auditoria',label:'Histórico',icone:'🛡️'}};
 const ESTRUTURA_CATEGORIAS={ENTRADA:[{grupo:'Entradas Principais',opcoes:['Salário / Prolabore','Rendimentos / Extra','Vendas / Serviços','Investimentos / Dividendos','Reembolsos / Retornos']}],DESPESA:[{grupo:'Moradia e Habitação',opcoes:['Aluguel/Condomínio','Energia Elétrica','Água e Saneamento','Internet / Fibra','Gás de Cozinha']},{grupo:'Alimentação & Lazer',opcoes:['Supermercado / Feira','Deliveries / iFood','Restaurantes / Bares','Cinema / Teatros','Passeios / Viagens','Streaming / Jogos']},{grupo:'Transporte & Veículo',opcoes:['Combustível','Uber / Táxi / Passagem','Manutenção / IPVA / Seguro']},{grupo:'Outros Gastos',opcoes:['Saúde e Farmácia','Educação e Cursos','Impostos, Taxas e Tarifas','Cuidados Pessoais & Estética','Pets & Animais','Manutenção & Reformas','Presentes & Doações','Outros']} ]};
@@ -122,8 +128,8 @@ function nav(id,btn){document.querySelectorAll('.page').forEach(x=>x.classList.r
 
 function renderRodape(){
   const c=document.getElementById('nav-container-rodape');
-  const ordem=db.ordemAbas||['dashboard','compras','metas','anotacoes','auditoria'];
-  const visiveis=db.abasVisiveis||{dashboard:true,compras:true,metas:true,anotacoes:true,auditoria:true};
+  const ordem=db.ordemAbas||['dashboard','compras','anotacoes','auditoria'];
+  const visiveis=db.abasVisiveis||{dashboard:true,compras:true,metas:false,anotacoes:true,auditoria:true};
   const ativaAtual=document.querySelector('.page.active')?.id||'dashboard';
   
   const filtradas=ordem.filter(key=>visiveis[key]!==false);
@@ -136,8 +142,10 @@ function renderRodape(){
 function renderConfigAbas(){
   const c=document.getElementById('container-config-abas');
   const ordem=db.ordemAbas||['dashboard','compras','metas','anotacoes','auditoria'];
-  const visiveis=db.abasVisiveis||{dashboard:true,compras:true,metas:true,anotacoes:true,auditoria:true};
+  const visiveis=db.abasVisiveis||{dashboard:true,compras:true,metas:false,anotacoes:true,auditoria:true};
   
+  document.getElementById('chk-visivel-card-meta').checked = db.cardMetaIninicioVisivel !== false;
+
   c.innerHTML=ordem.map((key,idx)=>{
     const a=DADOS_ABAS[key];
     const estaVisivel=visiveis[key]!==false;
@@ -159,6 +167,9 @@ function salvarConfigAbasRodape(){
     novasVisiveis[key]=chk?chk.checked:true;
   });
   db.abasVisiveis=novasVisiveis;
+
+  const chkCardMeta = document.getElementById('chk-visivel-card-meta');
+  db.cardMetaIninicioVisivel = chkCardMeta ? chkCardMeta.checked : true;
   
   salvar();
   renderRodape();
@@ -170,7 +181,8 @@ function salvarConfigAbasRodape(){
     nav(primeiraVisivel, btnPrimeira || document.body);
   }
   
-  alert('Configurações do rodapé atualizadas com sucesso!');
+  render();
+  alert('Configurações atualizadas com sucesso!');
 }
 
 function padronizarCategoriasCustom(l){return(l||[]).map(x=>typeof x==='string'?{nome:x,tipo:'DESPESA'}:x)}
@@ -217,7 +229,16 @@ function render(){
   status.textContent=saldo>0?'Caixa positivo':saldo<0?'Caixa negativo':'Sem movimentação';
   status.className='status-pill '+(saldo>0?'green':saldo<0?'red':'');
   
-  renderMetaDestaqueIncio();
+  // Exibe ou oculta o card de metas na Início com base na nova opção dedicada
+  const cardMetaDestaqueEl = document.getElementById('card-meta-destaque');
+  const cardMetaVisivel = db.cardMetaIninicioVisivel !== false;
+  if(cardMetaDestaqueEl){
+    cardMetaDestaqueEl.style.display = cardMetaVisivel ? 'block' : 'none';
+  }
+  if(cardMetaVisivel){
+    renderMetaDestaqueIncio();
+  }
+
   renderAlertas(mes,txns,saldo);
   renderDrenos(txns,despesas);
   renderOrcamentos(mes);
@@ -234,7 +255,7 @@ function renderMetaDestaqueIncio(){
   const tagEl = document.getElementById('meta-destaque-tag');
   if(!db.metas.length){
     tagEl.textContent = 'Indisponível';
-    container.innerHTML = '<div class="empty">Nenhuma meta cadastrada. Vá na aba Metas para criar uma.</div>';
+    container.innerHTML = '<div class="empty">Nenhuma meta cadastrada. Você pode adicionar uma nas configurações ou pelo código.</div>';
     return;
   }
   const m = db.metas.find(x=>x.tipo==='RESERVA') || db.metas[0];
@@ -244,12 +265,19 @@ function renderMetaDestaqueIncio(){
   container.innerHTML = `
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
       <strong>${esc(m.nome)}</strong>
-      <strong class="purple">${brl(m.atual)} / ${brl(m.alvo)}</strong>
+      <div style="display:flex;align-items:center;gap:6px">
+        <strong class="purple">${brl(m.atual)} / ${brl(m.alvo)}</strong>
+        ${!m.auto?`
+          <button class="btn-icon green" onclick="abrirMovimentoMeta('${m.id}','ADD')" title="Adicionar valor">➕</button>
+          <button class="btn-icon red" onclick="abrirMovimentoMeta('${m.id}','SUB')" title="Retirar valor">➖</button>
+        `:''}
+        <button class="btn-icon yellow" onclick="abrirEdicaoMeta('${m.id}')" title="Editar meta">✏️</button>
+      </div>
     </div>
     <div class="progress"><div style="width:${pct}%;background:var(--purple)"></div></div>
     <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px">
       <div class="mini">${pct.toFixed(1)}% concluído ${m.auto?'<span style="color:var(--accent)">• 🤖 Sync Automático</span>':''}</div>
-      <div class="mini">${m.auto?'Vinculado ao Saldo Real':''}</div>
+      <div class="mini">${m.auto?'Vinculado ao Saldo Real':'Toque nos botões acima para movimentar'}</div>
     </div>
   `;
 }
@@ -379,7 +407,7 @@ document.getElementById('form-edit-txn').addEventListener('submit',e=>{e.prevent
 function deletarTransacao(id){if(confirm('Excluir este lançamento?')){db.transacoes=db.transacoes.filter(t=>t.id!==id);db.logs=db.logs.filter(l=>l.transacao_id!==id);salvar();render()}}
 function exportarCSV(){if(!db.transacoes.length)return alert('Sem lançamentos.');let csv='Data;Tipo;Categoria;Valor;Pagamento;Status;Observacao\n';db.transacoes.forEach(t=>csv+=`${t.data};${t.tipo};${String(t.categoria).replace(/;/g,',')};${num(t.valor).toFixed(2)};${t.pagamento};${t.status};"${String(t.obs||'').replace(/"/g,'""')}"\n`);const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='financeiro_v8_'+hoje()+'.csv';a.click()}
 function resetAba(k){if(!confirm(`Tem certeza absoluta que deseja limpar os dados de: ${k}?`))return;if(k==='transacoes'){db.transacoes=[];db.logs=[]}if(k==='compras')db.compras=[];if(k==='limites')db.limites={};if(k==='metas')db.metas=[];if(k==='anotacoes')db.anotacoes=[];salvar();render();alert('Seção limpa com sucesso.')}
-function resetGeral(){if(confirm('⚠️ ATENÇÃO: Deseja realmente apagar TODOS os dados e redefinir o sistema para o padrão inicial?')){if(confirm('Última chance: essa operação não pode ser desfeita.')){db={transacoes:[],logs:[],metas:[],anotacoes:[],compras:[],limites:{},categoriasCustom:[],ordemAbas:['dashboard','compras','metas','anotacoes','auditoria'],abasVisiveis:{dashboard:true,compras:true,metas:true,anotacoes:true,auditoria:true},atalhosConfig:db.atalhosConfig};salvar();fecharModal('modal-config');render();alert('Sistema resetado por completo.')}}}
+function resetGeral(){if(confirm('⚠️ ATENÇÃO: Deseja realmente apagar TODOS os dados e redefinir o sistema para o padrão inicial?')){if(confirm('Última chance: essa operação não pode ser desfeita.')){db={transacoes:[],logs:[],metas:[],anotacoes:[],compras:[],limites:{},categoriasCustom:[],ordemAbas:['dashboard','compras','anotacoes','auditoria'],abasVisiveis:{dashboard:true,compras:true,metas:false,anotacoes:true,auditoria:true},cardMetaIninicioVisivel:true,atalhosConfig:db.atalhosConfig};salvar();fecharModal('modal-config');render();alert('Sistema resetado por completo.')}}}
 window.addEventListener('load',()=>{document.getElementById('data').value=hoje();atualizarMeses();atualizarSelectsCategorias();renderAtalhosEditaveis();renderConfigAbas();render()});
 </script>
 </body></html>
