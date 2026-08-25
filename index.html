@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Financeiro Expert v7.0 Pro</title>
+<title>Financeiro Expert v8.2 Pro</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
 :root{--bg:#0d1117;--card:#161b22;--card2:#21262d;--accent:#38bdf8;--green:#2ecc71;--red:#f87171;--yellow:#fbbf24;--purple:#a855f7;--text:#f0f6fc;--sub:#8b949e;--border:#30363d;--orange:#fb923c}
@@ -26,7 +26,7 @@ canvas{max-height:280px}.divider{border-top:1px solid var(--border);margin:14px 
 </style>
 </head>
 <body>
-<header><div class="brand">📱 Financeiro Expert <span style="font-size:.65rem;color:var(--accent)">v7.0</span><button onclick="abrirModal('modal-config')" style="background:none;border:0;color:var(--sub);font-size:1rem">⚙️</button></div><select id="filtro-mes" onchange="render()"><option value="TODOS">Todo o Histórico</option></select></header>
+<header><div class="brand">📱 Financeiro Expert <span style="font-size:.65rem;color:var(--accent)">v8.2</span><button onclick="abrirModal('modal-config')" style="background:none;border:0;color:var(--sub);font-size:1rem">⚙️</button></div><select id="filtro-mes" onchange="render()"><option value="TODOS">Todo o Histórico</option></select></header>
 <div class="container">
 <!-- DASHBOARD -->
 <div id="dashboard" class="page active">
@@ -67,26 +67,105 @@ canvas{max-height:280px}.divider{border-top:1px solid var(--border);margin:14px 
   </form>
 </div></div>
 <!-- MODAIS -->
-<div class="modal-overlay" id="modal-config"><div class="modal-content"><div class="modal-head"><h3>⚙️ Configurações</h3><button class="close" onclick="fecharModal('modal-config')">✖</button></div><p class="mini">Redefina áreas específicas ou todo o sistema.</p><div style="display:grid;gap:6px;margin:15px 0"><button class="btn red-btn" onclick="resetAba('transacoes')">🗑️ Limpar Lançamentos</button><button class="btn red-btn" onclick="resetAba('compras')">🛒 Limpar Compras</button><button class="btn red-btn" onclick="resetAba('limites')">⚠️ Limpar Limites</button><button class="btn red-btn" onclick="resetAba('metas')">🎯 Limpar Metas</button><button class="btn red-btn" onclick="resetAba('anotacoes')">📝 Limpar Notas</button></div><div class="divider"></div><button class="btn red-btn" onclick="resetGeral()">💥 Resetar Todo o Sistema</button></div></div>
+<div class="modal-overlay" id="modal-config"><div class="modal-content"><div class="modal-head"><h3>⚙️ Configurações & Personalização</h3><button class="close" onclick="fecharModal('modal-config')">✖</button></div>
+  <p class="mini">Gerencie quais abas aparecem no rodapé, ordene-as e faça limpezas com segurança.</p>
+  
+  <div style="margin:14px 0">
+    <label style="color:var(--accent);margin-bottom:8px">🔀 Visibilidade e Ordem das Abas no Rodapé</label>
+    <div class="mini" style="margin-bottom:8px">Marque quais abas deseja exibir e defina a ordem delas:</div>
+    <div style="display:grid;gap:8px" id="container-config-abas"></div>
+    <button class="btn secondary small" style="margin-top:10px;width:100%" onclick="salvarConfigAbasRodape()">Salvar Configuração do Rodapé</button>
+  </div>
+
+  <div class="divider"></div>
+  <label style="color:var(--yellow);margin-bottom:8px">🗑️ Limpeza de Módulos Específicos</label>
+  <div style="display:grid;gap:6px;margin-bottom:14px">
+    <button class="btn secondary" style="color:var(--red);border-color:var(--red)" onclick="resetAba('transacoes')">🗑️ Limpar Apenas Lançamentos</button>
+    <button class="btn secondary" style="color:var(--red);border-color:var(--red)" onclick="resetAba('compras')">🛒 Limpar Lista de Compras</button>
+    <button class="btn secondary" style="color:var(--red);border-color:var(--red)" onclick="resetAba('limites')">⚠️ Limpar Limites e Orçamentos</button>
+    <button class="btn secondary" style="color:var(--red);border-color:var(--red)" onclick="resetAba('metas')">🎯 Limpar Metas Financeiras</button>
+    <button class="btn secondary" style="color:var(--red);border-color:var(--red)" onclick="resetAba('anotacoes')">🗑️ Limpar Anotações</button>
+  </div>
+  
+  <div class="divider"></div>
+  <label style="color:var(--red);margin-bottom:8px">💥 Zona de Perigo</label>
+  <button class="btn red-btn" onclick="resetGeral()">💥 Resetar Todo o Sistema</button>
+</div></div>
+
 <div class="modal-overlay" id="modal-mov-meta"><div class="modal-content"><div class="modal-head"><h3 id="mov-meta-titulo">💵 Movimentar Meta</h3><button class="close" onclick="fecharModal('modal-mov-meta')">✖</button></div><form id="form-mov-meta"><input type="hidden" id="mov-meta-id"><input type="hidden" id="mov-meta-tipo-operacao"><div class="form-group"><label>Valor</label><input type="number" step="0.01" min="0.01" id="mov-meta-valor" required></div><div class="two-actions"><button class="btn green-btn" id="mov-meta-btn-confirmar">Confirmar</button><button type="button" class="btn secondary" onclick="fecharModal('modal-mov-meta')">Cancelar</button></div></form></div></div>
 <div class="modal-overlay" id="modal-edit-meta"><div class="modal-content"><div class="modal-head"><h3>✏️ Editar Meta</h3><button class="close" onclick="fecharModal('modal-edit-meta')">✖</button></div><form id="form-edit-meta"><input type="hidden" id="edit-meta-id"><div class="form-group"><label>Nome</label><input id="edit-meta-nome" required></div><div class="form-group"><label>Tipo</label><select id="edit-meta-tipo"><option value="RESERVA">🛡️ Reserva</option><option value="CONSUMO">✈️ Objetivo</option></select></div><div class="grid-2"><input type="number" step="0.01" id="edit-meta-alvo" required placeholder="Alvo"><input type="number" step="0.01" id="edit-meta-atual" required placeholder="Atual"></div><div class="two-actions" style="margin-top:12px"><button class="btn green-btn">Salvar</button><button type="button" class="btn secondary" onclick="fecharModal('modal-edit-meta')">Cancelar</button></div></form></div></div>
 <div class="modal-overlay" id="modal-edit-txn"><div class="modal-content"><div class="modal-head"><h3>✏️ Editar Lançamento</h3><button class="close" onclick="fecharModal('modal-edit-txn')">✖</button></div><form id="form-edit-txn"><input type="hidden" id="edit-txn-id"><div class="form-group"><label>Tipo</label><select id="edit-txn-tipo"><option value="DESPESA">🔴 Despesa</option><option value="ENTRADA">🟢 Entrada</option></select></div><div class="form-group"><label>Valor</label><input type="number" step="0.01" id="edit-txn-valor" required></div><div class="form-group"><label>Categoria</label><input id="edit-txn-categoria" required></div><div class="form-group"><label>Data</label><input type="date" id="edit-txn-data" required></div><div class="grid-2"><div class="form-group"><label>Pagamento</label><select id="edit-txn-pagamento"><option>PIX / Dinheiro</option><option>Cartão de Débito</option><option>Boleto</option></select></div><div class="form-group"><label>Status</label><select id="edit-txn-status"><option value="PAGO">Pago</option><option value="PENDENTE">Pendente</option></select></div></div><input id="edit-txn-obs" placeholder="Observação"><div class="two-actions" style="margin-top:12px"><button class="btn green-btn">Salvar</button><button type="button" class="btn secondary" onclick="fecharModal('modal-edit-txn')">Cancelar</button></div></form></div></div>
 <div class="modal-overlay" id="modal-atalhos"><div class="modal-content"><div class="modal-head"><h3 id="m-header-atalhos">⚙️ Atalhos</h3><button class="close" onclick="fecharModal('modal-atalhos')">✖</button></div><div class="alert" style="background:rgba(56,189,248,.08);border-color:var(--accent);color:var(--accent)"><strong>➕ Nova categoria</strong><div style="display:flex;gap:6px;margin-top:6px"><input id="m-nova-cat-nome" placeholder="Nome da categoria"><button class="btn small" onclick="criarCategoriaPelaModal()">Adicionar</button></div></div><div id="form-edicao-modal" style="display:grid;gap:9px"></div><div class="two-actions" style="margin-top:14px"><button class="btn green-btn" onclick="salvarConfigAtalhosModal()">Salvar Alterações</button><button class="btn secondary" onclick="fecharModal('modal-atalhos')">Cancelar</button></div></div></div>
 <!-- NAV -->
-<div class="nav-tabs"><button class="tab-btn active" onclick="nav('dashboard',this)">📊<span>Início</span></button><button class="tab-btn" onclick="nav('compras',this)">🛒<span>Compras</span></button><button class="tab-btn" onclick="nav('metas',this)">🎯<span>Metas</span></button><button class="tab-btn" onclick="nav('anotacoes',this)">📝<span>Notas</span></button><button class="tab-btn" onclick="nav('auditoria',this)">🛡️<span>Histórico</span></button></div>
+<div class="nav-tabs" id="nav-container-rodape"></div>
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";import{getDatabase,ref,set,onValue}from"https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 const firebaseConfig={apiKey:"AIzaSyBp34X2K3BYJXkyNrpGy8l0XyjM-VY8uXY",authDomain:"financeiro-5ed97.firebaseapp.com",databaseURL:"https://financeiro-5ed97-default-rtdb.firebaseio.com",projectId:"financeiro-5ed97",storageBucket:"financeiro-5ed97.firebasestorage.app",messagingSenderId:"689227262420",appId:"1:689227262420:web:a25a067e62b665e3cece41"};
-const app=initializeApp(firebaseConfig),firebaseDb=getDatabase(app),dbRef=ref(firebaseDb,'financeiro/');window.salvarNoFirebase=dados=>set(dbRef,dados);onValue(dbRef,s=>{const d=s.val();if(d){db={...db,...d,transacoes:d.transacoes||[],logs:d.logs||[],metas:d.metas||[],anotacoes:d.anotacoes||[],compras:d.compras||[],limites:d.limites||{},categoriasCustom:padronizarCategoriasCustom(d.categoriasCustom||[]),atalhosConfig:padronizarAtalhos(d.atalhosConfig)};atualizarMeses();atualizarSelectsCategorias();renderAtalhosEditaveis();render()}});
+const app=initializeApp(firebaseConfig),firebaseDb=getDatabase(app),dbRef=ref(firebaseDb,'financeiro/');window.salvarNoFirebase=dados=>set(dbRef,dados);onValue(dbRef,s=>{const d=s.val();if(d){db={...db,...d,transacoes:d.transacoes||[],logs:d.logs||[],metas:d.metas||[],anotacoes:d.anotacoes||[],compras:d.compras||[],limites:d.limites||{},categoriasCustom:padronizarCategoriasCustom(d.categoriasCustom||[]),atalhosConfig:padronizarAtalhos(d.atalhosConfig),ordemAbas:d.ordemAbas||['dashboard','compras','metas','anotacoes','auditoria'],abasVisiveis:d.abasVisiveis||{dashboard:true,compras:true,metas:true,anotacoes:true,auditoria:true}};atualizarMeses();atualizarSelectsCategorias();renderAtalhosEditaveis();renderRodape();renderConfigAbas();render()}});
 </script>
 <script>
-let db={transacoes:[],logs:[],metas:[{id:'M1',nome:'Reserva de Emergência',tipo:'RESERVA',alvo:10000,atual:4500}],anotacoes:[],compras:[],limites:{},categoriasCustom:[],atalhosConfig:{DESPESA:[{label:'🛒 Mercado',cat:'Supermercado / Feira',meio:'PIX / Dinheiro'},{label:'🚗 Uber',cat:'Uber / Táxi / Passagem',meio:'Cartão de Débito'},{label:'🍔 iFood',cat:'Deliveries / iFood',meio:'Cartão de Débito'},{label:'⛽ Posto',cat:'Combustível',meio:'Cartão de Débito'},{label:'🍽️ Almoço',cat:'Restaurantes / Bares',meio:'PIX / Dinheiro'}],ENTRADA:[{label:'💵 Salário',cat:'Salário / Prolabore',meio:'PIX / Dinheiro'},{label:'💻 Freelance',cat:'Vendas / Serviços',meio:'PIX / Dinheiro'},{label:'📈 Dividendos',cat:'Investimentos / Dividendos',meio:'PIX / Dinheiro'},{label:'🔄 Reembolso',cat:'Reembolsos / Retornos',meio:'PIX / Dinheiro'},{label:'🎁 Extra',cat:'Rendimentos / Extra',meio:'PIX / Dinheiro'}]}};
+let db={transacoes:[],logs:[],metas:[{id:'M1',nome:'Reserva de Emergência',tipo:'RESERVA',alvo:10000,atual:4500}],anotacoes:[],compras:[],limites:{},categoriasCustom:[],ordemAbas:['dashboard','compras','metas','anotacoes','auditoria'],abasVisiveis:{dashboard:true,compras:true,metas:true,anotacoes:true,auditoria:true},atalhosConfig:{DESPESA:[{label:'🛒 Mercado',cat:'Supermercado / Feira',meio:'PIX / Dinheiro'},{label:'🚗 Uber',cat:'Uber / Táxi / Passagem',meio:'Cartão de Débito'},{label:'🍔 iFood',cat:'Deliveries / iFood',meio:'Cartão de Débito'},{label:'⛽ Posto',cat:'Combustível',meio:'Cartão de Débito'},{label:'🍽️ Almoço',cat:'Restaurantes / Bares',meio:'PIX / Dinheiro'}],ENTRADA:[{label:'💵 Salário',cat:'Salário / Prolabore',meio:'PIX / Dinheiro'},{label:'💻 Freelance',cat:'Vendas / Serviços',meio:'PIX / Dinheiro'},{label:'📈 Dividendos',cat:'Investimentos / Dividendos',meio:'PIX / Dinheiro'},{label:'🔄 Reembolso',cat:'Reembolsos / Retornos',meio:'PIX / Dinheiro'},{label:'🎁 Extra',cat:'Rendimentos / Extra',meio:'PIX / Dinheiro'}]}};
 let chartGastos=null,chartEvolucao=null,filtroComprasStatus='TODOS';
+const DADOS_ABAS={dashboard:{id:'dashboard',label:'Início',icone:'📊'},compras:{id:'compras',label:'Compras',icone:'🛒'},metas:{id:'metas',label:'Metas',icone:'🎯'},anotacoes:{id:'anotacoes',label:'Notas',icone:'📝'},auditoria:{id:'auditoria',label:'Histórico',icone:'🛡️'}};
 const ESTRUTURA_CATEGORIAS={ENTRADA:[{grupo:'Entradas Principais',opcoes:['Salário / Prolabore','Rendimentos / Extra','Vendas / Serviços','Investimentos / Dividendos','Reembolsos / Retornos']}],DESPESA:[{grupo:'Moradia e Habitação',opcoes:['Aluguel/Condomínio','Energia Elétrica','Água e Saneamento','Internet / Fibra','Gás de Cozinha']},{grupo:'Alimentação & Lazer',opcoes:['Supermercado / Feira','Deliveries / iFood','Restaurantes / Bares','Cinema / Teatros','Passeios / Viagens','Streaming / Jogos']},{grupo:'Transporte & Veículo',opcoes:['Combustível','Uber / Táxi / Passagem','Manutenção / IPVA / Seguro']},{grupo:'Outros Gastos',opcoes:['Saúde e Farmácia','Educação e Cursos','Impostos, Taxas e Tarifas','Cuidados Pessoais & Estética','Pets & Animais','Manutenção & Reformas','Presentes & Doações','Outros']} ]};
 const brl=v=>(Number(v)||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}),num=v=>Number(v)||0,hoje=()=>new Date().toISOString().slice(0,10);
 function abrirModal(id){document.getElementById(id).style.display='flex'}function fecharModal(id){document.getElementById(id).style.display='none'}
 function salvar(){if(typeof window.salvarNoFirebase==='function')window.salvarNoFirebase(db)}
 function nav(id,btn){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.tab-btn').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');btn.classList.add('active');render()}
+
+function renderRodape(){
+  const c=document.getElementById('nav-container-rodape');
+  const ordem=db.ordemAbas||['dashboard','compras','metas','anotacoes','auditoria'];
+  const visiveis=db.abasVisiveis||{dashboard:true,compras:true,metas:true,anotacoes:true,auditoria:true};
+  const ativaAtual=document.querySelector('.page.active')?.id||'dashboard';
+  
+  const filtradas=ordem.filter(key=>visiveis[key]!==false);
+  c.innerHTML=filtradas.map(key=>{
+    const a=DADOS_ABAS[key];if(!a)return'';
+    return`<button class="tab-btn ${ativaAtual===a.id?'active':''}" onclick="nav('${a.id}',this)">${a.icone}<span>${a.label}</span></button>`
+  }).join('');
+}
+
+function renderConfigAbas(){
+  const c=document.getElementById('container-config-abas');
+  const ordem=db.ordemAbas||['dashboard','compras','metas','anotacoes','auditoria'];
+  const visiveis=db.abasVisiveis||{dashboard:true,compras:true,metas:true,anotacoes:true,auditoria:true};
+  
+  c.innerHTML=ordem.map((key,idx)=>{
+    const a=DADOS_ABAS[key];
+    const estaVisivel=visiveis[key]!==false;
+    return `<div style="display:flex;gap:6px;align-items:center;background:var(--bg);padding:8px;border-radius:8px;border:1px solid var(--border)">
+      <input type="checkbox" id="chk-visivel-${key}" ${estaVisivel?'checked':''} style="width:18px;height:18px;accent-color:var(--accent)">
+      <select id="select-aba-${idx}" style="flex:1;padding:6px">${Object.values(DADOS_ABAS).map(item=>`<option value="${item.id}" ${item.id===key?'selected':''}>${item.icone} ${item.label}</option>`).join('')}</select>
+    </div>`
+  }).join('');
+}
+
+function salvarConfigAbasRodape(){
+  const nova=[0,1,2,3,4].map(i=>document.getElementById(`select-aba-${i}`).value);
+  if(new Set(nova).size!==5){return alert('Cada aba deve ser única na configuração.')}
+  db.ordemAbas=nova;
+  
+  const novasVisiveis={};
+  Object.keys(DADOS_ABAS).forEach(key=>{
+    const chk=document.getElementById(`chk-visivel-${key}`);
+    novasVisiveis[key]=chk?chk.checked:true;
+  });
+  db.abasVisiveis=novasVisiveis;
+  
+  salvar();
+  renderRodape();
+  
+  const ativaAtual=document.querySelector('.page.active')?.id;
+  if(ativaAtual && db.abasVisiveis[ativaAtual]===false){
+    const primeiraVisivel=db.ordemAbas.find(k=>db.abasVisiveis[k]!==false)||'dashboard';
+    const btnPrimeira=document.querySelector(`.tab-btn`);
+    nav(primeiraVisivel, btnPrimeira || document.body);
+  }
+  
+  alert('Configurações do rodapé atualizadas com sucesso!');
+}
+
 function padronizarCategoriasCustom(l){return(l||[]).map(x=>typeof x==='string'?{nome:x,tipo:'DESPESA'}:x)}
 function padronizarAtalhos(a){if(!a)return db.atalhosConfig;if(Array.isArray(a))return{DESPESA:a,ENTRADA:db.atalhosConfig.ENTRADA};return a}
 function atualizarMeses(){const s=document.getElementById('filtro-mes'),v=s.value;const meses=new Set(db.transacoes.map(t=>String(t.data||'').slice(0,7)).filter(Boolean));const agora=new Date();for(let i=-2;i<10;i++){const d=new Date(agora.getFullYear(),agora.getMonth()+i,1);meses.add(d.toISOString().slice(0,7))}const nomes=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];const arr=[...meses].sort();s.innerHTML='<option value="TODOS">Todo o Histórico</option>'+arr.map(m=>{const [y,mo]=m.split('-');return`<option value="${m}">${nomes[+mo-1]} / ${y}</option>`}).join('');s.value=arr.includes(v)?v:'TODOS'}
@@ -96,7 +175,7 @@ function entradasRecebidas(lista){return lista.filter(t=>(t.tipo==='ENTRADA'||t.
 function despesasPagas(lista){return lista.filter(t=>t.tipo==='DESPESA'&&t.status==='PAGO').reduce((a,t)=>a+num(t.valor),0)}
 function despesasTotais(lista){return lista.filter(t=>t.tipo==='DESPESA').reduce((a,t)=>a+num(t.valor),0)}
 function entradasTotais(lista){return lista.filter(t=>t.tipo==='ENTRADA'||t.tipo==='RECEITA').reduce((a,t)=>a+num(t.valor),0)}
-function render(){const mes=getFiltro(),txns=txnsDoMes(mes);const entradas=entradasTotais(txns),despesas=despesasTotais(txns),pagas=despesasPagas(txns),pend=txns.filter(t=>t.tipo==='DESPESA'&&t.status==='PENDENTE').reduce((a,t)=>a+num(t.valor),0);const salario=txns.filter(t=>(t.tipo==='ENTRADA'||t.tipo==='RECEITA')&&String(t.categoria||'').toLowerCase().includes('salário')).reduce((a,t)=>a+num(t.valor),0);const fluxo=entradas-pagas-pend;const saldo=entradasRecebidas(db.transacoes)-despesasPagas(db.transacoes);setText('dash-saldo',brl(saldo));setText('dash-fluxo-liquido',brl(entradas-pagas));setText('dash-salario',brl(salario));setText('dash-receitas',brl(entradas));setText('dash-despesas',brl(despesas));setText('dash-pagas',brl(pagas));setText('dash-pendentes',brl(pend));const el=document.getElementById('dash-fluxo-liquido');el.className='val '+((entradas-pagas)>=0?'green':'red');const limiteData=new Date();limiteData.setDate(limiteData.getDate()+30);const prox=db.transacoes.filter(t=>t.tipo==='DESPESA'&&t.status==='PENDENTE'&&t.data>=hoje()&&t.data<=limiteData.toISOString().slice(0,10)).reduce((a,t)=>a+num(t.valor),0);setText('dash-proximos',brl(prox));const status=document.getElementById('dash-status');status.textContent=saldo>0?'Caixa positivo':saldo<0?'Caixa negativo':'Sem movimentação';status.className='status-pill '+(saldo>0?'green':saldo<0?'red':'');renderAlertas(mes,txns,saldo);renderDrenos(txns,despesas);renderOrcamentos(mes);renderCompras();renderMetas();renderNotas();renderHistorico();renderGraficos(txns)}
+function render(){const mes=getFiltro(),txns=txnsDoMes(mes);const entradas=entradasTotais(txns),despesas=despesasTotais(txns),pagas=despesasPagas(txns),pend=txns.filter(t=>t.tipo==='DESPESA'&&t.status==='PENDENTE').reduce((a,t)=>a+num(t.valor),0);const salario=txns.filter(t=>(t.tipo==='ENTRADA'||t.tipo==='RECEITA')&&String(t.categoria||'').toLowerCase().includes('salário')).reduce((a,t)=>a+num(t.valor),0);const fluxo=entradas-pagas-pend;const saldo=entradasRecebidas(db.transacoes)-despesasPagas(db.transacoes);setText('dash-saldo',brl(saldo));setText('dash-fluxo-liquido',brl(entradas-pagas));setText('dash-salario',brl(salario));setText('dash-receitas',brl(entradas));setText('dash-despesas',brl(despesas));setText('dash-pagas',brl(pagas));setText('dash-pendentes',brl(pend));const el=document.getElementById('dash-fluxo-liquido');el.className='val '+((entradas-pagas)>=0?'green':'red');const limiteData=new Date();limiteData.setDate(limiteData.getDate()+30);const prox=db.transacoes.filter(t=>t.tipo==='DESPESA'&&t.status==='PENDENTE'&&t.data>=hoje()&&t.data<=limiteData.toISOString().slice(0,10)).reduce((a,t)=>a+num(t.valor),0);setText('dash-proximos',brl(prox));const status=document.getElementById('dash-status');status.textContent=saldo>0?'Caixa positivo':saldo<0?'Caixa negativo':'Sem movimentação';status.className='status-pill '+(saldo>0?'green':saldo<0?'red':'');renderAlertas(mes,txns,saldo);renderDrenos(txns,despesas);renderOrcamentos(mes);renderCompras();renderMetas();renderNotas();renderHistorico();renderGraficos(txns);renderRodape()}
 function setText(id,v){const e=document.getElementById(id);if(e)e.textContent=v}
 function renderAlertas(mes,txns,saldo){const c=document.getElementById('dashboard-alerts');let h='';if(saldo<0)h+='<div class="alert danger">🚨 Seu saldo disponível está negativo. Revise despesas e compromissos.</div>';const pend=txns.filter(t=>t.tipo==='DESPESA'&&t.status==='PENDENTE').reduce((a,t)=>a+num(t.valor),0);if(pend>0)h+=`<div class="alert warn">⏳ Você possui ${brl(pend)} em despesas pendentes ${mes==='TODOS'?'no histórico':'neste mês'}.</div>`;if(!h)h='<div class="alert ok">✅ Nenhum alerta financeiro crítico no período selecionado.</div>';c.innerHTML=h}
 function renderDrenos(txns,total){const c=document.getElementById('lista-drenos'),map={};txns.filter(t=>t.tipo==='DESPESA').forEach(t=>map[t.categoria]=(map[t.categoria]||0)+num(t.valor));const a=Object.entries(map).sort((x,y)=>y[1]-x[1]).slice(0,5);c.innerHTML=a.length?a.map(([cat,v],i)=>`<div class="list-item"><div class="item-head"><strong>#${i+1} ${cat}</strong><strong class="red">${brl(v)}</strong></div><div class="progress" style="margin-top:6px"><div style="width:${total?Math.min(v/total*100,100):0}%;background:var(--red)"></div></div><div class="mini">${total?(v/total*100).toFixed(1):0}% das despesas</div></div>`).join(''):'<div class="empty">Sem despesas no período selecionado.</div>'}
@@ -113,12 +192,53 @@ function preencherAtalho(cat,obs,meio){const s=document.getElementById('categori
 function abrirModalAtalhos(){const tipo=document.getElementById('tipo').value;document.getElementById('m-header-atalhos').textContent=`⚙️ Atalhos (${tipo==='ENTRADA'?'Entradas':'Despesas'})`;const c=document.getElementById('form-edicao-modal'),list=(db.atalhosConfig[tipo]||[]);const opts=[...document.getElementById('categoria').options].filter(o=>o.value!=='__NOVA__');c.innerHTML=list.map((a,i)=>`<div style="background:var(--bg);border:1px solid var(--border);padding:9px;border-radius:9px"><div class="mini">Atalho #${i+1}</div><input id="m-label-${i}" value="${esc(a.label)}" style="margin:5px 0"><select id="m-cat-${i}">${opts.map(o=>`<option value="${esc(o.value)}" ${o.value===a.cat?'selected':''}>${o.textContent}</option>`).join('')}<option value="Outros" ${!opts.some(o=>o.value===a.cat)?'selected':''}>Outros / Personalizado</option></select><input id="m-custom-${i}" value="${!opts.some(o=>o.value===a.cat)?esc(a.cat):''}" placeholder="Categoria personalizada" style="margin-top:5px;display:${!opts.some(o=>o.value===a.cat)?'block':'none'}"></div>`).join('');abrirModal('modal-atalhos')}
 function salvarConfigAtalhosModal(){const tipo=document.getElementById('tipo').value;const list=db.atalhosConfig[tipo]||[];list.forEach((a,i)=>{a.label=document.getElementById(`m-label-${i}`).value.trim()||a.label;const cat=document.getElementById(`m-cat-${i}`).value,custom=document.getElementById(`m-custom-${i}`).value.trim();a.cat=cat==='Outros'&&custom?custom:cat});salvar();renderAtalhosEditaveis();fecharModal('modal-atalhos')}
 function criarCategoriaPelaModal(){const nome=document.getElementById('m-nova-cat-nome').value.trim(),tipo=document.getElementById('tipo').value;if(!nome)return alert('Digite um nome válido.');if(!db.categoriasCustom.some(c=>c.nome.toLowerCase()===nome.toLowerCase()&&c.tipo===tipo)){db.categoriasCustom.push({nome,tipo});salvar();atualizarSelectsCategorias();document.getElementById('m-nova-cat-nome').value='';alert('Categoria criada com sucesso.')}else alert('Essa categoria já existe.')}
-function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;n'}[m]))}
+function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 
 document.getElementById('form-transacao').addEventListener('submit',e=>{e.preventDefault();let tipo=document.getElementById('tipo').value,cat=document.getElementById('categoria').value;if(cat==='__NOVA__'||cat==='Outros'){cat=document.getElementById('categoria-custom').value.trim();if(!cat)return alert('Digite o nome da categoria.');if(!db.categoriasCustom.some(c=>c.nome.toLowerCase()===cat.toLowerCase()&&c.tipo===tipo))db.categoriasCustom.push({nome:cat,tipo})}const total=num(document.getElementById('valor').value);if(total<=0)return alert('Informe um valor válido.');const meio=document.getElementById('pagamento').value,parcelavel=meio==='Boleto',parcelas=parcelavel?Math.max(1,Math.min(72,parseInt(document.getElementById('parcelas').value)||1)):1,valorParcela=total/parcelas,data0=new Date(document.getElementById('data').value+'T00:00:00'),statusInicial=document.getElementById('status').value,obs=document.getElementById('obs').value.trim();if(document.getElementById('chk-definir-limite').checked&&tipo==='DESPESA'){const lim=num(document.getElementById('limite-categoria-val').value);if(lim>0)db.limites[cat]=lim}for(let i=0;i<parcelas;i++){const d=new Date(data0);d.setMonth(d.getMonth()+i);const id='TXN-'+Date.now()+'-'+i;const st=i===0?statusInicial:'PENDENTE';db.transacoes.push({id,tipo,valor:Number(valorParcela.toFixed(2)),categoria:cat,data:d.toISOString().slice(0,10),pagamento:meio,fixa:document.getElementById('fixa').value,status:st,parcelas,obs:parcelas>1?`${obs?obs+' ':''}(Parcela ${i+1}/${parcelas})`:obs});db.logs.push({id:'LOG-'+Date.now()+'-'+i,transacao_id:id,data_hora:new Date().toLocaleString('pt-BR'),detalhes:`Registrado: ${tipo} ${brl(valorParcela)} (${cat})`})}salvar();e.target.reset();document.getElementById('data').valueAsDate=new Date();document.getElementById('parcelas').value=1;toggleCampoLimite(false);document.getElementById('alerta-orcamento').style.display='none';setTipoOperacao('DESPESA');fecharModal('modal-novo-lancamento');alert(parcelas>1?`${parcelas} parcelas geradas.`:'Lançamento registrado com sucesso!');render()});
 document.getElementById('form-compras').addEventListener('submit',e=>{e.preventDefault();db.compras.push({id:'C-'+Date.now(),nome:document.getElementById('c-item').value.trim(),qtd:Math.max(1,parseInt(document.getElementById('c-qtd').value)||1),preco:0,comprado:false});salvar();e.target.reset();document.getElementById('c-qtd').value=1;render()});
-function renderCompras(){const c=document.getElementById('lista-compras');let list=db.compras;if(filtroComprasStatus==='PENDENTES')list=list.filter(x=>!x.comprado);if(filtroComprasStatus==='COMPRADOS')list=list.filter(x=>x.comprado);const total=db.compras.filter(x=>x.comprado).reduce((a,x)=>a+num(x.preco)*Math.max(1,x.qtd),0);setText('compras-total-carrinho',brl(total));setText('compras-contagem',`${db.compras.filter(x=>x.comprado).length}/${db.compras.length}`);c.innerHTML=list.length?list.map(x=>`<div class="shop-item ${x.comprado?'purchased':''}"><input class="shop-check" type="checkbox" ${x.comprado?'checked':''} onchange="toggleCompra('${x.id}')"><div style="flex:1;min-width:0"><div class="shop-name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><strong>${esc(x.nome)}</strong> <span class="tag">x${x.qtd}</span></div>${x.comprado?`<div class="mini">Subtotal: ${brl(num(x.preco)*x.qtd)}</div>`:''}</div><input class="price" type="number" step="0.01" min="0" value="${x.preco>0?x.preco:''}" placeholder="R$ un" oninput="atualizarPrecoCompra('${x.id}',this.value)"><button class="btn-icon red" onclick="deletarCompra('${x.id}')">🗑️</button></div>`).join(''):'<div class="empty">Nenhum item nessa categoria.</div>'}
-function filtrarCompras(s){filtroComprasStatus=s;render()}function toggleCompra(id){const x=db.compras.find(x=>x.id===id);if(x){x.comprado=!x.comprado;salvar();render()}}function atualizarPrecoCompra(id,v){const x=db.compras.find(x=>x.id===id);if(x){x.preco=num(v);salvar();renderCompras()}}function deletarCompra(id){db.compras=db.compras.filter(x=>x.id!==id);salvar();render()}function limparComprados(){if(confirm('Remover todos os itens comprados?')){db.compras=db.compras.filter(x=>!x.comprado);salvar();render()}}
+
+function renderCompras(){
+  const c=document.getElementById('lista-compras');
+  let list=db.compras;
+  if(filtroComprasStatus==='PENDENTES')list=list.filter(x=>!x.comprado);
+  if(filtroComprasStatus==='COMPRADOS')list=list.filter(x=>x.comprado);
+  const total=db.compras.filter(x=>x.comprado).reduce((a,x)=>a+num(x.preco)*Math.max(1,x.qtd),0);
+  setText('compras-total-carrinho',brl(total));
+  setText('compras-contagem',`${db.compras.filter(x=>x.comprado).length}/${db.compras.length}`);
+  
+  c.innerHTML=list.length?list.map(x=>`
+    <div class="shop-item ${x.comprado?'purchased':''}" data-id="${x.id}">
+      <input class="shop-check" type="checkbox" ${x.comprado?'checked':''} onchange="toggleCompra('${x.id}')">
+      <div style="flex:1;min-width:0">
+        <div class="shop-name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><strong>${esc(x.nome)}</strong> <span class="tag">x${x.qtd}</span></div>
+        <div class="subtotal-label" style="font-size:.72rem;color:var(--sub);margin-top:2px">${x.comprado?`Subtotal: ${brl(num(x.preco)*x.qtd)}`:''}</div>
+      </div>
+      <input class="price" type="number" step="0.01" min="0" value="${x.preco>0?x.preco:''}" placeholder="R$ un" onchange="atualizarPrecoCompra('${x.id}',this.value)">
+      <button class="btn-icon red" onclick="deletarCompra('${x.id}')">🗑️</button>
+    </div>`).join(''):'<div class="empty">Nenhum item nessa categoria.</div>';
+}
+
+function filtrarCompras(s){filtroComprasStatus=s;render()}
+function toggleCompra(id){const x=db.compras.find(x=>x.id===id);if(x){x.comprado=!x.comprado;salvar();render()}}
+
+function atualizarPrecoCompra(id,v){
+  const x=db.compras.find(x=>x.id===id);
+  if(x){
+    x.preco=num(v);
+    salvar();
+    // Atualiza apenas o subtotal e o total do carrinho de forma isolada, sem redesenhar o elemento <input> e sem perder o foco/teclado
+    const total=db.compras.filter(item=>item.comprado).reduce((a,item)=>a+num(item.preco)*Math.max(1,item.qtd),0);
+    setText('compras-total-carrinho',brl(total));
+    const itemEl = document.querySelector(`.shop-item[data-id="${id}"]`);
+    if(itemEl){
+      const subtotalLabel = itemEl.querySelector('.subtotal-label');
+      if(subtotalLabel) subtotalLabel.textContent = x.comprado ? `Subtotal: ${brl(num(x.preco)*x.qtd)}` : '';
+    }
+  }
+}
+
+function deletarCompra(id){db.compras=db.compras.filter(x=>x.id!==id);salvar();render()}
+function limparComprados(){if(confirm('Remover todos os itens comprados?')){db.compras=db.compras.filter(x=>!x.comprado);salvar();render()}}
 
 document.getElementById('form-meta').addEventListener('submit',e=>{e.preventDefault();db.metas.push({id:'M-'+Date.now(),nome:document.getElementById('m-nome').value.trim(),tipo:document.getElementById('m-tipo').value,alvo:num(document.getElementById('m-alvo').value),atual:num(document.getElementById('m-atual').value)});salvar();e.target.reset();render()});function renderMetas(){const c=document.getElementById('lista-metas');c.innerHTML=db.metas.length?db.metas.map(m=>{const pct=m.alvo?Math.min(m.atual/m.alvo*100,100):0;return`<div class="list-item"><div class="item-head"><div><strong>🎯 ${esc(m.nome)}</strong><div class="mini">${brl(m.atual)} de ${brl(m.alvo)}</div></div><div><button class="btn-icon green" onclick="abrirMovimentoMeta('${m.id}','ADD')">➕</button><button class="btn-icon red" onclick="abrirMovimentoMeta('${m.id}','SUB')">➖</button><button class="btn-icon yellow" onclick="abrirEdicaoMeta('${m.id}')">✏️</button><button class="btn-icon red" onclick="deletarMeta('${m.id}')">🗑️</button></div></div><div class="progress" style="margin-top:7px"><div style="width:${pct}%"></div></div><div class="mini">${pct.toFixed(1)}% concluído</div></div>`}).join(''):'<div class="empty">Nenhuma meta cadastrada.</div>'}
 function abrirMovimentoMeta(id,tipo){const m=db.metas.find(x=>x.id===id);if(!m)return;document.getElementById('mov-meta-id').value=id;document.getElementById('mov-meta-tipo-operacao').value=tipo;document.getElementById('mov-meta-titulo').textContent=tipo==='ADD'?`🟢 Guardar em: ${m.nome}`:`🔴 Retirar de: ${m.nome}`;document.getElementById('mov-meta-btn-confirmar').className='btn '+(tipo==='ADD'?'green-btn':'red-btn');document.getElementById('mov-meta-valor').value='';abrirModal('modal-mov-meta')}
@@ -129,9 +249,9 @@ function renderHistorico(){const c=document.getElementById('lista-transacoes'),m
 function abrirEdicaoTransacao(id){const t=db.transacoes.find(x=>x.id===id);if(t){document.getElementById('edit-txn-id').value=t.id;document.getElementById('edit-txn-tipo').value=t.tipo;document.getElementById('edit-txn-valor').value=t.valor;document.getElementById('edit-txn-categoria').value=t.categoria;document.getElementById('edit-txn-data').value=t.data;document.getElementById('edit-txn-pagamento').value=t.pagamento;document.getElementById('edit-txn-status').value=t.status;document.getElementById('edit-txn-obs').value=t.obs||'';abrirModal('modal-edit-txn')}}
 document.getElementById('form-edit-txn').addEventListener('submit',e=>{e.preventDefault();const t=db.transacoes.find(x=>x.id===document.getElementById('edit-txn-id').value);if(t){t.tipo=document.getElementById('edit-txn-tipo').value;t.valor=num(document.getElementById('edit-txn-valor').value);t.categoria=document.getElementById('edit-txn-categoria').value.trim();t.data=document.getElementById('edit-txn-data').value;t.pagamento=document.getElementById('edit-txn-pagamento').value;t.status=document.getElementById('edit-txn-status').value;t.obs=document.getElementById('edit-txn-obs').value.trim();salvar();fecharModal('modal-edit-txn');render()}});
 function deletarTransacao(id){if(confirm('Excluir este lançamento?')){db.transacoes=db.transacoes.filter(t=>t.id!==id);db.logs=db.logs.filter(l=>l.transacao_id!==id);salvar();render()}}
-function exportarCSV(){if(!db.transacoes.length)return alert('Sem lançamentos.');let csv='Data;Tipo;Categoria;Valor;Pagamento;Status;Observacao\n';db.transacoes.forEach(t=>csv+=`${t.data};${t.tipo};${String(t.categoria).replace(/;/g,',')};${num(t.valor).toFixed(2)};${t.pagamento};${t.status};"${String(t.obs||'').replace(/"/g,'""')}"\n`);const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='financeiro_v7_'+hoje()+'.csv';a.click()}
-function resetAba(k){if(!confirm(`Tem certeza que deseja limpar ${k}?`))return;if(k==='transacoes'){db.transacoes=[];db.logs=[]}if(k==='compras')db.compras=[];if(k==='limites')db.limites={};if(k==='metas')db.metas=[];if(k==='anotacoes')db.anotacoes=[];salvar();render();alert('Seção limpa com sucesso.')}
-function resetGeral(){if(confirm('ATENÇÃO: apagar todos os dados do sistema?')){db={transacoes:[],logs:[],metas:[],anotacoes:[],compras:[],limites:{},categoriasCustom:[],atalhosConfig:db.atalhosConfig};salvar();fecharModal('modal-config');render();alert('Sistema resetado.')}}
-window.addEventListener('load',()=>{document.getElementById('data').value=hoje();atualizarMeses();atualizarSelectsCategorias();renderAtalhosEditaveis();render()});
+function exportarCSV(){if(!db.transacoes.length)return alert('Sem lançamentos.');let csv='Data;Tipo;Categoria;Valor;Pagamento;Status;Observacao\n';db.transacoes.forEach(t=>csv+=`${t.data};${t.tipo};${String(t.categoria).replace(/;/g,',')};${num(t.valor).toFixed(2)};${t.pagamento};${t.status};"${String(t.obs||'').replace(/"/g,'""')}"\n`);const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='financeiro_v8_'+hoje()+'.csv';a.click()}
+function resetAba(k){if(!confirm(`Tem certeza absoluta que deseja limpar os dados de: ${k}?`))return;if(k==='transacoes'){db.transacoes=[];db.logs=[]}if(k==='compras')db.compras=[];if(k==='limites')db.limites={};if(k==='metas')db.metas=[];if(k==='anotacoes')db.anotacoes=[];salvar();render();alert('Seção limpa com sucesso.')}
+function resetGeral(){if(confirm('⚠️ ATENÇÃO: Deseja realmente apagar TODOS os dados e redefinir o sistema para o padrão inicial?')){if(confirm('Última chance: essa operação não pode ser desfeita.')){db={transacoes:[],logs:[],metas:[],anotacoes:[],compras:[],limites:{},categoriasCustom:[],ordemAbas:['dashboard','compras','metas','anotacoes','auditoria'],abasVisiveis:{dashboard:true,compras:true,metas:true,anotacoes:true,auditoria:true},atalhosConfig:db.atalhosConfig};salvar();fecharModal('modal-config');render();alert('Sistema resetado por completo.')}}}
+window.addEventListener('load',()=>{document.getElementById('data').value=hoje();atualizarMeses();atualizarSelectsCategorias();renderAtalhosEditaveis();renderConfigAbas();render()});
 </script>
 </body></html>
