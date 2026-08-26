@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Financeiro Expert v8.3.3 Pro - Histórico Inteligente</title>
+<title>Financeiro Expert v8.3.4 Pro - Histórico Inteligente</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
 :root{--bg:#0d1117;--card:#161b22;--card2:#21262d;--accent:#38bdf8;--green:#2ecc71;--red:#f87171;--yellow:#fbbf24;--purple:#a855f7;--text:#f0f6fc;--sub:#8b949e;--border:#30363d;--orange:#fb923c}
@@ -26,7 +26,7 @@ canvas{max-height:280px}.divider{border-top:1px solid var(--border);margin:14px 
 </style>
 </head>
 <body>
-<header><div class="brand">📱 Financeiro Expert <span style="font-size:.65rem;color:var(--accent)">v8.3.3</span><button onclick="abrirModal('modal-config')" style="background:none;border:0;color:var(--sub);font-size:1rem">⚙️</button></div><select id="filtro-mes" onchange="render()"><option value="TODOS">Todo o Histórico</option></select></header>
+<header><div class="brand">📱 Financeiro Expert <span style="font-size:.65rem;color:var(--accent)">v8.3.4</span><button onclick="abrirModal('modal-config')" style="background:none;border:0;color:var(--sub);font-size:1rem">⚙️</button></div><select id="filtro-mes" onchange="render()"><option value="TODOS">Todo o Histórico</option></select></header>
 <div class="container">
 <!-- DASHBOARD -->
 <div id="dashboard" class="page active">
@@ -151,6 +151,41 @@ function validarAbas(arr){
 }
 
 function abrirModal(id){document.getElementById(id).style.display='flex'}function fecharModal(id){document.getElementById(id).style.display='none'}
+
+// --- Configuração para fechar o modal clicando fora ou deslizando para o lado ---
+window.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    let startX = 0;
+    let startY = 0;
+
+    overlay.addEventListener('click', (e) => {
+      if(e.target === overlay) {
+        overlay.style.display = 'none';
+      }
+    });
+
+    const content = overlay.querySelector('.modal-content');
+    if(content){
+      content.addEventListener('touchstart', (e) => {
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+      }, {passive: true});
+
+      content.addEventListener('touchend', (e) => {
+        const endX = e.changedTouches[0].clientX;
+        const endY = e.changedTouches[0].clientY;
+        const diffX = endX - startX;
+        const diffY = endY - startY;
+
+        // Se o gesto horizontal (para a esquerda ou direita) for maior que 60px e maior que o movimento vertical
+        if(Math.abs(diffX) > 60 && Math.abs(diffX) > Math.abs(diffY)){
+          overlay.style.display = 'none';
+        }
+      }, {passive: true});
+    }
+  });
+});
+
 function salvar(){if(typeof window.salvarNoFirebase==='function')window.salvarNoFirebase(db)}
 function nav(id,btn){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.tab-btn').forEach(x=>x.classList.remove('active'));const p=document.getElementById(id);if(p)p.classList.add('active');if(btn)btn.classList.add('active');render()}
 
@@ -198,7 +233,6 @@ function salvarConfigAbasRodape(){
     novasVisiveis[key]=chk?chk.checked:true;
   });
   
-  novasVisiveis['metas'] = true;
   db.abasVisiveis=novasVisiveis;
 
   const chkCardMeta = document.getElementById('chk-visivel-card-meta');
