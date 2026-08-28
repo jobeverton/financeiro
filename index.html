@@ -11,7 +11,6 @@
 body{background:var(--bg);color:var(--text);padding-bottom:80px;-webkit-font-smoothing:antialiased}
 button,input,select,textarea{font:inherit}button{cursor:pointer}
 
-/* Header Otimizado para não estourar nas bordas */
 header{background:rgba(22,27,34,.95);backdrop-filter:blur(12px);padding:10px 14px;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
 header .brand{font-weight:800;font-size:0.95rem;display:flex;align-items:center;gap:6px;white-space:nowrap}
 header select{width:auto;min-width:120px;max-width:160px;padding:6px 8px;border-radius:16px;background:var(--bg);color:var(--text);border:1px solid var(--border);font-size:0.85rem}
@@ -91,13 +90,10 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
 .modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
 .close{background:none;border:0;color:var(--sub);font-size:1.1rem}
 
-/* Gráficos controlados para não estourarem a tela */
 canvas{max-height:220px;width:100%!important}
 .divider{border-top:1px solid var(--border);margin:12px 0}
 .two-actions{display:flex;gap:8px}
 .two-actions>*{flex:1}
-.meter-row{display:flex;justify-content:space-between;font-size:0.72rem;margin-bottom:4px}
-.danger-text{color:var(--red)}
 
 .fab-container{position:sticky;bottom:8px;margin-top:10px;margin-bottom:6px;z-index:5}
 
@@ -128,6 +124,7 @@ canvas{max-height:220px;width:100%!important}
   </div>
 </header>
 <div class="container">
+<!-- DASHBOARD -->
 <div id="dashboard" class="page active">
   <div class="hero"><div class="hero-top"><div><div class="mini">SALDO DISPONÍVEL REAL</div><div id="dash-saldo" class="big green">R$ 0,00</div><div id="dash-saldo-info" class="mini">Entradas recebidas − despesas pagas</div></div><span id="dash-status" class="status-pill">Sem movimentação</span></div></div>
   <div class="fab-container"><button class="btn green-btn" onclick="abrirModal('modal-novo-lancamento')" style="box-shadow:0 4px 12px rgba(46,204,113,.35);font-size:0.9rem">➕ Novo Lançamento Rápido</button></div>
@@ -179,8 +176,11 @@ canvas{max-height:220px;width:100%!important}
   <div class="card kpi red-border"><div class="section-title"><h3>🚨 Raio-X dos Maiores Drenos</h3></div><div id="lista-drenos"></div></div>
   <div class="card"><div class="section-title"><h3>⚠️ Orçamentos</h3><span class="mini">limites mensais</span></div><div id="lista-orcamentos"></div></div>
 </div>
+<!-- COMPRAS -->
 <div id="compras" class="page"><div class="card"><h3>🛒 Lista de Compras Inteligente</h3><p class="mini" style="margin-bottom:10px">Monte a lista sem preço. No mercado, informe o preço unitário. Ao marcar o item, ele abate automaticamente nas despesas do sistema!</p><form id="form-compras"><div class="grid-2"><input id="c-item" placeholder="Produto (ex.: Leite)" required><input type="number" id="c-qtd" value="1" min="1" required placeholder="Qtd"></div><button class="btn green-btn" style="margin-top:6px">Adicionar à Lista</button></form><div class="card" style="margin-top:10px;margin-bottom:8px;background:var(--card2)"><div class="grid-2" style="margin:0"><div><div class="mini">ITENS</div><strong id="compras-contagem">0</strong></div><div style="text-align:right"><div class="mini">TOTAL NO CARRINHO</div><strong id="compras-total-carrinho" class="green">R$ 0,00</strong></div></div></div><div style="display:flex;gap:4px;margin-bottom:8px"><button class="btn secondary small" style="flex:1" onclick="filtrarCompras('TODOS')">Todos</button><button class="btn secondary small" style="flex:1;color:var(--yellow)" onclick="filtrarCompras('PENDENTES')">Pendentes</button><button class="btn secondary small" style="flex:1;color:var(--green)" onclick="filtrarCompras('COMPRADOS')">Carrinho</button></div><div id="lista-compras"></div><button type="button" onclick="limparComprados()" style="width:100%;margin-top:8px;background:none;border:1px dashed var(--border);color:var(--sub);padding:7px;border-radius:7px;font-size:0.7rem">🗑️ Remover itens comprados</button></div></div>
+<!-- METAS -->
 <div id="metas" class="page"><div class="card"><h3>🎯 Metas Financeiras Automatizadas</h3><p class="mini" style="margin-bottom:10px">Você pode atualizar manualmente ou marcar para o app sincronizar automaticamente com o saldo do sistema.</p><form id="form-meta" style="margin-bottom:12px"><div class="grid-2"><input id="m-nome" placeholder="Objetivo (ex: Reserva)" required><select id="m-tipo"><option value="RESERVA">🛡️ Reserva</option><option value="CONSUMO">✈️ Objetivo</option></select></div><div class="grid-2" style="margin-top:6px"><input type="number" step="0.01" id="m-alvo" placeholder="Valor alvo" required><input type="number" step="0.01" id="m-atual" placeholder="Já guardado" required></div><div style="background:var(--card2);border:1px solid var(--border);padding:8px;border-radius:8px;margin-top:6px;margin-bottom:6px"><div style="display:flex;justify-content:space-between;align-items:center"><label style="margin:0;color:var(--accent);font-size:0.72rem">🤖 Sincronizar automático com Saldo Líquido?</label><input type="checkbox" id="m-auto" style="width:16px;height:16px;accent-color:var(--accent)"></div></div><button class="btn secondary" style="margin-top:3px">Criar Nova Meta</button></form><div id="lista-metas"></div></div></div>
+<!-- NOTAS -->
 <div id="anotacoes" class="page">
   <div class="card">
     <h3>📝 Notas & Lembretes</h3>
@@ -200,6 +200,7 @@ canvas{max-height:220px;width:100%!important}
     <div id="lista-anotacoes"></div>
   </div>
 </div>
+<!-- HISTÓRICO -->
 <div id="auditoria" class="page">
   <div class="card">
     <div class="section-title">
@@ -213,132 +214,462 @@ canvas{max-height:220px;width:100%!important}
     <div style="margin-bottom:8px">
       <input id="busca-historico" oninput="render()" placeholder="🔍 Buscar no histórico por descrição ou categoria...">
     </div>
-    <div style="background:var(--card2);padding:7px 9px;border-radius:8px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center">
-      <span class="mini" style="color:var(--accent)">💡 Dica: Compras parceladas aparecem agrupadas. Clique em "Ver Parcelas".</span>
-    </div>
     <div id="lista-transacoes"></div>
   </div>
 </div>
 </div>
 
+<!-- MODAL DE DETALHES DE PARCELAS -->
 <div class="modal-overlay" id="modal-parcelas-detalhe"><div class="modal-content"><div class="modal-head"><h3 id="titulo-modal-parcelas">📦 Detalhes das Parcelas</h3><button class="close" onclick="fecharModal('modal-parcelas-detalhe')">✖</button></div><div id="lista-parcelas-detalhe" style="display:grid;gap:6px"></div></div></div>
 
+<!-- MODAL DE LANÇAMENTO -->
 <div class="modal-overlay" id="modal-novo-lancamento"><div class="modal-content"><div class="modal-head"><h3>➕ Novo Lançamento</h3><button class="close" onclick="fecharModal('modal-novo-lancamento')">✖</button></div>
   <form id="form-transacao">
     <div style="display:flex;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:3px;margin-bottom:10px"><button type="button" id="btn-tipo-despesa" onclick="setTipoOperacao('DESPESA')" style="flex:1;padding:8px;border:0;border-radius:7px;background:var(--red);color:#fff;font-weight:bold;font-size:0.85rem">🔴 Despesa</button><button type="button" id="btn-tipo-entrada" onclick="setTipoOperacao('ENTRADA')" style="flex:1;padding:8px;border:0;border-radius:7px;background:transparent;color:var(--sub);font-weight:bold;font-size:0.85rem">🟢 Entrada</button></div>
     <input type="hidden" id="tipo" value="DESPESA">
-    <div class="form-group"><label>Valor Total da Operação (R$)</label><input type="number" step="0.01" min="0.01" id="valor" required placeholder="0,00" style="font-size:1.3rem;font-weight:bold;text-align:center;color:var(--red)" oninput="verificarImpactoOrcamento(this.value)"></div>
-    <div id="alerta-orcamento" class="alert warn" style="display:none">⚠️ <strong>Atenção:</strong> este lançamento ultrapassará o limite da categoria.</div>
+    <div class="form-group"><label>Valor Total da Operação (R$)</label><input type="number" step="0.01" min="0.01" id="valor" required placeholder="0,00" style="font-size:1.3rem;font-weight:bold;text-align:center;color:var(--red)"></div>
     <div class="grid-2"><div class="form-group"><label>Categoria</label><select id="categoria" onchange="verificarCategoriaPersonalizada()"></select><div id="campo-cat-custom" style="display:none;margin-top:6px"><input id="categoria-custom" placeholder="Nome da nova categoria"></div></div><div class="form-group"><label>Data</label><input type="date" id="data" required><div style="display:flex;gap:4px;margin-top:3px"><button type="button" class="btn secondary small" onclick="setDataAtalho(0)">Hoje</button><button type="button" class="btn secondary small" onclick="setDataAtalho(-1)">Ontem</button></div></div></div>
-    
-    <div class="form-group">
-      <label id="label-atalhos">⚡ Atalhos Rápidos</label>
-      <div id="container-botoes-atalho" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(75px, 1fr));gap:5px;margin-top:5px;"></div>
-    </div>
-
-    <div style="background:var(--card2);border:1px solid var(--border);padding:8px;border-radius:8px;margin-bottom:10px"><div style="display:flex;justify-content:space-between;align-items:center"><label style="margin:0;color:var(--yellow);font-size:0.75rem">⚠️ Definir/atualizar limite mensal?</label><input type="checkbox" id="chk-definir-limite" onchange="toggleCampoLimite(this.checked)" style="width:16px;height:16px"></div><div id="div-campo-limite" style="display:none;margin-top:6px"><input type="number" step="0.01" id="limite-categoria-val" placeholder="Limite mensal em R$"></div></div>
     <div class="grid-3"><div class="form-group"><label>Pagamento</label><select id="pagamento" onchange="verificarMeioPagamento(this.value)"><option>PIX / Dinheiro</option><option>Cartão de Débito</option><option>Boleto</option></select></div><div class="form-group" id="group-parcelas" style="display:none"><label>Parcelas</label><input type="number" id="parcelas" min="1" max="72" value="1"></div><div class="form-group"><label>Recorrência</label><select id="fixa"><option value="VARIAVEL">Pontual / Variável</option><option value="FIXA">Fixa Mensal</option></select></div></div>
     <div class="grid-2"><div class="form-group"><label>Status Inicial</label><select id="status"><option value="PAGO">Pago / Efetuado</option><option value="PENDENTE">Pendente / Agendado</option></select></div><div class="form-group"><label>Descrição / Observação</label><input id="obs" placeholder="Ex: almoço, farmácia..."></div></div>
     <button class="btn" type="submit">Salvar Lançamento</button>
   </form>
 </div></div>
 
+<!-- MODAL CONFIGURAÇÃO -->
 <div class="modal-overlay" id="modal-config"><div class="modal-content"><div class="modal-head"><h3>⚙️ Configurações & Personalização</h3><button class="close" onclick="fecharModal('modal-config')">✖</button></div>
-  <p class="mini">Gerencie quais abas aparecem no rodapé, o card na tela inicial e faça limpezas com segurança.</p>
-  
-  <div style="margin:12px 0">
-    <label style="color:var(--accent);margin-bottom:6px">🎯 Exibição da Meta na Tela Inicial</label>
-    <div style="display:flex;gap:6px;align-items:center;background:var(--bg);padding:7px;border-radius:7px;border:1px solid var(--border);margin-bottom:10px">
-      <input type="checkbox" id="chk-visivel-card-meta" style="width:16px;height:16px;accent-color:var(--accent)">
-      <label for="chk-visivel-card-meta" style="margin:0;color:var(--text);font-weight:normal;cursor:pointer;font-size:0.75rem">Exibir card "Meta Principal em Foco" no Início</label>
-    </div>
-
-    <label style="color:var(--accent);margin-bottom:6px">🔀 Visibilidade e Ordem das Abas no Rodapé</label>
-    <div class="mini" style="margin-bottom:6px">Marque quais abas deseja exibir no menu inferior e defina a ordem delas:</div>
-    <div style="display:grid;gap:6px" id="container-config-abas"></div>
-    <button class="btn secondary small" style="margin-top:8px;width:100%" onclick="salvarConfigAbasRodape()">Salvar Configurações</button>
-  </div>
-
+  <p class="mini">Gerencie abas e faça limpezas com segurança.</p>
   <div class="divider"></div>
-  <label style="color:var(--yellow);margin-bottom:6px">🗑️ Limpeza de Módulos Específicos</label>
-  <div style="display:grid;gap:5px;margin-bottom:12px">
-    <button class="btn secondary" style="color:var(--red);border-color:var(--red)" onclick="resetAba('transacoes')">🗑️ Limpar Apenas Lançamentos</button>
-    <button class="btn secondary" style="color:var(--red);border-color:var(--red)" onclick="resetAba('compras')">🛒 Limpar Lista de Compras</button>
-    <button class="btn secondary" style="color:var(--red);border-color:var(--red)" onclick="resetAba('limites')">⚠️ Limpar Limites e Orçamentos</button>
-    <button class="btn secondary" style="color:var(--red);border-color:var(--red)" onclick="resetAba('metas')">🎯 Limpar Metas Financeiras</button>
-    <button class="btn secondary" style="color:var(--red);border-color:var(--red)" onclick="resetAba('anotacoes')">🗑️ Limpar Anotações</button>
-  </div>
-  
-  <div class="divider"></div>
-  <label style="color:var(--red);margin-bottom:6px">💥 Zona de Perigo</label>
   <button class="btn red-btn" onclick="resetGeral()" style="margin-bottom: 10px;">💥 Resetar Todo o Sistema</button>
-  
-  <button class="btn secondary" style="color:var(--red);border-color:var(--red);width:100%;margin-top:2px;" onclick="fazerLogout()">
-    <i class="fas fa-sign-out-alt"></i> Sair da Conta (Logout)
-  </button>
+  <button class="btn secondary" style="color:var(--red);border-color:var(--red);width:100%" onclick="fazerLogout()"><i class="fas fa-sign-out-alt"></i> Sair da Conta</button>
 </div></div>
 
-<div class="modal-overlay" id="modal-mov-meta"><div class="modal-content"><div class="modal-head"><h3 id="mov-meta-titulo">💵 Movimentar Meta</h3><button class="close" onclick="fecharModal('modal-mov-meta')">✖</button></div><form id="form-mov-meta"><input type="hidden" id="mov-meta-id"><input type="hidden" id="mov-meta-tipo-operacao"><div class="form-group"><label>Valor</label><input type="number" step="0.01" min="0.01" id="mov-meta-valor" required></div><div class="two-actions"><button class="btn green-btn" id="mov-meta-btn-confirmar">Confirmar</button><button type="button" class="btn secondary" onclick="fecharModal('modal-mov-meta')">Cancelar</button></div></form></div></div>
-<div class="modal-overlay" id="modal-edit-meta"><div class="modal-content"><div class="modal-head"><h3>✏️ Editar Meta</h3><button class="close" onclick="fecharModal('modal-edit-meta')">✖</button></div><form id="form-edit-meta"><input type="hidden" id="edit-meta-id"><div class="form-group"><label>Nome</label><input id="edit-meta-nome" required></div><div class="form-group"><label>Tipo</label><select id="edit-meta-tipo"><option value="RESERVA">🛡️ Reserva</option><option value="CONSUMO">✈️ Objetivo</option></select></div><div class="grid-2"><input type="number" step="0.01" id="edit-meta-alvo" required placeholder="Alvo"><input type="number" step="0.01" id="edit-meta-atual" required placeholder="Atual"></div><div style="background:var(--card2);border:1px solid var(--border);padding:8px;border-radius:8px;margin-top:6px;margin-bottom:6px"><div style="display:flex;justify-content:space-between;align-items:center"><label style="margin:0;color:var(--accent);font-size:0.72rem">🤖 Sincronizar automático com Saldo Líquido?</label><input type="checkbox" id="edit-meta-auto" style="width:16px;height:16px;accent-color:var(--accent)"></div></div><div class="two-actions" style="margin-top:10px"><button class="btn green-btn">Salvar</button><button type="button" class="btn secondary" onclick="fecharModal('modal-edit-meta')">Cancelar</button></div></form></div></div>
-<div class="modal-overlay" id="modal-edit-txn"><div class="modal-content"><div class="modal-head"><h3>✏️ Editar Lançamento</h3><button class="close" onclick="fecharModal('modal-edit-txn')">✖</button></div><form id="form-edit-txn"><input type="hidden" id="edit-txn-id"><div class="form-group"><label>Tipo</label><select id="edit-txn-tipo"><option value="DESPESA">🔴 Despesa</option><option value="ENTRADA">🟢 Entrada</option></select></div><div class="form-group"><label>Valor</label><input type="number" step="0.01" id="edit-txn-valor" required></div><div class="form-group"><label>Categoria</label><input id="edit-txn-categoria" required></div><div class="form-group"><label>Data</label><input type="date" id="edit-txn-data" required></div><div class="grid-2"><div class="form-group"><label>Pagamento</label><select id="edit-txn-pagamento"><option>PIX / Dinheiro</option><option>Cartão de Débito</option><option>Boleto</option></select></div><div class="form-group"><label>Status</label><select id="edit-txn-status"><option value="PAGO">Pago</option><option value="PENDENTE">Pendente</option></select></div></div><input id="edit-txn-obs" placeholder="Observação"><div class="two-actions" style="margin-top:10px"><button class="btn green-btn">Salvar</button><button type="button" class="btn secondary" onclick="fecharModal('modal-edit-txn')">Cancelar</button></div></form></div></div>
-<div class="modal-overlay" id="modal-atalhos"><div class="modal-content"><div class="modal-head"><h3 id="m-header-atalhos">⚙️ Atalhos</h3><button class="close" onclick="fecharModal('modal-atalhos')">✖</button></div><div class="alert" style="background:rgba(56,189,248,.08);border-color:var(--accent);color:var(--accent)"><strong>➕ Nova categoria</strong><div style="display:flex;gap:5px;margin-top:5px"><input id="m-nova-cat-nome" placeholder="Nome da categoria"><button class="btn small" onclick="criarCategoriaPelaModal()">Adicionar</button></div></div><div id="form-edicao-modal" style="display:grid;gap:8px"></div><div class="two-actions" style="margin-top:12px"><button class="btn green-btn" onclick="salvarConfigAtalhosModal()">Salvar Alterações</button><button class="btn secondary" onclick="fecharModal('modal-atalhos')">Cancelar</button></div></div></div>
+<!-- NAV -->
 <div class="nav-tabs" id="nav-container-rodape"></div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+<!-- Lógica Principal Integrada e Protegida -->
+<script>
+// Objeto de banco de dados padrão para evitar telas em branco
+let db = {
+  transacoes: [],
+  metas: [],
+  compras: [],
+  anotacoes: [],
+  limites: {},
+  categoriasCustom: ['Alimentação', 'Moradia', 'Transporte', 'Lazer', 'Saúde', 'Educação', 'Outros'],
+  ordemAbas: ['dashboard', 'compras', 'metas', 'anotacoes', 'auditoria'],
+  abasVisiveis: { dashboard: true, compras: true, metas: true, anotacoes: true, auditoria: true },
+  cardMetaIninicioVisivel: true
+};
 
-const firebaseConfig={apiKey:"AIzaSyBp34X2K3BYJXkyNrpGy8l0XyjM-VY8uXY",authDomain:"financeiro-5ed97.firebaseapp.com",databaseURL:"https://financeiro-5ed97-default-rtdb.firebaseio.com",projectId:"financeiro-5ed97",storageBucket:"financeiro-5ed97.firebasestorage.app",messagingSenderId:"689227262420",appId:"1:689227262420:web:a25a067e62b665e3cece41"};
-const app=initializeApp(firebaseConfig),firebaseDb=getDatabase(app),dbRef=ref(firebaseDb,'financeiro/');
-const auth = getAuth(app);
+let paginaAtual = 'dashboard';
+let ocultarValoresGlobal = false;
+let chartGastosInstancia = null;
+let chartEvolucaoInstancia = null;
 
-window.salvarNoFirebase = dados => {
-  set(dbRef, dados).catch(err => {
-    console.warn("Erro ao salvar no Firebase, utilizando cache local:", err);
-    localStorage.setItem('financeiro_offline_cache', JSON.stringify(dados));
-    showToast("Salvo localmente (Offline)", "error");
+function showToast(msg, tipo = 'success') {
+  const container = document.getElementById('toast-container');
+  if(!container) return;
+  const t = document.createElement('div');
+  t.className = `toast ${tipo}`;
+  t.innerHTML = `<span>${msg}</span>`;
+  container.appendChild(t);
+  setTimeout(() => t.remove(), 3000);
+}
+
+function abrirModal(id) {
+  const m = document.getElementById(id);
+  if(m) m.style.display = 'flex';
+}
+
+function fecharModal(id) {
+  const m = document.getElementById(id);
+  if(m) m.style.display = 'none';
+}
+
+function togglePrivacidade() {
+  ocultarValoresGlobal = !ocultarValoresGlobal;
+  render();
+  showToast(ocultarValoresGlobal ? "Valores ocultados" : "Valores exibidos", "success");
+}
+
+function formatarMoeda(val) {
+  if(ocultarValoresGlobal) return "R$ •••••";
+  return Number(val || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+function mudarPagina(id) {
+  paginaAtual = id;
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const el = document.getElementById(id);
+  if(el) el.classList.add('active');
+  renderRodape();
+  render();
+}
+
+function renderRodape() {
+  const nav = document.getElementById('nav-container-rodape');
+  if(!nav) return;
+  const abasInfo = [
+    { id: 'dashboard', label: 'Início', icon: 'fa-home' },
+    { id: 'compras', label: 'Compras', icon: 'fa-shopping-cart' },
+    { id: 'metas', label: 'Metas', icon: 'fa-bullseye' },
+    { id: 'anotacoes', label: 'Notas', icon: 'fa-sticky-note' },
+    { id: 'auditoria', label: 'Extrato', icon: 'fa-list-alt' }
+  ];
+  nav.innerHTML = abasInfo.map(a => `
+    <button class="tab-btn ${paginaAtual === a.id ? 'active' : ''}" onclick="mudarPagina('${a.id}')">
+      <i class="fas ${a.icon} fa-lg"></i>
+      <span>${a.label}</span>
+    </button>
+  `).join('');
+}
+
+function atualizarMeses() {
+  const select = document.getElementById('filtro-mes');
+  if(!select) return;
+  const atualVal = select.value;
+  const mesesSet = new Set();
+  (db.transacoes || []).forEach(t => {
+    if(t.data) mesesSet.add(t.data.substring(0, 7));
   });
-};
+  const ordenados = Array.from(mesesSet).sort().reverse();
+  select.innerHTML = '<option value="TODOS">Todo o Histórico</option>' + 
+    ordenados.map(m => {
+      const [ano, mes] = m.split('-');
+      const nomeMes = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'][Number(mes)-1];
+      return `<option value="${m}">${nomeMes}/${ano}</option>`;
+    }).join('');
+  if(mesesSet.has(atualVal) || atualVal === 'TODOS') select.value = atualVal;
+}
 
-window.fazerLogout = function() {
-    signOut(auth).then(() => {
-        const appContainer = document.getElementById('app-container');
-        const loginContainer = document.getElementById('login-container');
-        if(appContainer) appContainer.style.display = 'none';
-        if(loginContainer) loginContainer.style.display = 'flex';
-        fecharModal('modal-config');
-        window.location.reload();
-    }).catch((error) => {
-        console.error("Erro ao fazer logout: ", error);
-        showToast("Erro ao encerrar a sessão.", "error");
-    });
-};
+function atualizarSelectsCategorias() {
+  const sel = document.getElementById('categoria');
+  if(!sel) return;
+  const cats = db.categoriasCustom || ['Outros'];
+  sel.innerHTML = cats.map(c => `<option value="${c}">${c}</option>`).join('') + '<option value="NOVA">+ Nova Categoria...</option>';
+}
 
-onValue(dbRef, s => {
-  const d = s.val();
-  if(d) {
-    db = {...db, ...d, transacoes:d.transacoes||[], logs:d.logs||[], metas:d.metas||[], anotacoes:d.anotacoes||[], compras:d.compras||[], limites:d.limites||{}, categoriasCustom:padronizarCategoriasCustom(d.categoriasCustom||[]), atalhosConfig:padronizarAtalhos(d.atalhosConfig), ordemAbas:validarAbas(d.ordemAbas), abasVisiveis:d.abasVisiveis||{dashboard:true,compras:true,metas:true,anotacoes:true,auditoria:true}, cardMetaIninicioVisivel:d.cardMetaIninicioVisivel!==undefined?d.cardMetaIninicioVisivel:true};
-    atualizarMeses();
-    atualizarSelectsCategorias();
-    renderRodape();
-    renderConfigAbas();
+function verificarCategoriaPersonalizada() {
+  const sel = document.getElementById('categoria');
+  const campo = document.getElementById('campo-cat-custom');
+  if(sel && campo) campo.style.display = sel.value === 'NOVA' ? 'block' : 'none';
+}
+
+function setTipoOperacao(tipo) {
+  document.getElementById('tipo').value = tipo;
+  const btnD = document.getElementById('btn-tipo-despesa');
+  const btnE = document.getElementById('btn-tipo-entrada');
+  if(tipo === 'DESPESA') {
+    btnD.style.background = 'var(--red)';
+    btnD.style.color = '#fff';
+    btnE.style.background = 'transparent';
+    btnE.style.color = 'var(--sub)';
+  } else {
+    btnE.style.background = 'var(--green)';
+    btnE.style.color = '#fff';
+    btnD.style.background = 'transparent';
+    btnD.style.color = 'var(--sub)';
+  }
+}
+
+function setDataAtalho(dias) {
+  const d = new Date();
+  d.setDate(d.getDate() + dias);
+  document.getElementById('data').value = d.toISOString().split('T')[0];
+}
+
+function verificarMeioPagamento(val) {
+  const grupo = document.getElementById('group-parcelas');
+  if(grupo) grupo.style.display = val === 'Boleto' ? 'block' : 'none';
+}
+
+function render() {
+  atualizarMeses();
+  renderDashboard();
+  renderCompras();
+  renderMetas();
+  renderAnotacoes();
+  renderTransacoes();
+}
+
+function renderDashboard() {
+  const filtroMes = document.getElementById('filtro-mes')?.value || 'TODOS';
+  const txs = (db.transacoes || []).filter(t => filtroMes === 'TODOS' || (t.data && t.data.startsWith(filtroMes)));
+  
+  let recs = 0, desps = 0, pagas = 0, pends = 0, salario = 0;
+  txs.forEach(t => {
+    const val = Number(t.valor) || 0;
+    if(t.tipo === 'ENTRADA') {
+      recs += val;
+      if(t.categoria === 'Salário' || (t.obs && t.obs.toLowerCase().includes('salário'))) salario += val;
+    } else {
+      desps += val;
+      if(t.status === 'PAGO') pagas += val;
+      else pends += val;
+    }
+  });
+
+  const saldoReal = recs - pagas;
+  const fluxoLiquido = recs - desps;
+
+  const elSaldo = document.getElementById('dash-saldo');
+  if(elSaldo) {
+    elSaldo.innerText = formatarMoeda(saldoReal);
+    elSaldo.className = `big ${saldoReal >= 0 ? 'green' : 'red'}`;
+  }
+  
+  if(document.getElementById('dash-fluxo-liquido')) document.getElementById('dash-fluxo-liquido').innerText = formatarMoeda(fluxoLiquido);
+  if(document.getElementById('dash-salario')) document.getElementById('dash-salario').innerText = formatarMoeda(salario);
+  if(document.getElementById('dash-receitas')) document.getElementById('dash-receitas').innerText = formatarMoeda(recs);
+  if(document.getElementById('dash-despesas')) document.getElementById('dash-despesas').innerText = formatarMoeda(desps);
+  if(document.getElementById('dash-pagas')) document.getElementById('dash-pagas').innerText = formatarMoeda(pagas);
+  if(document.getElementById('dash-pendentes')) document.getElementById('dash-pendentes').innerText = formatarMoeda(pends);
+
+  renderGraficoGastos(txs);
+}
+
+function renderGraficoGastos(txs) {
+  const ctx = document.getElementById('chartGastos');
+  if(!ctx) return;
+  const catTotais = {};
+  txs.filter(t => t.tipo === 'DESPESA').forEach(t => {
+    catTotais[t.categoria] = (catTotais[t.categoria] || 0) + Number(t.valor);
+  });
+
+  const labels = Object.keys(catTotais);
+  const data = Object.values(catTotais);
+
+  if(chartGastosInstancia) chartGastosInstancia.destroy();
+  chartGastosInstancia = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: labels.length ? labels : ['Sem dados'],
+      datasets: [{ data: data.length ? data : [1], backgroundColor: ['#38bdf8','#2ecc71','#fbbf24','#a855f7','#f87171','#fb923c','#30363d'] }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#f0f6fc', boxWidth: 12 } } } }
+  });
+}
+
+function renderCompras() {
+  const lista = document.getElementById('lista-compras');
+  if(!lista) return;
+  const itens = db.compras || [];
+  document.getElementById('compras-contagem').innerText = itens.length;
+  const totalCarrinho = itens.filter(i => i.comprado).reduce((acc, i) => acc + (Number(i.preco) || 0) * (Number(i.qtd) || 1), 0);
+  document.getElementById('compras-total-carrinho').innerText = formatarMoeda(totalCarrinho);
+
+  lista.innerHTML = itens.length === 0 ? '<div class="empty">Nenhum item na lista.</div>' : itens.map((i, idx) => `
+    <div class="shop-item ${i.comprado ? 'purchased' : ''}">
+      <input type="checkbox" class="shop-check" ${i.comprado ? 'checked' : ''} onchange="toggleCompra(${idx})">
+      <div style="flex:1"><div class="shop-name">${i.nome}</div><div class="mini">Qtd: ${i.qtd}</div></div>
+      <input type="number" step="0.01" class="price" placeholder="R$ 0,00" value="${i.preco || ''}" onchange="atualizarPrecoCompra(${idx}, this.value)">
+      <button class="btn-icon red" onclick="removerCompra(${idx})">🗑️</button>
+    </div>
+  `).join('');
+}
+
+function toggleCompra(idx) {
+  if(db.compras[idx]) {
+    db.compras[idx].comprado = !db.compras[idx].comprado;
+    salvarDados();
     render();
   }
-}, (error) => {
-  console.warn("Falha na escuta do Firebase, buscando cache local:", error);
-  const cacheLocal = localStorage.getItem('financeiro_offline_cache');
-  if(cacheLocal) {
+}
+
+function atualizarPrecoCompra(idx, val) {
+  if(db.compras[idx]) {
+    db.compras[idx].preco = parseFloat(val) || 0;
+    salvarDados();
+    render();
+  }
+}
+
+function removerCompra(idx) {
+  db.compras.splice(idx, 1);
+  salvarDados();
+  render();
+}
+
+function limparComprados() {
+  db.compras = db.compras.filter(i => !i.comprado);
+  salvarDados();
+  render();
+}
+
+function renderMetas() {
+  const lista = document.getElementById('lista-metas');
+  if(!lista) return;
+  const metas = db.metas || [];
+  lista.innerHTML = metas.length === 0 ? '<div class="empty">Nenhuma meta cadastrada.</div>' : metas.map((m, idx) => {
+    const prog = m.alvo > 0 ? Math.min(100, (m.atual / m.alvo) * 100) : 0;
+    return `
+      <div class="card" style="background:var(--card2);margin-bottom:8px">
+        <div class="section-title"><h3>${m.nome}</h3><span class="tag">${m.tipo}</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:4px">
+          <span>Atual: <strong>${formatarMoeda(m.atual)}</strong></span>
+          <span>Alvo: <strong>${formatarMoeda(m.alvo)}</strong></span>
+        </div>
+        <div class="progress"><div style="width:${prog}%"></div></div>
+        <div style="display:flex;gap:6px;margin-top:8px">
+          <button class="btn secondary small" style="flex:1" onclick="removerMeta(${idx})">Excluir</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function removerMeta(idx) {
+  db.metas.splice(idx, 1);
+  salvarDados();
+  render();
+}
+
+function renderAnotacoes() {
+  const lista = document.getElementById('lista-anotacoes');
+  if(!lista) return;
+  const notas = db.anotacoes || [];
+  lista.innerHTML = notas.length === 0 ? '<div class="empty">Nenhuma nota registrada.</div>' : notas.map((n, idx) => `
+    <div class="note-card prio-${n.prio || 'BAIXA'}">
+      <div class="section-title"><h3>${n.titulo}</h3><span class="tag">${n.prio}</span></div>
+      <p style="font-size:0.82rem;white-space:pre-wrap">${n.texto}</p>
+      <div style="text-align:right;margin-top:6px"><button class="btn secondary small" onclick="removerNota(${idx})">Excluir</button></div>
+    </div>
+  `).join('');
+}
+
+function removerNota(idx) {
+  db.anotacoes.splice(idx, 1);
+  salvarDados();
+  render();
+}
+
+function renderTransacoes() {
+  const lista = document.getElementById('lista-transacoes');
+  if(!lista) return;
+  const filtroMes = document.getElementById('filtro-mes')?.value || 'TODOS';
+  const txs = (db.transacoes || []).filter(t => filtroMes === 'TODOS' || (t.data && t.data.startsWith(filtroMes)));
+
+  lista.innerHTML = txs.length === 0 ? '<div class="empty">Nenhum lançamento encontrado.</div>' : txs.map((t, idx) => `
+    <div class="list-item">
+      <div class="item-head">
+        <div><strong>${t.obs || t.categoria}</strong> <span class="tag">${t.categoria}</span></div>
+        <div class="${t.tipo === 'ENTRADA' ? 'green' : 'red'} font-weight:bold">${t.tipo === 'ENTRADA' ? '+' : '-'}${formatarMoeda(t.valor)}</div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px">
+        <span class="mini">${t.data} • ${t.status}</span>
+        <button class="btn secondary small" onclick="removerTransacao(${idx})">Excluir</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function removerTransacao(idx) {
+  db.transacoes.splice(idx, 1);
+  salvarDados();
+  render();
+  showToast("Lançamento removido com sucesso", "success");
+}
+
+function salvarDados() {
+  localStorage.setItem('financeiro_app_data', JSON.stringify(db));
+}
+
+function carregarDados() {
+  const salvo = localStorage.getItem('financeiro_app_data');
+  if(salvo) {
     try {
-      const d = JSON.parse(cacheLocal);
-      db = {...db, ...d};
-      atualizarMeses();
-      atualizarSelectsCategorias();
-      renderRodape();
-      renderConfigAbas();
-      render();
-      showToast("Carregado do cache offline", "error");
+      db = {...db, ...JSON.parse(salvo)};
     } catch(e) {}
+  }
+}
+
+function resetGeral() {
+  if(confirm("Tem certeza que deseja apagar todos os dados do aplicativo?")) {
+    localStorage.removeItem('financeiro_app_data');
+    window.location.reload();
+  }
+}
+
+function fazerLogout() {
+  window.location.reload();
+}
+
+// Event Listeners dos Formulários
+document.addEventListener('DOMContentLoaded', () => {
+  carregarDados();
+  setDataAtalho(0);
+  atualizarSelectsCategorias();
+  renderRodape();
+  render();
+
+  const formTx = document.getElementById('form-transacao');
+  if(formTx) {
+    formTx.addEventListener('submit', e => {
+      e.preventDefault();
+      const tipo = document.getElementById('tipo').value;
+      const valor = parseFloat(document.getElementById('valor').value) || 0;
+      let categoria = document.getElementById('categoria').value;
+      if(categoria === 'NOVA') {
+        categoria = document.getElementById('categoria-custom').value.trim() || 'Outros';
+        if(!db.categoriasCustom.includes(categoria)) db.categoriasCustom.push(categoria);
+      }
+      const data = document.getElementById('data').value;
+      const pagamento = document.getElementById('pagamento').value;
+      const status = document.getElementById('status').value;
+      const obs = document.getElementById('obs').value;
+
+      db.transacoes.push({ tipo, valor, categoria, data, pagamento, status, obs });
+      salvarDados();
+      fecharModal('modal-novo-lancamento');
+      formTx.reset();
+      setDataAtalho(0);
+      atualizarSelectsCategorias();
+      render();
+      showToast("Lançamento salvo com sucesso!");
+    });
+  }
+
+  const formCompras = document.getElementById('form-compras');
+  if(formCompras) {
+    formCompras.addEventListener('submit', e => {
+      e.preventDefault();
+      const nome = document.getElementById('c-item').value;
+      const qtd = parseInt(document.getElementById('c-qtd').value) || 1;
+      db.compras.push({ nome, qtd, comprado: false, preco: 0 });
+      salvarDados();
+      formCompras.reset();
+      document.getElementById('c-qtd').value = 1;
+      renderCompras();
+    });
+  }
+
+  const formMeta = document.getElementById('form-meta');
+  if(formMeta) {
+    formMeta.addEventListener('submit', e => {
+      e.preventDefault();
+      const nome = document.getElementById('m-nome').value;
+      const tipo = document.getElementById('m-tipo').value;
+      const alvo = parseFloat(document.getElementById('m-alvo').value) || 0;
+      const atual = parseFloat(document.getElementById('m-atual').value) || 0;
+      db.metas.push({ nome, tipo, alvo, atual });
+      salvarDados();
+      formMeta.reset();
+      renderMetas();
+    });
+  }
+
+  const formNota = document.getElementById('form-nota');
+  if(formNota) {
+    formNota.addEventListener('submit', e => {
+      e.preventDefault();
+      const titulo = document.getElementById('n-titulo').value;
+      const prio = document.getElementById('n-prio').value;
+      const texto = document.getElementById('n-texto').value;
+      db.anotacoes.push({ titulo, prio, texto });
+      salvarDados();
+      formNota.reset();
+      renderAnotacoes();
+    });
   }
 });
 </script>
