@@ -503,6 +503,67 @@ canvas{max-height:230px;width:100%!important}
   </div>
 </div>
 
+<!-- MODAL EDITAR LANÇAMENTO (EXTRATO) -->
+<div class="modal-overlay" id="modal-editar-transacao">
+  <div class="modal-content">
+    <div class="modal-head">
+      <div>
+        <h3 style="font-size:0.95rem;color:var(--text);text-transform:none">✏️ Editar Lançamento</h3>
+        <div class="mini">Altere as informações do item selecionado no extrato</div>
+      </div>
+      <button class="close" onclick="fecharModal('modal-editar-transacao')">✖</button>
+    </div>
+
+    <form id="form-editar-transacao">
+      <input type="hidden" id="edit-index">
+      <div class="form-group">
+        <label>Tipo de Operação</label>
+        <select id="edit-tipo">
+          <option value="DESPESA">Despresa / Saída</option>
+          <option value="ENTRADA">Entrada / Receita</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Valor (R$)</label>
+        <input type="number" step="0.01" min="0.01" id="edit-valor" required>
+      </div>
+
+      <div class="grid-2">
+        <div class="form-group">
+          <label>Categoria</label>
+          <select id="edit-categoria"></select>
+        </div>
+        <div class="form-group">
+          <label>Conta / Instituição</label>
+          <select id="edit-conta"></select>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="form-group">
+          <label>Data</label>
+          <input type="date" id="edit-data" required>
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <select id="edit-status">
+            <option value="PAGO">Pago / Efetuado</option>
+            <option value="PENDENTE">Pendente / Agendado</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Descrição / Observação</label>
+        <input id="edit-obs">
+      </div>
+
+      <button class="btn green-btn" type="submit" style="margin-top:4px"><i class="fas fa-check-circle"></i> Salvar Alterações</button>
+    </form>
+  </div>
+</div>
+
 <div class="nav-tabs" id="nav-container-rodape"></div>
 
 <!-- FIREBASE SDKs (Modular v9+) -->
@@ -1342,11 +1403,39 @@ function renderTransacoes() {
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px">
           <span class="mini">${t.data} • ${t.status} • ${t.pagamento} (${t.conta})</span>
-          <button class="btn secondary small" onclick="removerTransacao(${realIdx})">Excluir</button>
+          <div style="display:flex;gap:4px">
+            <button class="btn secondary small" onclick="abrirEditarTransacao(${realIdx})" title="Editar Lançamento"><i class="fas fa-pencil-alt"></i></button>
+            <button class="btn secondary small" onclick="removerTransacao(${realIdx})">Excluir</button>
+          </div>
         </div>
       </div>
     `;
   }).join('');
+}
+
+function abrirEditarTransacao(idx) {
+  const t = db.transacoes[idx];
+  if(!t) return;
+  
+  document.getElementById('edit-index').value = idx;
+  document.getElementById('edit-tipo').value = t.tipo || 'DESPESA';
+  document.getElementById('edit-valor').value = t.valor || 0;
+  
+  // Preencher Select de Categorias
+  const selCat = document.getElementById('edit-categoria');
+  const cats = db.categoriasCustom || ['Outros'];
+  selCat.innerHTML = cats.map(c => `<option value="${c}" ${c === t.categoria ? 'selected' : ''}>${c}</option>`).join('');
+
+  // Preencher Select de Contas
+  const selConta = document.getElementById('edit-conta');
+  const contas = db.contas || [];
+  selConta.innerHTML = contas.map(c => `<option value="${c.nome}" ${c.nome === t.conta ? 'selected' : ''}>${c.nome} (${c.tipo})</option>`).join('');
+
+  document.getElementById('edit-data').value = t.data || '';
+  document.getElementById('edit-status').value = t.status || 'PAGO';
+  document.getElementById('edit-obs').value = t.obs || '';
+
+  abrirModal('modal-editar-transacao');
 }
 
 function removerTransacao(idx) {
@@ -1522,6 +1611,50 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
+  const formEditTx = document.getElementById('form-editar-transacao');
+  if(formEditTx) {
+    formEditTx.addEventListener('submit', e => {
+      e.preventDefault();
+      salvarEstadoAnterior();
+      const idx = parseInt(document.getElementById('edit-index').value);
+      const transacaoAntiga = db.transacoes[idx];
+
+      if(transacaoAntiga) {
+        // Reverter impacto anterior no saldo se estava pago
+        if(transacaoAntiga.status === 'PAGO') {
+          const contaAntiga = db.contas.find(c => c.nome === transacaoAntiga.conta);
+          if(contaAntiga) {
+            if(transacaoAntiga.tipo === 'ENTRADA') contaAntiga.saldo -= Number(transacaoAntiga.valor);
+            else contaAntiga.saldo += Number(transacaoAntiga.valor);
+          }
+        }
+
+        // Atualizar dados
+        transacaoAntiga.tipo = document.getElementById('edit-tipo').value;
+        transacaoAntiga.valor = parseFloat(document.getElementById('edit-valor').value) || 0;
+        transacaoAntiga.categoria = document.getElementById('edit-categoria').value;
+        transacaoAntiga.conta = document.getElementById('edit-conta').value;
+        transacaoAntiga.data = document.getElementById('edit-data').value;
+        transacaoAntiga.status = document.getElementById('edit-status').value;
+        transacaoAntiga.obs = document.getElementById('edit-obs').value;
+
+        // Aplicar novo impacto no saldo se estiver pago
+        if(transacaoAntiga.status === 'PAGO') {
+          const contaNova = db.contas.find(c => c.nome === transacaoAntiga.conta);
+          if(contaNova) {
+            if(transacaoNova.tipo === 'ENTRADA') contaNova.saldo += Number(transacaoAntiga.valor);
+            else contaNova.saldo -= Number(transacaoAntiga.valor);
+          }
+        }
+
+        salvarDados();
+        fecharModal('modal-editar-transacao');
+        render();
+        showToast("Lançamento atualizado com sucesso!");
+      }
+    });
+  }
+
   const formConta = document.getElementById('form-conta');
   if(formConta) {
     formConta.addEventListener('submit', e => {
@@ -1592,4 +1725,3 @@ document.addEventListener('DOMContentLoaded', async () => {
 </script>
 </body>
 </html>
-```[cite: 5]
