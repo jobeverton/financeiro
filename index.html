@@ -130,6 +130,7 @@ canvas{max-height:230px;width:100%!important}
     <button onclick="desfazerUltimaAcao()" class="btn-icon" title="Desfazer Última Ação">↩️</button>
     <button onclick="togglePrivacidade()" id="btn-privacidade" class="btn-icon" title="Ocultar/Exibir Valores">👁️</button>
     <select id="filtro-mes" onchange="render()"><option value="TODOS">Todo o Histórico</option></select>
+    <button onclick="atualizarDadosApp()" class="btn-icon" title="Atualizar Dados">🔄</button>
     <button onclick="abrirModal('modal-config')" class="btn-icon" title="Configurações Avançadas">⚙️</button>
   </div>
 </header>
@@ -1440,6 +1441,25 @@ async function carregarDados() {
   }
 }
 
+async function atualizarDadosApp() {
+  showToast("Atualizando dados...", "success");
+  await carregarDados();
+  render();
+  showToast("Dados atualizados com sucesso!", "success");
+}
+
+let touchstartY = 0;
+window.addEventListener('touchstart', e => {
+  touchstartY = e.touches[0].clientY;
+});
+
+window.addEventListener('touchend', async e => {
+  let touchendY = e.changedTouches[0].clientY;
+  if (window.scrollY === 0 && touchendY - touchstartY > 120) {
+    await atualizarDadosApp();
+  }
+});
+
 function resetGeral() {
   if(confirm("Tem certeza absoluta que deseja apagar todos os dados e reiniciar o sistema?")) {
     localStorage.removeItem('financeiro_app_v91_data');
@@ -1572,3 +1592,4 @@ document.addEventListener('DOMContentLoaded', async () => {
 </script>
 </body>
 </html>
+```[cite: 5]
