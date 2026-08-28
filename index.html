@@ -23,15 +23,29 @@ header{background:rgba(22,27,34,.92);backdrop-filter:blur(12px);padding:13px 16p
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.78);backdrop-filter:blur(4px);z-index:50;display:none;align-items:center;justify-content:center;padding:15px}.modal-content{background:var(--card);border:1px solid var(--border);border-radius:16px;width:100%;max-width:520px;max-height:88vh;overflow:auto;padding:18px}.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}.close{background:none;border:0;color:var(--sub);font-size:1.2rem}
 canvas{max-height:280px}.divider{border-top:1px solid var(--border);margin:14px 0}.two-actions{display:flex;gap:8px}.two-actions>*{flex:1}.meter-row{display:flex;justify-content:space-between;font-size:.74rem;margin-bottom:5px}.danger-text{color:var(--red)}
 .fab-container{position:sticky;bottom:10px;margin-top:14px;margin-bottom:8px;z-index:5}
+/* Toast Notification System */
+#toast-container{position:fixed;top:20px;right:20px;z-index:100;display:flex;flex-direction:column;gap:8px}
+.toast{background:var(--card2);color:var(--text);padding:12px 18px;border-radius:10px;border:1px solid var(--border);box-shadow:0 4px 12px rgba(0,0,0,.3);font-size:.82rem;animation:slideIn .25s ease;display:flex;align-items:center;gap:8px}
+.toast.success{border-color:var(--green);color:var(--green)}
+.toast.error{border-color:var(--red);color:var(--red)}
+@keyframes slideIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:none}}
 @media(max-width:480px){.grid-2{gap:8px}.grid-3{gap:5px}.card{padding:13px}.val{font-size:1.12rem}.hero .big{font-size:1.45rem}header select{min-width:132px}}
 </style>
 </head>
 <body>
-<header><div class="brand">📱 Financeiro Expert <span style="font-size:.65rem;color:var(--accent)">v8.3.6</span><button onclick="abrirModal('modal-config')" style="background:none;border:0;color:var(--sub);font-size:1rem">⚙️</button></div><select id="filtro-mes" onchange="render()"><option value="TODOS">Todo o Histórico</option></select></header>
+<div id="toast-container"></div>
+<header>
+  <div class="brand">📱 Financeiro Expert <span style="font-size:.65rem;color:var(--accent)">v8.3.6 Pro</span></div>
+  <div style="display:flex;align-items:center;gap:8px">
+    <button onclick="togglePrivacidade()" id="btn-privacidade" class="btn-icon" title="Ocultar/Exibir Valores">👁️</button>
+    <select id="filtro-mes" onchange="render()"><option value="TODOS">Todo o Histórico</option></select>
+    <button onclick="abrirModal('modal-config')" class="btn-icon" style="font-size:1rem">⚙️</button>
+  </div>
+</header>
 <div class="container">
 <!-- DASHBOARD -->
 <div id="dashboard" class="page active">
-  <div class="hero"><div class="hero-top"><div><div class="mini">SALDO DISPONÍVEL REAL</div><div id="dash-saldo" class="big green">R$ 0,00</div><div id="dash-saldo-info" class="mini">Entradas recebidas − despesas pagas</div></div><span id="dash-status" class="status-pill">Sem movimentação</span></div></div>
+  <div class="hero"><div class="hero-top"><div><div class="mini">SALDO DISPONÍVEL REAL</div><div id="dash-saldo" class="big green">R$ 0,00</div><div id="dash-saldo-info" class="mini">Entradas recebidas − despesas pagas[cite: 4]</div></div><span id="dash-status" class="status-pill">Sem movimentação</span></div></div>
   <div class="fab-container"><button class="btn green-btn" onclick="abrirModal('modal-novo-lancamento')" style="box-shadow:0 4px 14px rgba(46,204,113,.4);font-size:.95rem">➕ Novo Lançamento Rápido</button></div>
   <div id="dashboard-alerts"></div>
   
@@ -40,19 +54,52 @@ canvas{max-height:280px}.divider{border-top:1px solid var(--border);margin:14px 
     <div id="conteudo-meta-destaque"><div class="empty">Nenhuma meta ativa para exibir.</div></div>
   </div>
 
-  <div class="grid-2"><div class="card kpi"><h3>🎯 Fluxo Líquido do Mês</h3><div id="dash-fluxo-liquido" class="val">R$ 0,00</div><div class="mini">Entradas − despesas do mês</div></div><div class="card kpi purple-border"><h3>💵 Salário do Mês</h3><div id="dash-salario" class="val purple">R$ 0,00</div><div class="mini">Receitas classificadas como salário</div></div></div>
-  <div class="grid-2"><div class="card kpi green-border"><h3>📥 Entradas Recebidas</h3><div id="dash-receitas" class="val green">R$ 0,00</div></div><div class="card kpi red-border"><h3>📤 Despesas do Mês</h3><div id="dash-despesas" class="val red">R$ 0,00</div></div></div>
-  <div class="grid-2"><div class="card kpi green-border"><h3>✅ Despesas Pagas</h3><div id="dash-pagas" class="val green">R$ 0,00</div></div><div class="card kpi yellow-border"><h3>⏳ Compromissos Pendentes</h3><div id="dash-pendentes" class="val yellow">R$ 0,00</div></div></div>
-  <div class="card kpi orange-border" style="border-left-color:var(--orange)"><h3>📅 Próximos 30 Dias</h3><div id="dash-proximos" class="val" style="color:var(--orange)">R$ 0,00</div><div class="mini">Despesas ainda não pagas</div></div>
+  <div class="grid-2">
+    <div class="card kpi"><h3>🎯 Fluxo Líquido do Mês</h3><div id="dash-fluxo-liquido" class="val">R$ 0,00</div><div class="mini">Entradas − despesas do mês[cite: 4]</div></div>
+    <div class="card kpi purple-border"><h3>💵 Salário do Mês</h3><div id="dash-salario" class="val purple">R$ 0,00</div><div class="mini">Receitas classificadas como salário[cite: 4]</div></div>
+  </div>
+  <div class="grid-2">
+    <div class="card kpi green-border"><h3>📥 Entradas Recebidas</h3><div id="dash-receitas" class="val green">R$ 0,00</div></div>
+    <div class="card kpi red-border"><h3>📤 Despesas do Mês</h3><div id="dash-despesas" class="val red">R$ 0,00</div></div>
+  </div>
+  <div class="grid-2">
+    <div class="card kpi green-border"><h3>✅ Despesas Pagas</h3><div id="dash-pagas" class="val green">R$ 0,00</div></div>
+    <div class="card kpi yellow-border"><h3>⏳ Compromissos Pendentes</h3><div id="dash-pendentes" class="val yellow">R$ 0,00</div></div>
+  </div>
+  
+  <!-- NOVO BLOCO: DISTRIBUIÇÃO MENSAL (FIXOS, VARIÁVEIS E INVESTIMENTOS) -->
+  <div class="card kpi" style="border-left-color:var(--purple)">
+    <h3>📑 Distribuição de Gastos do Mês</h3>
+    <div class="grid-3" style="margin-top:10px;margin-bottom:0">
+      <div>
+        <div class="mini">FIXOS</div>
+        <div id="dash-gastos-fixos" class="val" style="font-size:1.05rem;color:var(--yellow)">R$ 0,00</div>
+      </div>
+      <div>
+        <div class="mini">VARIÁVEIS</div>
+        <div id="dash-gastos-variaveis" class="val" style="font-size:1.05rem;color:var(--orange)">R$ 0,00</div>
+      </div>
+      <div>
+        <div class="mini">INVESTIMENTOS</div>
+        <div id="dash-gastos-investimentos" class="val" style="font-size:1.05rem;color:var(--purple)">R$ 0,00</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card kpi orange-border" style="border-left-color:var(--orange)">
+    <h3>📅 Próximos 30 Dias & Fôlego Preditivo</h3>
+    <div id="dash-proximos" class="val" style="color:var(--orange)">R$ 0,00</div>
+    <div id="dash-folego" class="mini" style="margin-top:4px">Calculando fôlego financeiro...</div>
+  </div>
   <div class="card"><div class="section-title"><h3>📊 Gastos por Categoria</h3><span id="dash-categorias-total" class="mini"></span></div><canvas id="chartGastos"></canvas></div>
   <div class="card"><div class="section-title"><h3>📈 Ranking de Gastos</h3><span class="mini">maiores drenos</span></div><canvas id="chartEvolucao"></canvas></div>
   <div class="card kpi red-border"><div class="section-title"><h3>🚨 Raio-X dos Maiores Drenos</h3></div><div id="lista-drenos"></div></div>
   <div class="card"><div class="section-title"><h3>⚠️ Orçamentos</h3><span class="mini">limites mensais</span></div><div id="lista-orcamentos"></div></div>
 </div>
 <!-- COMPRAS -->
-<div id="compras" class="page"><div class="card"><h3>🛒 Lista de Compras Inteligente</h3><p class="mini" style="margin-bottom:12px">Monte a lista sem preço. No mercado, informe o preço unitário. Ao marcar o item, ele abate automaticamente nas despesas do sistema!</p><form id="form-compras"><div class="grid-2"><input id="c-item" placeholder="Produto (ex.: Leite)" required><input type="number" id="c-qtd" value="1" min="1" required placeholder="Qtd"></div><button class="btn green-btn" style="margin-top:8px">Adicionar à Lista</button></form><div class="card" style="margin-top:12px;margin-bottom:10px;background:var(--card2)"><div class="grid-2" style="margin:0"><div><div class="mini">ITENS</div><strong id="compras-contagem">0</strong></div><div style="text-align:right"><div class="mini">TOTAL NO CARRINHO</div><strong id="compras-total-carrinho" class="green">R$ 0,00</strong></div></div></div><div style="display:flex;gap:5px;margin-bottom:10px"><button class="btn secondary small" style="flex:1" onclick="filtrarCompras('TODOS')">Todos</button><button class="btn secondary small" style="flex:1;color:var(--yellow)" onclick="filtrarCompras('PENDENTES')">Pendentes</button><button class="btn secondary small" style="flex:1;color:var(--green)" onclick="filtrarCompras('COMPRADOS')">Carrinho</button></div><div id="lista-compras"></div><button type="button" onclick="limparComprados()" style="width:100%;margin-top:10px;background:none;border:1px dashed var(--border);color:var(--sub);padding:8px;border-radius:8px;font-size:.72rem">🗑️ Remover itens comprados</button></div></div>
+<div id="compras" class="page"><div class="card"><h3>🛒 Lista de Compras Inteligente</h3><p class="mini" style="margin-bottom:12px">Monte a lista sem preço. No mercado, informe o preço unitário. Ao marcar o item, ele abate automaticamente nas despesas do sistema[cite: 4]!</p><form id="form-compras"><div class="grid-2"><input id="c-item" placeholder="Produto (ex.: Leite)" required><input type="number" id="c-qtd" value="1" min="1" required placeholder="Qtd"></div><button class="btn green-btn" style="margin-top:8px">Adicionar à Lista</button></form><div class="card" style="margin-top:12px;margin-bottom:10px;background:var(--card2)"><div class="grid-2" style="margin:0"><div><div class="mini">ITENS</div><strong id="compras-contagem">0</strong></div><div style="text-align:right"><div class="mini">TOTAL NO CARRINHO</div><strong id="compras-total-carrinho" class="green">R$ 0,00</strong></div></div></div><div style="display:flex;gap:5px;margin-bottom:10px"><button class="btn secondary small" style="flex:1" onclick="filtrarCompras('TODOS')">Todos</button><button class="btn secondary small" style="flex:1;color:var(--yellow)" onclick="filtrarCompras('PENDENTES')">Pendentes</button><button class="btn secondary small" style="flex:1;color:var(--green)" onclick="filtrarCompras('COMPRADOS')">Carrinho</button></div><div id="lista-compras"></div><button type="button" onclick="limparComprados()" style="width:100%;margin-top:10px;background:none;border:1px dashed var(--border);color:var(--sub);padding:8px;border-radius:8px;font-size:.72rem">🗑️ Remover itens comprados</button></div></div>
 <!-- METAS -->
-<div id="metas" class="page"><div class="card"><h3>🎯 Metas Financeiras Automatizadas</h3><p class="mini" style="margin-bottom:12px">Você pode atualizar manualmente ou marcar para o app sincronizar automaticamente com o saldo do sistema.</p><form id="form-meta" style="margin-bottom:14px"><div class="grid-2"><input id="m-nome" placeholder="Objetivo (ex: Reserva)" required><select id="m-tipo"><option value="RESERVA">🛡️ Reserva</option><option value="CONSUMO">✈️ Objetivo</option></select></div><div class="grid-2" style="margin-top:7px"><input type="number" step="0.01" id="m-alvo" placeholder="Valor alvo" required><input type="number" step="0.01" id="m-atual" placeholder="Já guardado" required></div><div style="background:var(--card2);border:1px solid var(--border);padding:10px;border-radius:10px;margin-top:8px;margin-bottom:8px"><div style="display:flex;justify-content:space-between;align-items:center"><label style="margin:0;color:var(--accent);font-size:.75rem">🤖 Sincronizar automático com Saldo Líquido?</label><input type="checkbox" id="m-auto" style="width:18px;height:18px;accent-color:var(--accent)"></div></div><button class="btn secondary" style="margin-top:4px">Criar Nova Meta</button></form><div id="lista-metas"></div></div></div>
+<div id="metas" class="page"><div class="card"><h3>🎯 Metas Financeiras Automatizadas</h3><p class="mini" style="margin-bottom:12px">Você pode atualizar manualmente ou marcar para o app sincronizar automaticamente com o saldo do sistema[cite: 4].</p><form id="form-meta" style="margin-bottom:14px"><div class="grid-2"><input id="m-nome" placeholder="Objetivo (ex: Reserva)" required><select id="m-tipo"><option value="RESERVA">🛡️ Reserva</option><option value="CONSUMO">✈️ Objetivo</option></select></div><div class="grid-2" style="margin-top:7px"><input type="number" step="0.01" id="m-alvo" placeholder="Valor alvo" required><input type="number" step="0.01" id="m-atual" placeholder="Já guardado" required></div><div style="background:var(--card2);border:1px solid var(--border);padding:10px;border-radius:10px;margin-top:8px;margin-bottom:8px"><div style="display:flex;justify-content:space-between;align-items:center"><label style="margin:0;color:var(--accent);font-size:.75rem">🤖 Sincronizar automático com Saldo Líquido?</label><input type="checkbox" id="m-auto" style="width:18px;height:18px;accent-color:var(--accent)"></div></div><button class="btn secondary" style="margin-top:4px">Criar Nova Meta</button></form><div id="lista-metas"></div></div></div>
 <!-- NOTAS -->
 <div id="anotacoes" class="page">
   <div class="card">
@@ -84,8 +131,11 @@ canvas{max-height:280px}.divider{border-top:1px solid var(--border);margin:14px 
       <select id="filtro-tipo-historico" onchange="render()"><option value="TODOS">Todos os tipos</option><option value="ENTRADA">Entradas</option><option value="DESPESA">Despesas</option></select>
       <select id="filtro-status-historico" onchange="render()"><option value="TODOS">Todos os status</option><option value="PAGO">Pagos</option><option value="PENDENTE">Pendentes</option></select>
     </div>
+    <div style="margin-bottom:10px">
+      <input id="busca-historico" oninput="render()" placeholder="🔍 Buscar no histórico por descrição ou categoria...">
+    </div>
     <div style="background:var(--card2);padding:8px 10px;border-radius:10px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center">
-      <span class="mini" style="color:var(--accent)">💡 Dica: Compras parceladas aparecem agrupadas. Clique em "Ver Parcelas" para gerenciar.</span>
+      <span class="mini" style="color:var(--accent)">💡 Dica: Compras parceladas aparecem agrupadas. Clique em "Ver Parcelas" para gerenciar[cite: 4].</span>
     </div>
     <div id="lista-transacoes"></div>
   </div>
@@ -167,7 +217,13 @@ const firebaseConfig={apiKey:"AIzaSyBp34X2K3BYJXkyNrpGy8l0XyjM-VY8uXY",authDomai
 const app=initializeApp(firebaseConfig),firebaseDb=getDatabase(app),dbRef=ref(firebaseDb,'financeiro/');
 const auth = getAuth(app);
 
-window.salvarNoFirebase=dados=>set(dbRef,dados);
+window.salvarNoFirebase = dados => {
+  set(dbRef, dados).catch(err => {
+    console.warn("Erro ao salvar no Firebase, utilizando cache local:", err);
+    localStorage.setItem('financeiro_offline_cache', JSON.stringify(dados));
+    showToast("Salvo localmente (Offline)", "error");
+  });
+};
 
 window.fazerLogout = function() {
     signOut(auth).then(() => {
@@ -179,18 +235,69 @@ window.fazerLogout = function() {
         window.location.reload();
     }).catch((error) => {
         console.error("Erro ao fazer logout: ", error);
-        alert("Erro ao encerrar a sessão.");
+        showToast("Erro ao encerrar a sessão.", "error");
     });
 };
 
-onValue(dbRef,s=>{const d=s.val();if(d){db={...db,...d,transacoes:d.transacoes||[],logs:d.logs||[],metas:d.metas||[],anotacoes:d.anotacoes||[],compras:d.compras||[],limites:d.limites||{},categoriasCustom:padronizarCategoriasCustom(d.categoriasCustom||[]),atalhosConfig:padronizarAtalhos(d.atalhosConfig),ordemAbas:validarAbas(d.ordemAbas),abasVisiveis:d.abasVisiveis||{dashboard:true,compras:true,metas:true,anotacoes:true,auditoria:true},cardMetaIninicioVisivel:d.cardMetaIninicioVisivel!==undefined?d.cardMetaIninicioVisivel:true};atualizarMeses();atualizarSelectsCategorias();renderRodape();renderConfigAbas();render()}});
+onValue(dbRef, s => {
+  const d = s.val();
+  if(d) {
+    db = {...db, ...d, transacoes:d.transacoes||[], logs:d.logs||[], metas:d.metas||[], anotacoes:d.anotacoes||[], compras:d.compras||[], limites:d.limites||{}, categoriasCustom:padronizarCategoriasCustom(d.categoriasCustom||[]), atalhosConfig:padronizarAtalhos(d.atalhosConfig), ordemAbas:validarAbas(d.ordemAbas), abasVisiveis:d.abasVisiveis||{dashboard:true,compras:true,metas:true,anotacoes:true,auditoria:true}, cardMetaIninicioVisivel:d.cardMetaIninicioVisivel!==undefined?d.cardMetaIninicioVisivel:true};
+    atualizarMeses();
+    atualizarSelectsCategorias();
+    renderRodape();
+    renderConfigAbas();
+    render();
+  }
+}, (error) => {
+  console.warn("Falha na escuta do Firebase, buscando cache local:", error);
+  const cacheLocal = localStorage.getItem('financeiro_offline_cache');
+  if(cacheLocal) {
+    try {
+      const d = JSON.parse(cacheLocal);
+      db = {...db, ...d};
+      atualizarMeses();
+      atualizarSelectsCategorias();
+      renderRodape();
+      renderConfigAbas();
+      render();
+      showToast("Carregado do cache offline", "error");
+    } catch(e) {}
+  }
+});
 </script>
 <script>
 let db={transacoes:[],logs:[],metas:[{id:'M1',nome:'Reserva de Emergência',tipo:'RESERVA',alvo:10000,atual:4500,auto:true}],anotacoes:[],compras:[],limites:{},categoriasCustom:[],ordemAbas:['dashboard','compras','metas','anotacoes','auditoria'],abasVisiveis:{dashboard:true,compras:true,metas:true,anotacoes:true,auditoria:true},cardMetaIninicioVisivel:true,atalhosConfig:{DESPESA:[{label:'🛒 Mercado',cat:'Supermercado / Feira',meio:'PIX / Dinheiro'},{label:'🚗 Uber',cat:'Uber / Táxi / Passagem',meio:'Cartão de Débito'},{label:'🍔 iFood',cat:'Deliveries / iFood',meio:'Cartão de Débito'},{label:'⛽ Posto',cat:'Combustível',meio:'Cartão de Débito'},{label:'🍽️ Almoço',cat:'Restaurantes / Bares',meio:'PIX / Dinheiro'}],ENTRADA:[{label:'💵 Salário',cat:'Salário / Prolabore',meio:'PIX / Dinheiro'},{label:'💻 Freelance',cat:'Vendas / Serviços',meio:'PIX / Dinheiro'},{label:'📈 Dividendos',cat:'Investimentos / Dividendos',meio:'PIX / Dinheiro'},{label:'🔄 Reembolso',cat:'Reembolsos / Retornos',meio:'PIX / Dinheiro'},{label:'🎁 Extra',cat:'Rendimentos / Extra',meio:'PIX / Dinheiro'}]}};
-let chartGastos=null,chartEvolucao=null,filtroComprasStatus='TODOS';
+let chartGastos=null,chartEvolucao=null,filtroComprasStatus='TODOS', modoPrivacidade=false;
 const DADOS_ABAS={dashboard:{id:'dashboard',label:'Início',icone:'📊'},compras:{id:'compras',label:'Compras',icone:'🛒'},metas:{id:'metas',label:'Metas',icone:'🎯'},anotacoes:{id:'anotacoes',label:'Notas',icone:'📝'},auditoria:{id:'auditoria',label:'Histórico',icone:'🛡️'}};
 const ESTRUTURA_CATEGORIAS={ENTRADA:[{grupo:'Entradas Principais',opcoes:['Salário / Prolabore','Rendimentos / Extra','Vendas / Serviços','Investimentos / Dividendos','Reembolsos / Retornos']}],DESPESA:[{grupo:'Moradia e Habitação',opcoes:['Aluguel/Condomínio','Energia Elétrica','Água e Saneamento','Internet / Fibra','Gás de Cozinha']},{grupo:'Alimentação & Lazer',opcoes:['Supermercado / Feira','Deliveries / iFood','Restaurantes / Bares','Cinema / Teatros','Passeios / Viagens','Streaming / Jogos']},{grupo:'Transporte & Veículo',opcoes:['Combustível','Uber / Táxi / Passagem','Manutenção / IPVA / Seguro']},{grupo:'Outros Gastos',opcoes:['Saúde e Farmácia','Educação e Cursos','Impostos, Taxas e Tarifas','Cuidados Pessoais & Estética','Pets & Animais','Manutenção & Reformas','Presentes & Doações','Outros']} ]};
-const brl=v=>(Number(v)||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}),num=v=>Number(v)||0,hoje=()=>new Date().toISOString().slice(0,10);
+
+const brl = v => {
+  const numVal = Number(v) || 0;
+  if(modoPrivacidade) return 'R$ •••••';
+  return numVal.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+};
+const num=v=>Number(v)||0,hoje=()=>new Date().toISOString().slice(0,10);
+
+function togglePrivacidade(){
+  modoPrivacidade = !modoPrivacidade;
+  const btn = document.getElementById('btn-privacidade');
+  if(btn) btn.textContent = modoPrivacidade ? '🔒' : '👁️';
+  render();
+}
+
+function showToast(mensagem, tipo = 'success') {
+  const container = document.getElementById('toast-container');
+  if(!container) return;
+  const toast = document.createElement('div');
+  toast.className = `toast ${tipo}`;
+  toast.innerHTML = `<span>${tipo === 'success' ? '✅' : '⚠️'}</span> <span>${mensagem}</span>`;
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    setTimeout(() => toast.remove(), 300);
+  }, 3000);
+}
 
 function validarAbas(arr){
   const padrao=['dashboard','compras','metas','anotacoes','auditoria'];
@@ -211,7 +318,8 @@ function abrirModal(id){
   }
   const el=document.getElementById(id);
   if(el)el.style.display='flex';
-}function fecharModal(id){document.getElementById(id).style.display='none'}
+}
+function fecharModal(id){document.getElementById(id).style.display='none'}
 
 window.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.modal-overlay').forEach(overlay => {
@@ -283,7 +391,7 @@ function renderConfigAbas(){
 
 function salvarConfigAbasRodape(){
   const nova=[0,1,2,3,4].map(i=>document.getElementById(`select-aba-${i}`).value);
-  if(new Set(nova).size!==5){return alert('Cada aba deve ser única na configuração.')}
+  if(new Set(nova).size!==5){return showToast('Cada aba deve ser única na configuração.', 'error')}
   db.ordemAbas=validarAbas(nova);
   
   const novasVisiveis={};
@@ -308,7 +416,7 @@ function salvarConfigAbasRodape(){
   }
   
   render();
-  alert('Configurações atualizadas com sucesso!');
+  showToast('Configurações atualizadas com sucesso!');
 }
 
 function padronizarCategoriasCustom(l){return(l||[]).map(x=>typeof x==='string'?{nome:x,tipo:'DESPESA'}:x)}
@@ -345,11 +453,43 @@ function render(){
   setText('dash-pagas',brl(pagas));
   setText('dash-pendentes',brl(pend));
   
+  // Cálculo e exibição da Distribuição de Gastos do Mês
+  const catsFixas = ['Aluguel/Condomínio', 'Energia Elétrica', 'Água e Saneamento', 'Internet / Fibra', 'Gás de Cozinha'];
+  const catsInvest = ['Investimentos / Dividendos', 'Aporte na Reserva de Emergência'];
+  
+  let totalFixos = 0;
+  let totalVariaveis = 0;
+  let totalInvest = 0;
+
+  txns.filter(t => t.tipo === 'DESPESA').forEach(t => {
+    const catName = t.categoria;
+    if(catsFixas.includes(catName) || t.fixa === 'FIXA'){
+      totalFixos += num(t.valor);
+    } else if(catsInvest.includes(catName)){
+      totalInvest += num(t.valor);
+    } else {
+      totalVariaveis += num(t.valor);
+    }
+  });
+
+  setText('dash-gastos-fixos', brl(totalFixos));
+  setText('dash-gastos-variaveis', brl(totalVariaveis));
+  setText('dash-gastos-investimentos', brl(totalInvest));
+
   const el=document.getElementById('dash-fluxo-liquido');if(el)el.className='val '+((entradas-pagas)>=0?'green':'red');
   const limiteData=new Date();limiteData.setDate(limiteData.getDate()+30);
   const prox=db.transacoes.filter(t=>t.tipo==='DESPESA'&&t.status==='PENDENTE'&&t.data>=hoje()&&t.data<=limiteData.toISOString().slice(0,10)).reduce((a,t)=>a+num(t.valor),0);
   
   setText('dash-proximos',brl(prox));
+  
+  // Fôlego Preditivo Engine
+  const mediaDespesaDiaria = despesas > 0 ? (despesas / 30) : 1;
+  const diasFolego = mediaDespesaDiaria > 0 ? Math.floor(Math.max(0, saldo) / mediaDespesaDiaria) : 0;
+  const folegoEl = document.getElementById('dash-folego');
+  if(folegoEl) {
+    folegoEl.textContent = `Estimativa de fôlego: ~${diasFolego} dias com base no saldo atual`;
+  }
+
   const status=document.getElementById('dash-status');
   if(status){
     status.textContent=saldo>0?'Caixa positivo':saldo<0?'Caixa negativo':'Sem movimentação';
@@ -517,7 +657,7 @@ function preencherAtalho(atalho){
 
 function abrirModalAtalhos(){const tipo=document.getElementById('tipo').value;document.getElementById('m-header-atalhos').textContent=`⚙️ Atalhos (${tipo==='ENTRADA'?'Entradas':'Despesas'})`;const c=document.getElementById('form-edicao-modal'),list=(db.atalhosConfig[tipo]||[]);const opts=[...document.getElementById('categoria').options].filter(o=>o.value!=='__NOVA__');c.innerHTML=list.map((a,i)=>`<div style="background:var(--bg);border:1px solid var(--border);padding:9px;border-radius:9px"><div class="mini">Atalho #${i+1}</div><input id="m-label-${i}" value="${esc(a.label)}" style="margin:5px 0"><select id="m-cat-${i}">${opts.map(o=>`<option value="${esc(o.value)}" ${o.value===a.cat?'selected':''}>${o.textContent}</option>`).join('')}<option value="Outros" ${!opts.some(o=>o.value===a.cat)?'selected':''}>Outros / Personalizado</option></select><input id="m-custom-${i}" value="${!opts.some(o=>o.value===a.cat)?esc(a.cat):''}" placeholder="Categoria personalizada" style="margin-top:5px;display:${!opts.some(o=>o.value===a.cat)?'block':'none'}"></div>`).join('');abrirModal('modal-atalhos')}
 function salvarConfigAtalhosModal(){const tipo=document.getElementById('tipo').value;const list=db.atalhosConfig[tipo]||[];list.forEach((a,i)=>{a.label=document.getElementById(`m-label-${i}`).value.trim()||a.label;const cat=document.getElementById(`m-cat-${i}`).value,custom=document.getElementById(`m-custom-${i}`).value.trim();a.cat=cat==='Outros'&&custom?custom:cat});salvar();fecharModal('modal-atalhos');renderAtalhosEditaveis()}
-function criarCategoriaPelaModal(){const nome=document.getElementById('m-nova-cat-nome').value.trim(),tipo=document.getElementById('tipo').value;if(!nome)return alert('Digite um nome válido.');if(!db.categoriasCustom.some(c=>c.nome.toLowerCase()===nome.toLowerCase()&&c.tipo===tipo)){db.categoriasCustom.push({nome,tipo});salvar();atualizarSelectsCategorias();document.getElementById('m-nova-cat-nome').value='';alert('Categoria criada com sucesso.')}else alert('Essa categoria já existe.')}
+function criarCategoriaPelaModal(){const nome=document.getElementById('m-nova-cat-nome').value.trim(),tipo=document.getElementById('tipo').value;if(!nome)return showToast('Digite um nome válido.', 'error');if(!db.categoriasCustom.some(c=>c.nome.toLowerCase()===nome.toLowerCase()&&c.tipo===tipo)){db.categoriasCustom.push({nome,tipo});salvar();atualizarSelectsCategorias();document.getElementById('m-nova-cat-nome').value='';showToast('Categoria criada com sucesso.')}else showToast('Essa categoria já existe.', 'error')}
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 
 const fTxn = document.getElementById('form-transacao');
@@ -526,11 +666,11 @@ if(fTxn) fTxn.addEventListener('submit',e=>{
   let tipo=document.getElementById('tipo').value,cat=document.getElementById('categoria').value;
   if(cat==='__NOVA__'||cat==='Outros'){
     cat=document.getElementById('categoria-custom').value.trim();
-    if(!cat)return alert('Digite o nome da categoria.');
+    if(!cat)return showToast('Digite o nome da categoria.', 'error');
     if(!db.categoriasCustom.some(c=>c.nome.toLowerCase()===cat.toLowerCase()&&c.tipo===tipo))db.categoriasCustom.push({nome:cat,tipo})
   }
   const total=num(document.getElementById('valor').value);
-  if(total<=0)return alert('Informe um valor válido.');
+  if(total<=0)return showToast('Informe um valor válido.', 'error');
   const meio=document.getElementById('pagamento').value,parcelavel=meio==='Boleto',parcelas=parcelavel?Math.max(1,Math.min(72,parseInt(document.getElementById('parcelas').value)||1)):1;
   
   const valorBaseParcela = Math.floor((total / parcelas) * 100) / 100;
@@ -568,7 +708,7 @@ if(fTxn) fTxn.addEventListener('submit',e=>{
     });
     db.logs.push({id:'LOG-'+Date.now()+'-'+i,transacao_id:id,data_hora:new Date().toLocaleString('pt-BR'),detalhes:`Registrado: ${tipo} ${brl(valorParcela)} (${cat})`})
   }
-  salvar();e.target.reset();document.getElementById('data').valueAsDate=new Date();document.getElementById('parcelas').value=1;toggleCampoLimite(false);const alO = document.getElementById('alerta-orcamento');if(alO) alO.style.display='none';setTipoOperacao('DESPESA');fecharModal('modal-novo-lancamento');alert(parcelas>1?`${parcelas} parcelas geradas.`:'Lançamento registrado com sucesso!');render()});
+  salvar();e.target.reset();document.getElementById('data').valueAsDate=new Date();document.getElementById('parcelas').value=1;toggleCampoLimite(false);const alO = document.getElementById('alerta-orcamento');if(alO) alO.style.display='none';setTipoOperacao('DESPESA');fecharModal('modal-novo-lancamento');showToast(parcelas>1?`${parcelas} parcelas geradas.`:'Lançamento registrado com sucesso!');render()});
 
 const fComp = document.getElementById('form-compras');
 if(fComp) fComp.addEventListener('submit',e=>{e.preventDefault();db.compras.push({id:'C-'+Date.now(),nome:document.getElementById('c-item').value.trim(),qtd:Math.max(1,parseInt(document.getElementById('c-qtd').value)||1),preco:0,comprado:false});salvar();e.target.reset();document.getElementById('c-qtd').value=1;render()});
@@ -764,7 +904,14 @@ function renderHistorico(){
   const c=document.getElementById('lista-transacoes');
   if(!c) return;
   const mes=getFiltro(),tipo=document.getElementById('filtro-tipo-historico').value,st=document.getElementById('filtro-status-historico').value;
-  let a=txnsDoMes(mes);if(tipo!=='TODOS')a=a.filter(t=>t.tipo===tipo);if(st!=='TODOS')a=a.filter(t=>t.status===st);
+  const buscaHist = (document.getElementById('busca-historico')?.value || '').toLowerCase();
+
+  let a=txnsDoMes(mes);
+  if(tipo!=='TODOS')a=a.filter(t=>t.tipo===tipo);
+  if(st!=='TODOS')a=a.filter(t=>t.status===st);
+  if(buscaHist) {
+    a = a.filter(t => String(t.categoria||'').toLowerCase().includes(buscaHist) || String(t.obs||'').toLowerCase().includes(buscaHist));
+  }
   
   const unicosMap = new Map();
   const individuais = [];
@@ -878,16 +1025,15 @@ const fEditTxn = document.getElementById('form-edit-txn');
 if(fEditTxn) fEditTxn.addEventListener('submit',e=>{e.preventDefault();const t=db.transacoes.find(x=>x.id===document.getElementById('edit-txn-id').value);if(t){t.tipo=document.getElementById('edit-txn-tipo').value;t.valor=num(document.getElementById('edit-txn-valor').value);t.categoria=document.getElementById('edit-txn-categoria').value.trim();t.data=document.getElementById('edit-txn-data').value;t.pagamento=document.getElementById('edit-txn-pagamento').value;t.status=document.getElementById('edit-txn-status').value;t.obs=document.getElementById('edit-txn-obs').value.trim();salvar();fecharModal('modal-edit-txn');fecharModal('modal-parcelas-detalhe');render()}});
 
 function deletarTransacao(id){if(confirm('Excluir este lançamento/parcela?')){db.transacoes=db.transacoes.filter(t=>t.id!==id);db.logs=db.logs.filter(l=>l.transacao_id!==id);salvar();fecharModal('modal-parcelas-detalhe');render()}}
-function exportarCSV(){if(!db.transacoes.length)return alert('Sem lançamentos.');let csv='Data;Tipo;Categoria;Valor;Pagamento;Status;Observacao\n';db.transacoes.forEach(t=>csv+=`${t.data};${t.tipo};${String(t.categoria).replace(/;/g,',')};${num(t.valor).toFixed(2)};${t.pagamento};${t.status};"${String(t.obs||'').replace(/"/g,'""')}"\n`);const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='financeiro_v8_'+hoje()+'.csv';a.click()}
-function resetAba(k){if(!confirm(`Tem certeza absoluta que deseja limpar os dados de: ${k}?`))return;if(k==='transacoes'){db.transacoes=[];db.logs=[]}if(k==='compras')db.compras=[];if(k==='limites')db.limites={};if(k==='metas')db.metas=[];if(k==='anotacoes')db.anotacoes=[];salvar();render();alert('Seção limpa com sucesso.')}
-function resetGeral(){if(confirm('⚠️ ATENÇÃO: Deseja realmente apagar TODOS os dados e redefinir o sistema para o padrão inicial?')){if(confirm('Última chance: essa operação não pode ser desfeita.')){db={transacoes:[],logs:[],metas:[],anotacoes:[],compras:[],limites:{},categoriasCustom:[],ordemAbas:['dashboard','compras','metas','anotacoes','auditoria'],abasVisiveis:{dashboard:true,compras:true,metas:true,anotacoes:true,auditoria:true},cardMetaIninicioVisivel:true,atalhosConfig:db.atalhosConfig};salvar();fecharModal('modal-config');render();alert('Sistema resetado por completo.')}}}
+function exportarCSV(){if(!db.transacoes.length)return showToast('Sem lançamentos.', 'error');let csv='Data;Tipo;Categoria;Valor;Pagamento;Status;Observacao\n';db.transacoes.forEach(t=>csv+=`${t.data};${t.tipo};${String(t.categoria).replace(/;/g,',')};${num(t.valor).toFixed(2)};${t.pagamento};${t.status};"${String(t.obs||'').replace(/"/g,'""')}"\n`);const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='financeiro_v8_'+hoje()+'.csv';a.click()}
+function resetAba(k){if(!confirm(`Tem certeza absoluta que deseja limpar os dados de: ${k}?`))return;if(k==='transacoes'){db.transacoes=[];db.logs=[]}if(k==='compras')db.compras=[];if(k==='limites')db.limites={};if(k==='metas')db.metas=[];if(k==='anotacoes')db.anotacoes=[];salvar();render();showToast('Seção limpa com sucesso.')}
+function resetGeral(){if(confirm('⚠️ ATENÇÃO: Deseja realmente apagar TODOS os dados e redefinir o sistema para o padrão inicial?')){if(confirm('Última chance: essa operação não pode ser desfeita.')){db={transacoes:[],logs:[],metas:[],anotacoes:[],compras:[],limites:{},categoriasCustom:[],ordemAbas:['dashboard','compras','metas','anotacoes','auditoria'],abasVisiveis:{dashboard:true,compras:true,metas:true,anotacoes:true,auditoria:true},cardMetaIninicioVisivel:true,atalhosConfig:db.atalhosConfig};salvar();fecharModal('modal-config');render();showToast('Sistema resetado por completo.')}}}
 
 window.addEventListener('load',()=>{
   const elData = document.getElementById('data');
   if(elData) elData.value=hoje();
   atualizarMeses();
   atualizarSelectsCategorias();
-  
   renderConfigAbas();
   render();
 });
