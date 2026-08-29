@@ -519,7 +519,7 @@ canvas{max-height:230px;width:100%!important}
       <div class="form-group">
         <label>Tipo de Operação</label>
         <select id="edit-tipo">
-          <option value="DESPESA">Despresa / Saída</option>
+          <option value="DESPESA">Despesa / Saída</option>
           <option value="ENTRADA">Entrada / Receita</option>
         </select>
       </div>
@@ -584,7 +584,6 @@ canvas{max-height:230px;width:100%!important}
   const app = initializeApp(firebaseConfig);
   const dbFirebase = getDatabase(app);
 
-  // Expõe funções do Firebase globalmente para o app interagir
   window.salvarDadosFirebase = async function(dados) {
     try {
       await set(ref(dbFirebase, 'financeiro_app_v91_data'), dados);
@@ -655,6 +654,19 @@ let paginaAtual = 'dashboard';
 let ocultarValoresGlobal = false;
 let chartGastosInstancia = null;
 let chartEvolucaoInstancia = null;
+
+// Sincronização automática em tempo real entre celulares (via Storage Event)
+window.addEventListener('storage', async (event) => {
+  if (event.key === 'financeiro_app_v91_data' && event.newValue) {
+    try {
+      db = JSON.parse(event.newValue);
+      render();
+      showToast("Dados atualizados em tempo real pelo outro dispositivo!", "success");
+    } catch (e) {
+      console.error("Erro ao sincronizar do storage:", e);
+    }
+  }
+});
 
 function toggleDrawer(id) {
   const el = document.getElementById(id);
@@ -874,16 +886,22 @@ function atualizarMeses() {
 
 function atualizarSelectsCategorias() {
   const sel = document.getElementById('categoria');
-  if(!sel) return;
+  const editSel = document.getElementById('edit-categoria');
   const cats = db.categoriasCustom || ['Outros'];
-  sel.innerHTML = cats.map(c => `<option value="${c}">${c}</option>`).join('') + '<option value="NOVA">+ Nova Categoria...</option>';
+  const htmlCats = cats.map(c => `<option value="${c}">${c}</option>`).join('');
+
+  if(sel) sel.innerHTML = htmlCats + '<option value="NOVA">+ Nova Categoria...</option>';
+  if(editSel) editSel.innerHTML = htmlCats;
 }
 
 function atualizarSelectsContas() {
   const sel = document.getElementById('conta-origem');
-  if(!sel) return;
+  const editSel = document.getElementById('edit-conta');
   const contas = db.contas || [];
-  sel.innerHTML = contas.length === 0 ? '<option value="Geral">Conta Geral</option>' : contas.map(c => `<option value="${c.nome}">${c.nome} (${c.tipo})</option>`).join('');
+  const htmlContas = contas.length === 0 ? '<option value="Geral">Conta Geral</option>' : contas.map(c => `<option value="${c.nome}">${c.nome} (${c.tipo})</option>`).join('');
+
+  if(sel) sel.innerHTML = htmlContas;
+  if(editSel) editSel.innerHTML = htmlContas;
 }
 
 function verificarCategoriaPersonalizada() {
@@ -927,6 +945,8 @@ function verificarMeioPagamento(val) {
 
 function render() {
   atualizarMeses();
+  atualizarSelectsCategorias();
+  atualizarSelectsContas();
   renderDashboard();
   renderContas();
   renderCompras();
@@ -1421,12 +1441,10 @@ function abrirEditarTransacao(idx) {
   document.getElementById('edit-tipo').value = t.tipo || 'DESPESA';
   document.getElementById('edit-valor').value = t.valor || 0;
   
-  // Preencher Select de Categorias
   const selCat = document.getElementById('edit-categoria');
   const cats = db.categoriasCustom || ['Outros'];
   selCat.innerHTML = cats.map(c => `<option value="${c}" ${c === t.categoria ? 'selected' : ''}>${c}</option>`).join('');
 
-  // Preencher Select de Contas
   const selConta = document.getElementById('edit-conta');
   const contas = db.contas || [];
   selConta.innerHTML = contas.map(c => `<option value="${c.nome}" ${c.nome === t.conta ? 'selected' : ''}>${c.nome} (${c.tipo})</option>`).join('');
@@ -1505,7 +1523,6 @@ function executarImportacao() {
 }
 
 function salvarDados() {
-  // Salva no LocalStorage como cache imediato e sincroniza com o Firebase Database
   localStorage.setItem('financeiro_app_v91_data', JSON.stringify(db));
   if (typeof window.salvarDadosFirebase === 'function') {
     window.salvarDadosFirebase(db);
@@ -1513,7 +1530,6 @@ function salvarDados() {
 }
 
 async function carregarDados() {
-  // Tenta carregar do Firebase primeiro, caso falhe ou esteja vazio, busca do localStorage
   if (typeof window.carregarDadosFirebase === 'function') {
     const dadosRemotos = await window.carregarDadosFirebase();
     if (dadosRemotos) {
@@ -1604,8 +1620,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       fecharModal('modal-novo-lancamento');
       formTx.reset();
       setDataAtalho(0);
-      atualizarSelectsCategorias();
-      atualizarSelectsContas();
       render();
       showToast("Lançamento inteligente efetuado com sucesso!");
     });
@@ -1620,7 +1634,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const transacaoAntiga = db.transacoes[idx];
 
       if(transacaoAntiga) {
-        // Reverter impacto anterior no saldo se estava pago
+        // 1. Reverter o saldo da conta antiga caso estivesse pago
         if(transacaoAntiga.status === 'PAGO') {
           const contaAntiga = db.contas.find(c => c.nome === transacaoAntiga.conta);
           if(contaAntiga) {
@@ -1629,7 +1643,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           }
         }
 
-        // Atualizar dados
+        // 2. Aplicar novos valores editados
         transacaoAntiga.tipo = document.getElementById('edit-tipo').value;
         transacaoAntiga.valor = parseFloat(document.getElementById('edit-valor').value) || 0;
         transacaoAntiga.categoria = document.getElementById('edit-categoria').value;
@@ -1638,19 +1652,20 @@ document.addEventListener('DOMContentLoaded', async () => {
         transacaoAntiga.status = document.getElementById('edit-status').value;
         transacaoAntiga.obs = document.getElementById('edit-obs').value;
 
-        // Aplicar novo impacto no saldo se estiver pago
+        // 3. Aplicar o saldo na nova conta caso esteja pago
         if(transacaoAntiga.status === 'PAGO') {
           const contaNova = db.contas.find(c => c.nome === transacaoAntiga.conta);
           if(contaNova) {
-            if(transacaoNova.tipo === 'ENTRADA') contaNova.saldo += Number(transacaoAntiga.valor);
+            if(transacaoAntiga.tipo === 'ENTRADA') contaNova.saldo += Number(transacaoAntiga.valor);
             else contaNova.saldo -= Number(transacaoAntiga.valor);
           }
         }
 
+        // 4. Salvar e forçar recálculo completo de todas as abas / dashboard / gráficos
         salvarDados();
         fecharModal('modal-editar-transacao');
         render();
-        showToast("Lançamento atualizado com sucesso!");
+        showToast("Lançamento atualizado e abas sincronizadas com sucesso!");
       }
     });
   }
@@ -1708,17 +1723,20 @@ document.addEventListener('DOMContentLoaded', async () => {
   const formNota = document.getElementById('form-nota');
   if(formNota) {
     formNota.addEventListener('submit', e => {
-      e.preventDefault();
-      salvarEstadoAnterior();
-      const titulo = document.getElementById('n-titulo').value;
-      const prio = document.getElementById('n-prio').value;
-      const texto = document.getElementById('n-texto').value;
-      const dataAlvo = document.getElementById('n-data-alvo').value;
-      db.anotacoes.push({ titulo, prio, texto, dataAlvo });
-      salvarDados();
-      formNota.reset();
-      renderAnotacoes();
-      showToast("Anotação salva com sucesso!");
+      e.decorators = true;
+      formNota.addEventListener('submit', e => {
+        e.preventDefault();
+        salvarEstadoAnterior();
+        const titulo = document.getElementById('n-titulo').value;
+        const prio = document.getElementById('n-prio').value;
+        const texto = document.getElementById('n-texto').value;
+        const dataAlvo = document.getElementById('n-data-alvo').value;
+        db.anotacoes.push({ titulo, prio, texto, dataAlvo });
+        salvarDados();
+        formNota.reset();
+        renderAnotacoes();
+        showToast("Anotação salva com sucesso!");
+      });
     });
   }
 });
