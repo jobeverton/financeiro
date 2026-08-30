@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Financeiro Expert v9.1 Pro - Ultimate Edition</title>
+<title>Financeiro Expert v10.0 Ultra Edition</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
@@ -179,11 +179,15 @@ button, .floating-block, input {
   .val{font-size:1.15rem}
 }
 </style>
+
+<style id="v10-ultra-style">
+.ultra-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.ultra-grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.ultra-stat{padding:14px;border:1px solid var(--border);border-radius:14px;background:linear-gradient(145deg,var(--card),var(--card2))}.ultra-stat .num{font-size:1.25rem;font-weight:900;margin-top:5px}.ultra-label{font-size:.68rem;color:var(--sub);text-transform:uppercase;letter-spacing:.6px;font-weight:800}.score-ring{width:100px;height:100px;border-radius:50%;display:grid;place-items:center;margin:auto;background:conic-gradient(var(--accent) calc(var(--score)*1%),var(--border) 0)}.score-ring:before{content:'';width:76px;height:76px;border-radius:50%;background:var(--card);position:absolute}.score-inner{position:relative;text-align:center;font-weight:900}.insight{padding:12px;border-left:4px solid var(--accent);background:var(--card2);border-radius:10px;margin-bottom:8px}.table-ultra{width:100%;border-collapse:collapse;font-size:.78rem}.table-ultra th,.table-ultra td{padding:9px 6px;border-bottom:1px solid var(--border);text-align:left}.table-ultra th{color:var(--sub);font-size:.65rem;text-transform:uppercase}.positive{color:var(--green)}.negative{color:var(--red)}.neutral{color:var(--yellow)}.forecast-bar{height:12px;background:var(--bg);border-radius:99px;overflow:hidden;border:1px solid var(--border)}.forecast-bar span{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--purple))}.ultra-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.ultra-actions button{min-height:58px}.ultra-kicker{font-size:.72rem;color:var(--accent);font-weight:900;letter-spacing:.8px;text-transform:uppercase;margin-bottom:5px}@media(max-width:560px){.ultra-grid-3{grid-template-columns:1fr}.ultra-actions{grid-template-columns:1fr 1fr}}
+</style>
 </head>
-<body>
+<body data-design="ultra-premium" data-version="10.0-ultra-design">
 <div id="toast-container"></div>
 <header>
-  <div class="brand">🚀 Financeiro Expert <span class="badge-pro">v9.1 PRO</span></div>
+  <div class="brand"><span class="brand-mark">◈</span><span class="brand-name">Financeiro Expert</span><span class="badge-pro">ULTRA 10.0</span></div>
   <div style="display:flex;align-items:center;gap:6px">
     <button onclick="desfazerUltimaAcao()" class="btn-icon" title="Desfazer Última Ação">↩️</button>
     <button onclick="togglePrivacidade()" id="btn-privacidade" class="btn-icon" title="Ocultar/Exibir Valores">👁️</button>
@@ -645,6 +649,30 @@ button, .floating-block, input {
       <button class="btn green-btn" type="submit" style="margin-top:4px"><i class="fas fa-check-circle"></i> Salvar Alterações</button>
     </form>
   </div>
+</div>
+
+
+<!-- V10 ULTRA MODULES -->
+<div id="inteligencia" class="page">
+  <div class="hero"><div class="ultra-kicker">Financeiro Expert v10</div><h2>🧠 Central de Inteligência</h2><p class="mini">Diagnóstico automático baseado nos seus lançamentos, compromissos e capacidade de poupança.</p></div>
+  <div class="card"><div class="ultra-grid-3"><div class="ultra-stat"><div class="ultra-label">Score financeiro</div><div id="u-score" class="num">0/1000</div><div id="u-score-desc" class="mini">Calculando...</div></div><div class="ultra-stat"><div class="ultra-label">Autonomia</div><div id="u-runway" class="num pink">0 dias</div><div class="mini">Cenário realista</div></div><div class="ultra-stat"><div class="ultra-label">Taxa de economia</div><div id="u-saving" class="num green">0%</div><div class="mini">No período filtrado</div></div></div></div>
+  <div class="card"><div class="section-title"><h3>🔎 Diagnóstico</h3><span class="tag">ULTRA ENGINE</span></div><div id="u-insights"></div></div>
+  <div class="card"><div class="section-title"><h3>🔮 Projeção de caixa</h3><span class="mini">30 dias</span></div><div class="ultra-grid"><div><div class="ultra-label">Cenário crítico</div><div id="u-critical" class="num red">R$ 0,00</div></div><div><div class="ultra-label">Cenário realista</div><div id="u-realistic" class="num yellow">R$ 0,00</div></div><div><div class="ultra-label">Cenário otimista</div><div id="u-optimistic" class="num green">R$ 0,00</div></div><div><div class="ultra-label">Comprometido</div><div id="u-committed" class="num">R$ 0,00</div></div></div></div>
+</div>
+
+<div id="relatorios" class="page">
+  <div class="hero"><div class="ultra-kicker">Centro de Controle</div><h2>📊 Relatórios ULTRA</h2><p class="mini">Visão mensal, anual e patrimonial calculada a partir dos dados atuais.</p></div>
+  <div class="card"><div class="ultra-grid-3"><div class="ultra-stat"><div class="ultra-label">Receitas</div><div id="r-receitas" class="num green">R$ 0,00</div></div><div class="ultra-stat"><div class="ultra-label">Despesas</div><div id="r-despesas" class="num red">R$ 0,00</div></div><div class="ultra-stat"><div class="ultra-label">Resultado</div><div id="r-resultado" class="num">R$ 0,00</div></div></div></div>
+  <div class="card"><div class="section-title"><h3>📅 Comparativo por mês</h3></div><div id="r-mensal"></div></div>
+  <div class="card"><div class="section-title"><h3>🏦 Patrimônio consolidado</h3></div><div id="r-patrimonio"></div></div>
+  <div class="card"><div class="section-title"><h3>💾 Exportação</h3></div><div class="ultra-actions"><button class="btn secondary" onclick="exportarCSV()">CSV</button><button class="btn secondary" onclick="ultraExportJSON()">JSON</button><button class="btn secondary" onclick="ultraRelatorioPrint()">Imprimir</button></div></div>
+</div>
+
+<div id="patrimonio" class="page">
+  <div class="hero"><div class="ultra-kicker">Patrimônio</div><h2>🏦 Patrimônio & Liquidez</h2><p class="mini">Separação entre dinheiro disponível, compromissos e patrimônio líquido.</p></div>
+  <div class="card"><div class="ultra-grid-3"><div class="ultra-stat"><div class="ultra-label">Disponível</div><div id="p-disponivel" class="num green">R$ 0,00</div></div><div class="ultra-stat"><div class="ultra-label">Comprometido</div><div id="p-comprometido" class="num yellow">R$ 0,00</div></div><div class="ultra-stat"><div class="ultra-label">Patrimônio líquido</div><div id="p-liquido" class="num purple">R$ 0,00</div></div></div></div>
+  <div class="card"><div class="section-title"><h3>🏦 Contas</h3></div><div id="p-contas"></div></div>
+  <div class="card"><div class="section-title"><h3>💳 Exposição em cartões</h3></div><div id="p-cartoes"></div></div>
 </div>
 
 <div class="nav-tabs" id="nav-container-rodape"></div>
@@ -1886,6 +1914,534 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 });
+</script>
+<script>
+/* ================= V10 ULTRA ENGINE ================= */
+(function(){
+  const V10='financeiro_app_v10_ultra';
+  const uid=()=> 'id_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,8);
+  const money=v=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(v)||0);
+  const esc=s=>String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+  function ensureV10(){
+    db.version='10.0'; db.transacoes=db.transacoes||[]; db.contas=db.contas||[]; db.metas=db.metas||[]; db.compras=db.compras||[]; db.anotacoes=db.anotacoes||[];
+    db.transacoes.forEach(t=>{if(!t.id)t.id=uid(); if(!t.criadoEm)t.criadoEm=new Date().toISOString(); if(!t.parcelas)t.parcelas=1;});
+    db.contas.forEach(c=>{if(!c.id)c.id=uid(); if(c.saldoInicial==null)c.saldoInicial=Number(c.saldo)||0;});
+    db.audit=db.audit||[]; db.tags=db.tags||[]; db.configV10=db.configV10||{version:1};
+    if(!db.ordemAbas) db.ordemAbas=['dashboard','contas','compras','metas','anotacoes','auditoria'];
+    ['inteligencia','relatorios','patrimonio'].forEach(id=>{if(!db.ordemAbas.includes(id))db.ordemAbas.push(id)});
+    db.abasVisiveis=db.abasVisiveis||{}; ['inteligencia','relatorios','patrimonio'].forEach(id=>{if(db.abasVisiveis[id]==null)db.abasVisiveis[id]=true});
+  }
+  function audit(acao,detalhes){db.audit=db.audit||[];db.audit.unshift({id:uid(),acao,detalhes,data:new Date().toISOString()});if(db.audit.length>500)db.audit.length=500;}
+  function txs(){return db.transacoes||[]}
+  function calc(){
+    const contas=db.contas||[]; const receitas=txs().filter(t=>t.tipo==='ENTRADA'&&t.status==='PAGO').reduce((a,t)=>a+Number(t.valor||0),0); const despesas=txs().filter(t=>t.tipo==='DESPESA'&&t.status==='PAGO').reduce((a,t)=>a+Number(t.valor||0),0); const pend=txs().filter(t=>t.status!=='PAGO').reduce((a,t)=>a+Number(t.valor||0),0); const disponivel=contas.filter(c=>c.tipo!=='Cartao').reduce((a,c)=>a+Number(c.saldo||0),0); const cartao=txs().filter(t=>t.tipo==='DESPESA'&&t.pagamento==='Cartão de Crédito'&&t.status!=='PAGO').reduce((a,t)=>a+Number(t.valor||0),0); return {receitas,despesas,resultado:receitas-despesas,pend,disponivel,cartao,liquido:disponivel-cartao};
+  }
+  function score(){const x=calc(); const receita=x.receitas||0, desp=x.despesas||0; const saving=receita>0?Math.max(0,Math.min(1,(receita-desp)/receita)):0; const compromet=x.pend+x.cartao; const ratio=(x.disponivel+receita)>0?Math.min(1,compromet/(x.disponivel+receita)):1; let s=Math.round(saving*450+(x.disponivel>0?300:0)+(1-ratio)*250); return Math.max(0,Math.min(1000,s));}
+  function insight(){const x=calc(), out=[]; const taxa=x.receitas?((x.receitas-x.despesas)/x.receitas)*100:0; if(x.disponivel<0)out.push(['Crítico','Sua liquidez disponível está negativa. Priorize despesas essenciais e regularização de compromissos.','red']); else if(x.disponivel<x.pend)out.push(['Atenção','Seus compromissos pendentes superam a liquidez atual. Evite novas despesas não essenciais.','yellow']); else out.push(['Liquidez saudável','Sua liquidez atual cobre os compromissos pendentes registrados.','green']); if(taxa<0)out.push(['Fluxo negativo','As despesas pagas estão acima das receitas pagas no período filtrado.','red']); else if(taxa<15)out.push(['Margem apertada',`Sua taxa de economia está em ${taxa.toFixed(1)}%. Há pouco espaço para imprevistos.`,'yellow']); else out.push(['Boa margem',`Você reteve aproximadamente ${taxa.toFixed(1)}% das receitas pagas.`,'green']); const cats={};txs().filter(t=>t.tipo==='DESPESA').forEach(t=>cats[t.categoria]=(cats[t.categoria]||0)+Number(t.valor||0));const top=Object.entries(cats).sort((a,b)=>b[1]-a[1])[0];if(top)out.push(['Maior dreno',`${top[0]} representa ${money(top[1])} das despesas registradas.`,'accent']); return out;}
+  function renderUltra(){ensureV10(); const x=calc(), sc=score(), taxa=x.receitas?((x.receitas-x.despesas)/x.receitas)*100:0; const daily=x.despesas/30||0; const runway=daily>0?Math.floor(x.disponivel/daily):999; const ids={ 'u-score':`${sc}/1000`,'u-runway':`${Math.max(0,runway)} dias`,'u-saving':`${taxa.toFixed(1)}%`,'u-critical':money(x.disponivel-x.pend-x.cartao-x.despesas*.15),'u-realistic':money(x.disponivel-x.pend-x.cartao+x.resultado),'u-optimistic':money(x.disponivel-x.pend-x.cartao+Math.max(0,x.resultado)*1.15),'u-committed':money(x.pend+x.cartao)};Object.entries(ids).forEach(([id,v])=>{const e=document.getElementById(id);if(e)e.textContent=v});const sd=document.getElementById('u-score-desc');if(sd)sd.textContent=sc>=800?'Excelente':sc>=600?'Boa, com pontos a otimizar':sc>=400?'Atenção':'Crítica';const ins=document.getElementById('u-insights');if(ins)ins.innerHTML=insight().map(i=>`<div class="insight" style="border-left-color:var(--${i[2]})"><strong>${esc(i[0])}</strong><div class="mini" style="margin-top:3px">${esc(i[1])}</div></div>`).join('');}
+  function renderReports(){const x=calc();['r-receitas','r-despesas','r-resultado'].forEach((id,i)=>{const e=document.getElementById(id);if(e)e.textContent=money([x.receitas,x.despesas,x.resultado][i])});const by={};txs().forEach(t=>{const m=(t.data||'').slice(0,7)||'Sem data';by[m]??={r:0,d:0};if(t.tipo==='ENTRADA')by[m].r+=Number(t.valor||0);else by[m].d+=Number(t.valor||0)});const rm=document.getElementById('r-mensal');if(rm){const rows=Object.entries(by).sort((a,b)=>b[0].localeCompare(a[0])).slice(0,12);rm.innerHTML=rows.length?`<table class="table-ultra"><thead><tr><th>Mês</th><th>Entradas</th><th>Despesas</th><th>Resultado</th></tr></thead><tbody>${rows.map(([m,v])=>`<tr><td>${esc(m)}</td><td class="positive">${money(v.r)}</td><td class="negative">${money(v.d)}</td><td class="${v.r-v.d>=0?'positive':'negative'}">${money(v.r-v.d)}</td></tr>`).join('')}</tbody></table>`:'<div class="empty">Sem dados suficientes.</div>'}const rp=document.getElementById('r-patrimonio');if(rp)rp.innerHTML=`<div class="ultra-grid"><div><div class="ultra-label">Liquidez</div><div class="num green">${money(x.disponivel)}</div></div><div><div class="ultra-label">Cartões</div><div class="num yellow">${money(x.cartao)}</div></div><div><div class="ultra-label">Patrimônio líquido operacional</div><div class="num purple">${money(x.liquido)}</div></div></div>`;}
+  function renderPatrimonio(){const x=calc();[['p-disponivel',x.disponivel],['p-comprometido',x.pend+x.cartao],['p-liquido',x.liquido]].forEach(([id,v])=>{const e=document.getElementById(id);if(e)e.textContent=money(v)});const pc=document.getElementById('p-contas');if(pc)pc.innerHTML=(db.contas||[]).map(c=>`<div class="list-item"><div class="item-head"><strong>${esc(c.nome)}</strong><span class="${Number(c.saldo)>=0?'positive':'negative'}">${money(c.saldo)}</span></div><div class="mini">${esc(c.tipo)} • saldo informado</div></div>`).join('')||'<div class="empty">Nenhuma conta.</div>';const cards=(db.contas||[]).filter(c=>c.tipo==='Cartao');const pcard=document.getElementById('p-cartoes');if(pcard)pcard.innerHTML=cards.length?cards.map(c=>`<div class="list-item"><div class="item-head"><strong>${esc(c.nome)}</strong><span>${money(c.saldo)}</span></div></div>`).join(''):'<div class="empty">Nenhum cartão cadastrado.</div>';}
+  window.ultraExportJSON=function(){const blob=new Blob([JSON.stringify({...db,exportadoEm:new Date().toISOString(),versao:'10.0'},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`financeiro_expert_v10_backup_${new Date().toISOString().slice(0,10)}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500);showToast('Backup JSON da v10 criado.','success');};
+  window.ultraRelatorioPrint=function(){const w=window.open('','_blank');if(!w){showToast('Permita pop-ups para imprimir.','error');return}w.document.write(`<html><head><title>Relatório Financeiro Expert v10</title><style>body{font-family:Arial;padding:30px}table{width:100%;border-collapse:collapse}td,th{padding:8px;border-bottom:1px solid #ddd;text-align:left}
+
+/* =========================================================
+   V10 ULTRA — DESIGN SYSTEM
+   Premium dark glass / fintech dashboard
+   ========================================================= */
+:root{
+  --bg:#070b12;
+  --bg-2:#0b111b;
+  --surface:#0f1724;
+  --surface-2:#121d2d;
+  --surface-3:#162235;
+  --line:rgba(148,163,184,.13);
+  --line-strong:rgba(148,163,184,.22);
+  --text:#f5f7fb;
+  --muted:#91a0b5;
+  --muted-2:#66758b;
+  --accent:#55d6a0;
+  --accent-2:#34b57f;
+  --blue:#5aa9ff;
+  --purple:#a78bfa;
+  --warning:#f6c85f;
+  --danger:#ff6b7a;
+  --shadow:0 18px 55px rgba(0,0,0,.30);
+  --shadow-sm:0 8px 28px rgba(0,0,0,.22);
+  --radius:18px;
+  --radius-sm:12px;
+}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:
+    radial-gradient(circle at 12% 0%,rgba(85,214,160,.075),transparent 28%),
+    radial-gradient(circle at 92% 4%,rgba(90,169,255,.07),transparent 25%),
+    linear-gradient(145deg,var(--bg),var(--bg-2) 58%,#08101a);
+  color:var(--text);
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  letter-spacing:-.01em;
+}
+body:before{
+  content:"";
+  position:fixed;inset:0;pointer-events:none;z-index:-1;
+  background-image:linear-gradient(rgba(255,255,255,.012) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(255,255,255,.012) 1px,transparent 1px);
+  background-size:36px 36px;
+  mask-image:linear-gradient(to bottom,black,transparent 85%);
+}
+
+button,input,select,textarea{font:inherit}
+button{transition:.18s ease}
+button:hover{transform:translateY(-1px)}
+button:active{transform:translateY(0)}
+
+.app-shell,.layout,.main-layout{background:transparent!important}
+.sidebar{
+  background:rgba(9,15,24,.82)!important;
+  backdrop-filter:blur(22px);
+  border-right:1px solid var(--line)!important;
+  box-shadow:18px 0 50px rgba(0,0,0,.14);
+}
+.logo,.brand,.app-logo{
+  letter-spacing:-.04em;
+}
+.logo span,.brand span,.app-logo span{color:var(--accent)!important}
+
+header,.topbar,.header,.app-header{
+  background:rgba(7,11,18,.72)!important;
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--line)!important;
+}
+
+.nav-item,.menu-item,.sidebar a{
+  border:1px solid transparent!important;
+  border-radius:12px!important;
+  color:var(--muted)!important;
+  margin:4px 8px!important;
+  padding:11px 13px!important;
+}
+.nav-item:hover,.menu-item:hover,.sidebar a:hover{
+  color:var(--text)!important;
+  background:rgba(255,255,255,.035)!important;
+  border-color:var(--line)!important;
+}
+.nav-item.active,.menu-item.active,.sidebar a.active{
+  color:#eafff6!important;
+  background:linear-gradient(90deg,rgba(85,214,160,.13),rgba(85,214,160,.035))!important;
+  border-color:rgba(85,214,160,.18)!important;
+  box-shadow:inset 3px 0 0 var(--accent),0 8px 22px rgba(0,0,0,.12);
+}
+
+main,.content,.main-content{background:transparent!important}
+.page,.section,.panel{
+  animation:ultraIn .32s ease both;
+}
+@keyframes ultraIn{
+  from{opacity:0;transform:translateY(6px)}
+  to{opacity:1;transform:none}
+}
+
+.card,.dashboard-card,.stat-card,.panel-card,.table-card,.chart-card,
+section.card, .glass-card{
+  background:linear-gradient(145deg,rgba(18,29,45,.90),rgba(12,20,32,.88))!important;
+  border:1px solid var(--line)!important;
+  border-radius:var(--radius)!important;
+  box-shadow:var(--shadow-sm)!important;
+  overflow:hidden;
+}
+.card:hover,.dashboard-card:hover,.stat-card:hover{
+  border-color:rgba(148,163,184,.20)!important;
+}
+
+h1,h2,h3,h4{
+  letter-spacing:-.035em;
+}
+h1{font-size:clamp(26px,3vw,38px)!important}
+h2{font-size:24px!important}
+h3{font-size:17px!important}
+.subtitle,.muted,.description,.help-text{color:var(--muted)!important}
+
+.kpi-grid,.stats-grid,.dashboard-grid,.cards-grid{
+  gap:14px!important;
+}
+.kpi,.kpi-card,.stat-card{
+  position:relative;
+  min-height:132px;
+  padding:20px!important;
+}
+.kpi:after,.kpi-card:after,.stat-card:after{
+  content:"";
+  position:absolute;right:-28px;top:-34px;width:100px;height:100px;
+  border-radius:50%;
+  background:rgba(85,214,160,.055);
+  pointer-events:none;
+}
+.kpi-value,.stat-value,.amount,.big-number{
+  font-weight:800!important;
+  letter-spacing:-.055em;
+}
+.kpi-label,.stat-label{
+  color:var(--muted)!important;
+  text-transform:uppercase;
+  font-size:10px!important;
+  letter-spacing:.09em;
+  font-weight:700;
+}
+
+input,select,textarea{
+  color:var(--text)!important;
+  background:#0b1421!important;
+  border:1px solid var(--line-strong)!important;
+  border-radius:11px!important;
+  min-height:42px;
+  outline:none!important;
+  box-shadow:none!important;
+}
+input::placeholder,textarea::placeholder{color:#56667c}
+input:focus,select:focus,textarea:focus{
+  border-color:rgba(85,214,160,.55)!important;
+  box-shadow:0 0 0 3px rgba(85,214,160,.08)!important;
+}
+
+.btn,.button,button[type="button"],button[type="submit"]{
+  border-radius:11px!important;
+  border:1px solid var(--line-strong)!important;
+  background:#142033!important;
+  color:#eaf0f8!important;
+  font-weight:700;
+}
+.btn-primary,.primary,.btn-success,.success,
+button.primary,button.save,button[data-action="save"]{
+  background:linear-gradient(135deg,var(--accent),#43c990)!important;
+  color:#06110c!important;
+  border-color:transparent!important;
+  box-shadow:0 8px 24px rgba(85,214,160,.18);
+}
+.btn-danger,.danger{background:rgba(255,107,122,.10)!important;color:#ff9aa6!important;border-color:rgba(255,107,122,.22)!important}
+.btn-warning,.warning{background:rgba(246,200,95,.10)!important;color:#f6d986!important;border-color:rgba(246,200,95,.20)!important}
+
+table{
+  border-collapse:separate!important;
+  border-spacing:0!important;
+  width:100%;
+}
+thead th{
+  background:#0b1421!important;
+  color:#8291a6!important;
+  font-size:10px!important;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  padding:13px 14px!important;
+  border-bottom:1px solid var(--line)!important;
+}
+tbody td{
+  padding:14px!important;
+  border-bottom:1px solid rgba(148,163,184,.08)!important;
+}
+tbody tr:hover{background:rgba(255,255,255,.018)!important}
+
+.badge,.tag,.pill,.status{
+  border-radius:999px!important;
+  border:1px solid var(--line)!important;
+  padding:5px 9px!important;
+  font-size:10px!important;
+  font-weight:800!important;
+}
+
+.progress,.progress-bar,.bar-track{
+  background:#0a121e!important;
+  border-radius:999px!important;
+  overflow:hidden;
+}
+.progress-fill,.bar-fill{
+  border-radius:999px!important;
+  background:linear-gradient(90deg,var(--accent-2),var(--accent))!important;
+}
+
+.chart-container,.chart-box,canvas{
+  border-radius:14px;
+}
+hr{border-color:var(--line)!important}
+
+.modal,.dialog,.modal-content{
+  background:#0d1725!important;
+  border:1px solid var(--line-strong)!important;
+  border-radius:20px!important;
+  box-shadow:0 30px 100px rgba(0,0,0,.55)!important;
+}
+.modal-backdrop,.overlay{
+  background:rgba(2,6,12,.72)!important;
+  backdrop-filter:blur(7px);
+}
+
+.toast,.notification{
+  background:#101c2b!important;
+  border:1px solid var(--line-strong)!important;
+  box-shadow:var(--shadow)!important;
+  border-radius:13px!important;
+}
+
+.search-box,.command-bar{
+  background:rgba(11,20,33,.86)!important;
+  border:1px solid var(--line)!important;
+  border-radius:13px!important;
+  backdrop-filter:blur(14px);
+}
+
+.empty-state{
+  padding:44px 20px!important;
+  color:var(--muted)!important;
+}
+
+@media(max-width:900px){
+  .sidebar{
+    width:76px!important;
+  }
+  .sidebar .nav-label,.sidebar .menu-label,.sidebar .brand-text{
+    display:none!important;
+  }
+  .nav-item,.menu-item,.sidebar a{
+    justify-content:center!important;
+    margin:4px 7px!important;
+  }
+}
+@media(max-width:700px){
+  .sidebar{
+    position:fixed!important;
+    left:0;right:0;bottom:0;top:auto!important;
+    width:100%!important;height:68px!important;
+    z-index:1000;
+    border-right:0!important;
+    border-top:1px solid var(--line)!important;
+  }
+  .sidebar nav,.sidebar .nav,.sidebar ul{
+    display:flex!important;
+    overflow-x:auto!important;
+    height:100%;
+    align-items:center;
+  }
+  .sidebar .nav-item,.sidebar .menu-item,.sidebar a{
+    flex:0 0 auto!important;
+    min-width:66px!important;
+    margin:5px!important;
+    padding:8px!important;
+  }
+  main,.content,.main-content{
+    padding-bottom:88px!important;
+  }
+  .kpi-grid,.stats-grid,.dashboard-grid,.cards-grid{
+    grid-template-columns:1fr 1fr!important;
+  }
+}
+@media(max-width:480px){
+  .kpi-grid,.stats-grid,.dashboard-grid,.cards-grid{
+    grid-template-columns:1fr!important;
+  }
+  .card,.dashboard-card,.stat-card{border-radius:15px!important}
+}
+
+/* Premium section heading */
+.section-heading,.page-heading{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:16px;
+  margin-bottom:20px;
+}
+.section-heading small,.page-heading small{
+  color:var(--muted-2);
+  font-weight:700;
+}
+
+/* Floating quick action */
+.quick-action,.fab{
+  background:linear-gradient(135deg,var(--accent),#43c990)!important;
+  color:#06110c!important;
+  border:0!important;
+  box-shadow:0 14px 35px rgba(85,214,160,.22)!important;
+}
+
+/* Make native scrollbars discreet */
+*{scrollbar-width:thin;scrollbar-color:#25364d transparent}
+*::-webkit-scrollbar{width:8px;height:8px}
+*::-webkit-scrollbar-thumb{background:#25364d;border-radius:999px}
+*::-webkit-scrollbar-track{background:transparent}
+
+
+/* =========================================================
+   V10 ULTRA — PROFESSIONAL TOPBAR / BRAND / SETTINGS
+   ========================================================= */
+header{
+  min-height:76px!important;
+  padding:0 24px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:20px!important;
+  position:sticky!important;
+  top:0!important;
+  z-index:900!important;
+}
+header .brand{
+  color:#ffffff!important;
+  font-size:19px!important;
+  font-weight:850!important;
+  display:flex!important;
+  align-items:center!important;
+  gap:9px!important;
+  white-space:nowrap!important;
+  text-shadow:0 1px 12px rgba(0,0,0,.45);
+}
+header .brand:first-letter{color:#55d6a0!important}
+header .badge-pro{
+  color:#06110c!important;
+  background:linear-gradient(135deg,#55d6a0,#8be8bf)!important;
+  border:0!important;
+  box-shadow:0 5px 16px rgba(85,214,160,.18)!important;
+  padding:4px 8px!important;
+  font-size:9px!important;
+  letter-spacing:.07em!important;
+}
+header>div:last-child{
+  display:flex!important;
+  align-items:center!important;
+  gap:7px!important;
+}
+header .btn-icon{
+  width:38px!important;
+  height:38px!important;
+  min-width:38px!important;
+  padding:0!important;
+  display:grid!important;
+  place-items:center!important;
+  border-radius:11px!important;
+  color:#b8c5d6!important;
+  background:rgba(18,29,45,.78)!important;
+  border:1px solid rgba(148,163,184,.15)!important;
+}
+header .btn-icon:hover{
+  color:#fff!important;
+  border-color:rgba(85,214,160,.35)!important;
+  background:rgba(85,214,160,.09)!important;
+}
+#filtro-mes{
+  min-height:38px!important;
+  width:150px!important;
+  padding:0 12px!important;
+  background:#0c1624!important;
+  color:#e9eef6!important;
+  border:1px solid rgba(148,163,184,.16)!important;
+  font-size:12px!important;
+  font-weight:700!important;
+}
+
+/* Replace the generic settings modal with a more organized visual hierarchy */
+#modal-config .modal-content{
+  width:min(920px,94vw)!important;
+  max-height:88vh!important;
+  overflow:auto!important;
+  padding:0!important;
+  background:linear-gradient(145deg,#0d1725,#0a121e)!important;
+}
+#modal-config .modal-head{
+  position:sticky!important;
+  top:0!important;
+  z-index:5!important;
+  padding:20px 24px!important;
+  margin:0!important;
+  background:rgba(13,23,37,.96)!important;
+  backdrop-filter:blur(18px)!important;
+  border-bottom:1px solid rgba(148,163,184,.12)!important;
+}
+#modal-config .modal-head h3{
+  color:#fff!important;
+  font-size:20px!important;
+  letter-spacing:-.03em!important;
+}
+#modal-config .modal-head h3:after{
+  content:" • Controle do sistema";
+  color:#68788d;
+  font-size:11px;
+  font-weight:600;
+  letter-spacing:0;
+}
+#modal-config .drawer{
+  margin:12px 20px!important;
+  border:1px solid rgba(148,163,184,.12)!important;
+  border-radius:15px!important;
+  background:rgba(18,29,45,.55)!important;
+  overflow:hidden!important;
+}
+#modal-config .drawer-header{
+  min-height:54px!important;
+  padding:0 16px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  color:#e8eef6!important;
+  font-weight:800!important;
+  background:rgba(255,255,255,.018)!important;
+}
+#modal-config .drawer-header:hover{
+  background:rgba(85,214,160,.045)!important;
+}
+#modal-config .drawer-content{
+  padding:16px!important;
+  border-top:1px solid rgba(148,163,184,.10)!important;
+}
+#modal-config .form-group label{
+  color:#8f9eb1!important;
+  font-size:10px!important;
+  font-weight:800!important;
+  text-transform:uppercase!important;
+  letter-spacing:.08em!important;
+}
+
+/* Make the configuration action area feel like a real app footer */
+#modal-config .modal-actions{
+  position:sticky!important;
+  bottom:0!important;
+  padding:14px 20px!important;
+  margin-top:14px!important;
+  background:rgba(10,18,30,.96)!important;
+  border-top:1px solid rgba(148,163,184,.12)!important;
+  backdrop-filter:blur(18px)!important;
+}
+
+/* Compact topbar on small screens */
+@media(max-width:700px){
+  header{
+    min-height:64px!important;
+    padding:0 12px!important;
+  }
+  header .brand{
+    font-size:15px!important;
+    gap:6px!important;
+  }
+  header .badge-pro{display:none!important}
+  #filtro-mes{width:116px!important;font-size:11px!important}
+  header .btn-icon{
+    width:34px!important;height:34px!important;min-width:34px!important;
+  }
+}
+@media(max-width:480px){
+  header .brand{
+    max-width:145px!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+  }
+  header>div:last-child{gap:4px!important}
+  header .btn-icon:nth-of-type(1){display:none!important}
+}
+
+</style></head><body><h1>Financeiro Expert v10.0 Ultra</h1><p>Gerado em ${new Date().toLocaleString('pt-BR')}</p><h2>Resumo</h2><p>Receitas: ${money(calc().receitas)}<br>Despesas: ${money(calc().despesas)}<br>Resultado: ${money(calc().resultado)}<br>Liquidez: ${money(calc().disponivel)}</p><h2>Transações</h2><table><tr><th>Data</th><th>Descrição</th><th>Tipo</th><th>Valor</th></tr>${txs().map(t=>`<tr><td>${esc(t.data)}</td><td>${esc(t.obs||t.categoria)}</td><td>${esc(t.tipo)}</td><td>${money(t.valor)}</td></tr>`).join('')}</table></body></html>`);w.document.close();w.print();};
+  function save(){db.version='10.0';localStorage.setItem('financeiro_app_v91_data',JSON.stringify(db));if(typeof window.salvarDadosFirebase==='function')window.salvarDadosFirebase(db);}
+  function addTx(data){ensureV10();data.id=uid();data.criadoEm=new Date().toISOString();db.transacoes.push(data);audit('CREATE_TRANSACTION',`${data.tipo} ${money(data.valor)} • ${data.categoria}`);save();render();}
+  function replaceTxForm(){const f=document.getElementById('form-transacao');if(!f||f.dataset.v10Bound)return;const clone=f.cloneNode(true);f.parentNode.replaceChild(clone,f);clone.dataset.v10Bound='1';clone.addEventListener('submit',e=>{e.preventDefault();const tipo=document.getElementById('tipo').value,valor=Number(document.getElementById('valor').value)||0;if(valor<=0)return showToast('Informe um valor maior que zero.','error');let cat=document.getElementById('categoria').value;if(cat==='NOVA'){cat=document.getElementById('categoria-custom').value.trim()||'Outros';if(!db.categoriasCustom.includes(cat))db.categoriasCustom.push(cat)};addTx({tipo,valor,categoria:cat,conta:document.getElementById('conta-origem').value,data:document.getElementById('data').value,pagamento:document.getElementById('pagamento').value,status:document.getElementById('status').value,fixa:document.getElementById('fixa').value,obs:document.getElementById('obs').value,parcelas:Number(document.getElementById('parcelas')?.value)||1});fecharModal('modal-novo-lancamento');clone.reset();setDataAtalho(0);showToast('Lançamento registrado pela Engine v10.','success')});}
+  function patchTabs(){try{Object.assign(infoAbasMeta,{inteligencia:{label:'IA',icon:'fa-brain'},relatorios:{label:'Relatórios',icon:'fa-chart-line'},patrimonio:{label:'Patrimônio',icon:'fa-landmark'}})}catch(e){};ensureV10();renderRodape();}
+  document.addEventListener('DOMContentLoaded',()=>{ensureV10();replaceTxForm();patchTabs();const oldRender=window.render;window.render=function(){ensureV10();oldRender();renderUltra();renderReports();renderPatrimonio();};renderUltra();renderReports();renderPatrimonio();});
+})();
 </script>
 </body>
 </html>
