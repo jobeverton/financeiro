@@ -88,7 +88,6 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 
 .close{background:none;border:0;color:var(--sub);font-size:1.2rem}
 
 canvas{max-height:230px;width:100%!important}
-.fab-container{position:sticky;bottom:10px;margin-top:12px;margin-bottom:8px;z-index:5}
 
 .drawer { border: 1px solid var(--border); border-radius: 12px; background: var(--card2); margin-bottom: 10px; overflow: hidden; }
 .drawer-header { padding: 12px 14px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-size: 0.85rem; font-weight: bold; color: var(--accent); background: rgba(255,255,255,0.02); }
@@ -114,6 +113,65 @@ canvas{max-height:230px;width:100%!important}
 .value-input-container input { background: transparent; border: 0; font-size: 1.8rem; font-weight: 900; text-align: center; color: var(--red); padding: 4px; }
 .value-input-container input:focus { box-shadow: none; border: 0; }
 
+.dynamic-modular-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  border-radius: 16px;
+  transition: all 0.3s ease;
+  margin-bottom: 12px;
+}
+.floating-block {
+  background: #1e1e2f;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 14px 18px;
+  color: #fff;
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.2s ease;
+  flex: 1;
+  min-width: 140px;
+  text-align: center;
+}
+.floating-block:hover {
+  transform: translateY(-2px);
+  background: #2a2a40;
+}
+.contextual-bar {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: #11111b;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 12px 20px;
+  border-radius: 30px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 1000;
+}
+.contextual-bar.active {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+.contextual-bar input {
+  background: transparent;
+  border: none;
+  color: #fff;
+  outline: none;
+  width: 280px;
+  font-size: 14px;
+}
+button, .floating-block, input {
+  will-change: transform, background-color;
+}
+
 @media(max-width:480px){
   .grid-2{gap:8px}
   .grid-3{gap:6px}
@@ -135,11 +193,34 @@ canvas{max-height:230px;width:100%!important}
   </div>
 </header>
 
+<div id="contextual-panel" class="contextual-bar">
+  <input type="text" placeholder="O que você deseja fazer agora? (Ex: despesa, metas...)" id="intent-input" onkeydown="processarIntencao(event)" />
+</div>
+
 <div class="container">
 
 <!-- 1. DASHBOARD -->
 <div id="dashboard" class="page active">
-  <div class="hero">
+  <div class="dynamic-modular-container" id="modular-blocks">
+    <div class="floating-block" onclick="abrirModal('modal-novo-lancamento')">
+      <i class="fas fa-plus-circle fa-lg" style="color:var(--green)"></i>
+      <div class="mini" style="margin-top:4px">Novo Lançamento</div>
+    </div>
+    <div class="floating-block" onclick="mudarPagina('compras')">
+      <i class="fas fa-shopping-cart fa-lg" style="color:var(--accent)"></i>
+      <div class="mini" style="margin-top:4px">Lista Compras</div>
+    </div>
+    <div class="floating-block" onclick="mudarPagina('metas')">
+      <i class="fas fa-bullseye fa-lg" style="color:var(--purple)"></i>
+      <div class="mini" style="margin-top:4px">Ver Metas</div>
+    </div>
+    <div class="floating-block" onclick="togglePainelIntencao()">
+      <i class="fas fa-terminal fa-lg" style="color:var(--yellow)"></i>
+      <div class="mini" style="margin-top:4px">Busca por Voz/Texto (Ctrl+K)</div>
+    </div>
+  </div>
+
+  <div class="hero" id="card-patrimonio-liquido">
     <div class="hero-top">
       <div>
         <div class="mini">PATRIMÔNIO LÍQUIDO & SALDO DISPONÍVEL</div>
@@ -150,18 +231,12 @@ canvas{max-height:230px;width:100%!important}
     </div>
   </div>
 
-  <div class="fab-container">
-    <button class="btn green-btn" onclick="abrirModal('modal-novo-lancamento')" style="box-shadow:0 6px 20px rgba(16,185,129,0.3);font-size:0.95rem">
-      <i class="fas fa-plus-circle"></i> Novo Lançamento Inteligente
-    </button>
-  </div>
-
   <div class="card kpi purple-border" id="card-meta-destaque">
     <div class="section-title"><h3>🎯 Meta Principal em Foco</h3><span id="meta-destaque-tag" class="tag">Reserva</span></div>
     <div id="conteudo-meta-destaque"><div class="empty">Nenhuma meta ativa para exibir.</div></div>
   </div>
 
-  <div class="card kpi pink-border" style="border-left-color:var(--pink)">
+  <div class="card kpi pink-border" id="card-simulador-folego" style="border-left-color:var(--pink)">
     <div class="section-title"><h3>🔮 Simulador de Fôlego Preditivo (v9)</h3><span class="tag" style="color:var(--pink)">IA Engine</span></div>
     <div id="dash-folego-avancado" class="val pink">Calculando autonomia...</div>
     <div class="mini" id="dash-folego-detalhes">Com base na sua média de queima mensal de caixa.</div>
@@ -470,8 +545,16 @@ canvas{max-height:230px;width:100%!important}
       <div class="drawer-header" onclick="toggleDrawer('drawer-geral')"><span>👁️ Geral & Exibição</span><i class="fas fa-chevron-down"></i></div>
       <div class="drawer-content">
         <div style="display:flex;justify-content:space-between;align-items:center;background:var(--bg);padding:10px;border-radius:10px;border:1px solid var(--border);margin-bottom:10px">
+          <span class="mini" style="color:var(--text)">Exibir "Patrimônio Líquido" no Início</span>
+          <input type="checkbox" id="cfg-patrimonio" onchange="mudarConfigPatrimonio(this.checked)" style="width:18px;height:18px;accent-color:var(--accent)">
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;background:var(--bg);padding:10px;border-radius:10px;border:1px solid var(--border);margin-bottom:10px">
           <span class="mini" style="color:var(--text)">Exibir "Meta Principal em Foco" no Início</span>
           <input type="checkbox" id="cfg-meta-destaque" onchange="mudarConfigMetaDestaque(this.checked)" style="width:18px;height:18px;accent-color:var(--accent)">
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;background:var(--bg);padding:10px;border-radius:10px;border:1px solid var(--border);margin-bottom:10px">
+          <span class="mini" style="color:var(--text)">Exibir "Simulador de Fôlego Preditivo" no Início</span>
+          <input type="checkbox" id="cfg-folego" onchange="mudarConfigFolego(this.checked)" style="width:18px;height:18px;accent-color:var(--accent)">
         </div>
         <button class="btn secondary small" onclick="restaurarGraficos()" style="color:var(--accent);width:100%;margin-bottom:10px">🔄 Restaurar Gráficos Ocultos</button>
         <button class="btn secondary small" onclick="restaurarCardsFechados()" style="color:var(--green);border-color:var(--green);width:100%">♻️ Restaurar Cards e Seções Fechadas</button>
@@ -566,7 +649,6 @@ canvas{max-height:230px;width:100%!important}
 
 <div class="nav-tabs" id="nav-container-rodape"></div>
 
-<!-- FIREBASE SDKs (Modular v9+) -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
@@ -621,6 +703,8 @@ let db = {
   ordemAbas: ['dashboard', 'contas', 'compras', 'metas', 'anotacoes', 'auditoria'],
   abasVisiveis: { dashboard: true, contas: true, compras: true, metas: true, anotacoes: true, auditoria: true },
   cardMetaIninicioVisivel: true,
+  cardPatrimonioVisivel: true,
+  cardFolegoVisivel: true,
   graficosRemovidos: []
 };
 
@@ -655,7 +739,45 @@ let ocultarValoresGlobal = false;
 let chartGastosInstancia = null;
 let chartEvolucaoInstancia = null;
 
-// Sincronização automática em tempo real entre celulares (via Storage Event)
+document.addEventListener('keydown', (e) => {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+    e.preventDefault();
+    togglePainelIntencao();
+  }
+});
+
+function togglePainelIntencao() {
+  const panel = document.getElementById('contextual-panel');
+  panel.classList.toggle('active');
+  if (panel.classList.contains('active')) {
+    document.getElementById('intent-input').focus();
+  }
+}
+
+function processarIntencao(e) {
+  if (e.key === 'Enter') {
+    const val = e.target.value.toLowerCase().trim();
+    togglePainelIntencao();
+    e.target.value = '';
+    
+    if (val.includes('lancamento') || val.includes('despesa') || val.includes('gasto') || val.includes('entrada')) {
+      abrirModal('modal-novo-lancamento');
+    } else if (val.includes('meta') || val.includes('objetivo')) {
+      mudarPagina('metas');
+    } else if (val.includes('compra') || val.includes('mercado')) {
+      mudarPagina('compras');
+    } else if (val.includes('conta') || val.includes('banco') || val.includes('cartao')) {
+      mudarPagina('contas');
+    } else if (val.includes('nota') || val.includes('lembrete')) {
+      mudarPagina('anotacoes');
+    } else if (val.includes('extrato') || val.includes('historico') || val.includes('auditoria')) {
+      mudarPagina('auditoria');
+    } else {
+      showToast("Comando não reconhecido. Tente 'despesa', 'metas', 'compras'...", "error");
+    }
+  }
+}
+
 window.addEventListener('storage', async (event) => {
   if (event.key === 'financeiro_app_v91_data' && event.newValue) {
     try {
@@ -703,6 +825,8 @@ function restaurarCardsFechados() {
   restaurarGraficos();
   salvarEstadoAnterior();
   db.cardMetaIninicioVisivel = true;
+  db.cardPatrimonioVisivel = true;
+  db.cardFolegoVisivel = true;
   salvarDados();
   render();
   showToast("Todos os cards e seções foram restaurados com sucesso!", "success");
@@ -792,7 +916,12 @@ function renderRodape() {
 function renderizarConfiguracoesAbas() {
   const container = document.getElementById('lista-config-abas');
   const checkMeta = document.getElementById('cfg-meta-destaque');
+  const checkPatrimonio = document.getElementById('cfg-patrimonio');
+  const checkFolego = document.getElementById('cfg-folego');
+
   if(checkMeta) checkMeta.checked = db.cardMetaIninicioVisivel !== false;
+  if(checkPatrimonio) checkPatrimonio.checked = db.cardPatrimonioVisivel !== false;
+  if(checkFolego) checkFolego.checked = db.cardFolegoVisivel !== false;
   if(!container) return;
 
   if(!db.ordemAbas) db.ordemAbas = ['dashboard', 'contas', 'compras', 'metas', 'anotacoes', 'auditoria'];
@@ -862,6 +991,20 @@ function atualizarLimiteCategoria(cat, val) {
 function mudarConfigMetaDestaque(status) {
   salvarEstadoAnterior();
   db.cardMetaIninicioVisivel = status;
+  salvarDados();
+  render();
+}
+
+function mudarConfigPatrimonio(status) {
+  salvarEstadoAnterior();
+  db.cardPatrimonioVisivel = status;
+  salvarDados();
+  render();
+}
+
+function mudarConfigFolego(status) {
+  salvarEstadoAnterior();
+  db.cardFolegoVisivel = status;
   salvarDados();
   render();
 }
@@ -959,9 +1102,19 @@ function renderDashboard() {
   const filtroMes = document.getElementById('filtro-mes')?.value || 'TODOS';
   const txs = (db.transacoes || []).filter(t => filtroMes === 'TODOS' || (t.data && t.data.startsWith(filtroMes)));
   
+  const cardPatrimonio = document.getElementById('card-patrimonio-liquido');
+  if(cardPatrimonio) {
+    cardPatrimonio.style.display = db.cardPatrimonioVisivel !== false ? 'block' : 'none';
+  }
+
   const cardMetaDestaque = document.getElementById('card-meta-destaque');
   if(cardMetaDestaque) {
     cardMetaDestaque.style.display = db.cardMetaIninicioVisivel !== false ? 'block' : 'none';
+  }
+
+  const cardFolego = document.getElementById('card-simulador-folego');
+  if(cardFolego) {
+    cardFolego.style.display = db.cardFolegoVisivel !== false ? 'block' : 'none';
   }
 
   if(db.graficosRemovidos) {
@@ -1634,7 +1787,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       const transacaoAntiga = db.transacoes[idx];
 
       if(transacaoAntiga) {
-        // 1. Reverter o saldo da conta antiga caso estivesse pago
         if(transacaoAntiga.status === 'PAGO') {
           const contaAntiga = db.contas.find(c => c.nome === transacaoAntiga.conta);
           if(contaAntiga) {
@@ -1643,7 +1795,6 @@ document.addEventListener('DOMContentLoaded', async () => {
           }
         }
 
-        // 2. Aplicar novos valores editados
         transacaoAntiga.tipo = document.getElementById('edit-tipo').value;
         transacaoAntiga.valor = parseFloat(document.getElementById('edit-valor').value) || 0;
         transacaoAntiga.categoria = document.getElementById('edit-categoria').value;
@@ -1652,7 +1803,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         transacaoAntiga.status = document.getElementById('edit-status').value;
         transacaoAntiga.obs = document.getElementById('edit-obs').value;
 
-        // 3. Aplicar o saldo na nova conta caso esteja pago
         if(transacaoAntiga.status === 'PAGO') {
           const contaNova = db.contas.find(c => c.nome === transacaoAntiga.conta);
           if(contaNova) {
@@ -1661,7 +1811,6 @@ document.addEventListener('DOMContentLoaded', async () => {
           }
         }
 
-        // 4. Salvar e forçar recálculo completo de todas as abas / dashboard / gráficos
         salvarDados();
         fecharModal('modal-editar-transacao');
         render();
@@ -1723,20 +1872,17 @@ document.addEventListener('DOMContentLoaded', async () => {
   const formNota = document.getElementById('form-nota');
   if(formNota) {
     formNota.addEventListener('submit', e => {
-      e.decorators = true;
-      formNota.addEventListener('submit', e => {
-        e.preventDefault();
-        salvarEstadoAnterior();
-        const titulo = document.getElementById('n-titulo').value;
-        const prio = document.getElementById('n-prio').value;
-        const texto = document.getElementById('n-texto').value;
-        const dataAlvo = document.getElementById('n-data-alvo').value;
-        db.anotacoes.push({ titulo, prio, texto, dataAlvo });
-        salvarDados();
-        formNota.reset();
-        renderAnotacoes();
-        showToast("Anotação salva com sucesso!");
-      });
+      e.preventDefault();
+      salvarEstadoAnterior();
+      const titulo = document.getElementById('n-titulo').value;
+      const prio = document.getElementById('n-prio').value;
+      const texto = document.getElementById('n-texto').value;
+      const dataAlvo = document.getElementById('n-data-alvo').value;
+      db.anotacoes.push({ titulo, prio, texto, dataAlvo });
+      salvarDados();
+      formNota.reset();
+      renderAnotacoes();
+      showToast("Anotação salva com sucesso!");
     });
   }
 });
